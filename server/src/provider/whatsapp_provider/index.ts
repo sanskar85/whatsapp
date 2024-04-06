@@ -72,6 +72,11 @@ export class WhatsappProvider {
 			authStrategy: new LocalAuth({
 				clientId: this.client_id,
 			}),
+			webVersionCache: {
+				type: 'remote',
+				remotePath:
+					'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2410.1.html',
+			},
 		});
 
 		this.status = STATUS.UNINITIALIZED;
