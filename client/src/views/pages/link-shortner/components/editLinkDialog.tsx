@@ -64,7 +64,7 @@ const EditLinkDialog = forwardRef<EditLinkDialogHandle, Props>(({ onConfirm }: P
 					id: link_details.id,
 					type: 'NUMBER',
 					number: link_details.link.split('wa.me/')[1].split('?')[0],
-					message: link_details.link.split('text=')[1],
+					message: decodeURIComponent(link_details.link.split('text=')[1]),
 					title: link_details.title,
 				});
 			} else {
