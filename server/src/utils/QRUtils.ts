@@ -3,7 +3,7 @@ import Logger from 'n23-logger';
 import qr from 'qrcode';
 import { LOGO_PATH } from '../config/const';
 
-const generateQR = async (text: string) => {
+const generateQR = async (text: string, remove_promotion = false) => {
 	try {
 		// Generate QR code
 		const qrImage = await qr.toDataURL(text);
@@ -11,6 +11,10 @@ const generateQR = async (text: string) => {
 		// Load QR code image using Jimp
 		const qrJimp = await Jimp.read(Buffer.from(qrImage.split('base64,')[1], 'base64'));
 		qrJimp.resize(1024, 1024);
+
+		if (remove_promotion) {
+			return await qrJimp.getBufferAsync(Jimp.MIME_PNG);
+		}
 
 		// Load the image to be placed in the center
 		let image = await Jimp.read(__basedir + LOGO_PATH);

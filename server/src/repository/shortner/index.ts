@@ -26,7 +26,7 @@ ShortnerSchema.pre('save', async function (next) {
 		this.key = nanoid(6);
 	}
 	if (!this.qrString) {
-		const qrCodeBuffer = await QRUtils.generateQR(`https://open.whatsleads.in/${this.key}`);
+		const qrCodeBuffer = await QRUtils.generateQR(`https://open.whatsleads.in/${this.key}`, true);
 		if (qrCodeBuffer) {
 			this.qrString = `data:image/png;base64,${qrCodeBuffer.toString('base64')}`;
 		}
