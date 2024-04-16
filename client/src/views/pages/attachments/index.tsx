@@ -172,7 +172,12 @@ const AttachmentPage = () => {
 					</Tbody>
 				</Table>
 			</TableContainer>
-			<DeleteAlert type={'Attachments'} ref={deleteAlertRef} onConfirm={handleDeleteAttachments} />
+			<DeleteAlert
+				type={'Attachments'}
+				ref={deleteAlertRef}
+				onConfirm={handleDeleteAttachments}
+				disclaimer='Any scheduled messaged containing this attachment will not be sent'
+			/>
 		</Box>
 	);
 };
