@@ -77,11 +77,9 @@ async function contacts(req: Request, res: Response, next: NextFunction) {
 			whatsappUtils.getContacts()
 		);
 
-		let listed_contacts = [
-			...(options.saved ? saved : []),
-			...(options.unsaved ? non_saved : []),
-			...(options.chat_contacts ? saved_chat : []),
-		];
+		let listed_contacts = options.chat_contacts
+			? saved_chat
+			: [...(options.saved ? saved : []), ...(options.unsaved ? non_saved : [])];
 
 		listed_contacts = listed_contacts.filter(
 			(c) =>
