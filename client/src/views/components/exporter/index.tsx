@@ -137,6 +137,8 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 		if (SAVED_CHAT) {
 			ContactService.contacts({
 				...opts,
+				saved_contacts: false,
+				non_saved_contacts: false,
 				saved_chat_contacts: true,
 			});
 		}
