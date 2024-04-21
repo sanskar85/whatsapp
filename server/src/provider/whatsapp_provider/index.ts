@@ -194,7 +194,7 @@ export class WhatsappProvider {
 				if (!this.bot_service) return;
 				this.bot_service.handleMessage(chat.id._serialized, opt, contact, {
 					fromPoll: true,
-					isGroup: false,
+					isGroup: chat.isGroup,
 				});
 			});
 		});
