@@ -266,7 +266,7 @@ export default class BotService {
 		const whatsapp = this.whatsapp;
 
 		botsEngaged.forEach(async (bot) => {
-			if (!bot.group_respond && opts.isGroup) {
+			if (!bot.group_respond && (opts.isGroup || message_from.length > 12)) {
 				return;
 			}
 			await Delay(bot.response_delay_seconds);

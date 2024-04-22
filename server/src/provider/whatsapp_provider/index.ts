@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import QRCode from 'qrcode';
 import { Socket } from 'socket.io';
-import WAWebJS, { BusinessContact, Buttons, Client, GroupChat, LocalAuth } from 'whatsapp-web.js';
+import WAWebJS, { BusinessContact, Client, GroupChat, LocalAuth } from 'whatsapp-web.js';
 import { CHROMIUM_PATH, SOCKET_RESPONSES } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import { UserService } from '../../services';
@@ -41,6 +41,7 @@ export class WhatsappProvider {
 	private client: Client;
 	private client_id: ClientID;
 	private static clientsMap = new Map<ClientID, WhatsappProvider>();
+	private handledMessage = new Map<string, null>();
 
 	private qrCode: string | undefined;
 	private number: string | undefined;
@@ -209,17 +210,17 @@ export class WhatsappProvider {
 		});
 
 		this.client.on('message', async (message) => {
-			let button = new Buttons(
-				'Button body\n\nWant to test buttons some more? Check out https://github.com/wwebjs/buttons-test',
-				[{ body: 'Some text' }, { body: 'Try clicking me (id:test)', id: 'test' }],
-				'title',
-				'footer'
-			);
-			message.reply(button);
 			if (!this.bot_service) return;
+			if (this.handledMessage.has(message.id._serialized)) {
+				return;
+			}
+			this.handledMessage.set(message.id._serialized, null);
 			const chat = await message.getChat();
 			const isGroup = chat.isGroup;
 			const contact = await message.getContact();
+			if (!this.contact || contact.id._serialized === this.contact.id._serialized) {
+				return;
+			}
 			this.bot_service.handleMessage(message.from, message.body, contact, {
 				isGroup,
 				fromPoll: false,
