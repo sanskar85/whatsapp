@@ -88,7 +88,7 @@ export default class UserService {
 			? DateUtils.getMoment(this.user.subscription_expiry).isAfter(DateUtils.getMomentNow())
 			: false;
 		const isNew = DateUtils.getMoment(this.user.createdAt)
-			.add(28, 'days')
+			.add(7, 'days')
 			.isAfter(DateUtils.getMomentNow());
 		return {
 			isSubscribed: isPaymentValid,
