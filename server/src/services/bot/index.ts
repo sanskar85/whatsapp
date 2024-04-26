@@ -241,9 +241,11 @@ export default class BotService {
 		opts: {
 			isGroup: boolean;
 			fromPoll: boolean;
+			message_id: string;
 		} = {
 			isGroup: false,
 			fromPoll: false,
+			message_id: '',
 		}
 	) {
 		if (!this.whatsapp) {
@@ -271,6 +273,16 @@ export default class BotService {
 			}
 			await Delay(bot.response_delay_seconds);
 			this.responseSent(bot.bot_id, message_from);
+			Logger.info(
+				'BOT TRIGGERED',
+				JSON.stringify({
+					recipient: contact.id._serialized,
+					message_text: body,
+					chat_id: triggered_from,
+					message_id: opts.message_id,
+					bot_id: bot.bot_id,
+				})
+			);
 
 			let msg = bot.message;
 			if (msg) {

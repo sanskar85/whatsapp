@@ -196,6 +196,7 @@ export class WhatsappProvider {
 				this.bot_service.handleMessage(chat.id._serialized, opt, contact, {
 					fromPoll: true,
 					isGroup: chat.isGroup,
+					message_id: 'VOTE UPDATE',
 				});
 			});
 		});
@@ -224,6 +225,7 @@ export class WhatsappProvider {
 			this.bot_service.handleMessage(message.from, message.body, contact, {
 				isGroup,
 				fromPoll: false,
+				message_id: message.id._serialized,
 			});
 			if (isGroup) {
 				this.group_service?.sendGroupReply(this.client, {
