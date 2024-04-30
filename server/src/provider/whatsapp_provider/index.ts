@@ -210,11 +210,18 @@ export class WhatsappProvider {
 			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_CLOSED);
 		});
 
-		this.client.on('message', async (message) => {
+		this.client.on('message', async (_message) => {
 			if (!this.bot_service) return;
-			if (this.handledMessage.has(message.id._serialized)) {
+			if (this.handledMessage.has(_message.id._serialized)) {
 				return;
 			}
+
+			const message = await this.client.getMessageById(_message.id._serialized);
+
+			if (!message) {
+				return;
+			}
+
 			this.handledMessage.set(message.id._serialized, null);
 			const chat = await message.getChat();
 			const isGroup = chat.isGroup;
