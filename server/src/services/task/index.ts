@@ -3,6 +3,7 @@ import { TASK_RESULT_TYPE, TASK_STATUS, TASK_TYPE } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import TaskDB from '../../repository/tasks';
 import { IUser } from '../../types/user';
+import DateUtils from '../../utils/DateUtils';
 
 export default class TaskService {
 	private user: IUser;
@@ -20,6 +21,7 @@ export default class TaskService {
 			status: task.status,
 			data: task.data,
 			data_result_type: task.data_result_type,
+			createdAt: DateUtils.format(task.createdAt),
 		}));
 	}
 

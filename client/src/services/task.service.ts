@@ -13,6 +13,7 @@ export default class TaskService {
 					description: string;
 					status: TASK_STATUS;
 					data_result_type: TASK_RESULT_TYPE;
+					createdAt: string;
 					data?: string;
 				}) => ({
 					id: task.id as string,
@@ -21,6 +22,7 @@ export default class TaskService {
 					status: task.status as TASK_STATUS,
 					data_result_type: task.data_result_type as TASK_RESULT_TYPE,
 					data: (task.data as string) || undefined,
+					createdAt: task.createdAt as string,
 				})
 			);
 		} catch (err) {

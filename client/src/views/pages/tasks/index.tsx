@@ -78,7 +78,7 @@ const Tasks = () => {
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'5%'}>
 								Sl no.
 							</Th>
-							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'30%'}>
+							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'20%'}>
 								Type
 							</Th>
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'50%'}>
@@ -86,6 +86,9 @@ const Tasks = () => {
 							</Th>
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'10%'}>
 								Status
+							</Th>
+							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'10%'}>
+								Started At
 							</Th>
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'5%'}>
 								Action
@@ -114,6 +117,7 @@ const Tasks = () => {
 									<Td className='capitalize'>{task.type.toLowerCase().split('_').join(' ')}</Td>
 									<Td>{task.description}</Td>
 									<Td>{task.status}</Td>
+									<Td>{task.createdAt}</Td>
 									<Td>
 										<IconButton
 											hidden={task.data_result_type === TASK_RESULT_TYPE.NONE}

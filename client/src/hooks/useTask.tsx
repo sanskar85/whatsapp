@@ -25,6 +25,7 @@ export default function useTask() {
 			description: string;
 			status: TASK_STATUS;
 			data_result_type: TASK_RESULT_TYPE;
+			createdAt: string;
 			data?: string;
 		}[]
 	>([]);

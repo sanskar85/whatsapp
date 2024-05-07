@@ -1,11 +1,12 @@
 import { ComponentWithAs, IconProps } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import { IconType } from 'react-icons';
 import { singletonHook } from 'react-singleton-hook';
 import { NAVIGATION } from '../config/const';
 
 export type NavbarLocation = {
 	title: string;
-	icon?: string | ComponentWithAs<'svg', IconProps>;
+	icon?: string | ComponentWithAs<'svg', IconProps> | IconType;
 	link?: string;
 	actions?: React.ReactNode;
 };
