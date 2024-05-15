@@ -20,6 +20,7 @@ export const NAVIGATION = {
 	CSV: '/csv',
 	GROUP_MERGE: '/group-merge',
 	TASKS: '/pending-tasks',
+	OPEN: '/open',
 };
 
 export enum CHROME_ACTION {

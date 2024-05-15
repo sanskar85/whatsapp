@@ -8,6 +8,7 @@ import { LOGO } from './assets/Images';
 import { useNavbar } from './hooks/useNavbar';
 import { useTheme } from './hooks/useTheme';
 import useUserData from './hooks/useUserData';
+import Open from './views/pages/open';
 
 const Welcome = lazy(() => import('./views/pages/welcome'));
 const Scheduler = lazy(() => import('./views/pages/scheduler'));
@@ -33,6 +34,7 @@ function App() {
 				<Suspense fallback={<Loading />}>
 					<Routes>
 						<Route path={NAVIGATION.WELCOME} element={<Welcome />} />
+						<Route path={NAVIGATION.OPEN + '/:id'} element={<Open />} />
 						<Route path={NAVIGATION.HOME} element={<Home />}>
 							<Route path={NAVIGATION.CONTACT} element={<Contact />} />
 							<Route path={NAVIGATION.SCHEDULER} element={<Scheduler />} />
