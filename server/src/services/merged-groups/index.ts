@@ -381,7 +381,7 @@ export default class GroupMergeService {
 				}
 				await Delay(getRandomNumber(doc.min_delay, doc.max_delay));
 
-				await GroupReplyDB.create({ ...createDocData, mergedGroup: doc._id });
+				await GroupPrivateReplyDB.create({ ...createDocData, mergedGroup: doc._id });
 
 				let _reply_text = text.replace(new RegExp('{{public_name}}', 'g'), contact.pushname);
 
