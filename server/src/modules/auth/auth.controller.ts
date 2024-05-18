@@ -145,6 +145,7 @@ async function logout(req: Request, res: Response) {
 	const refreshTokens = req.cookies[JWT_REFRESH_COOKIE] as string;
 	res.clearCookie(JWT_COOKIE);
 	res.clearCookie(JWT_REFRESH_COOKIE);
+	res.clearCookie(CLIENT_ID_COOKIE);
 	await UserService.logout(refreshTokens);
 	return Respond({
 		res,
