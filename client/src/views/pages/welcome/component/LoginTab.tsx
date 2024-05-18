@@ -1,4 +1,4 @@
-import { Button, FormControl, FormLabel, Input, Stack } from '@chakra-ui/react';
+import { Button, FormControl, FormLabel, Input, Stack, Text, useToast } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Colors, NAVIGATION } from '../../../../config/const';
@@ -8,6 +8,7 @@ import { PasswordInput } from './PasswordInput';
 
 export default function LoginTab() {
 	const navigate = useNavigate();
+	const toast = useToast();
 	const { isAuthenticating } = useAuth();
 	const [{ username, password }, setCredentials] = useState({
 		username: '',
@@ -29,6 +30,37 @@ export default function LoginTab() {
 			...prev,
 			[e.target.name + 'Error']: false,
 		}));
+	};
+
+	const forgotPassword = async () => {
+		if (!username || !password) {
+			return setUIDetails({
+				usernameError: !username,
+				passwordError: false,
+				loginError: false,
+			});
+		}
+		const valid = await AuthService.forgotPassword(username);
+		if (valid) {
+			toast({
+				title: 'Password reset link sent to your email',
+				status: 'success',
+				duration: 4000,
+				isClosable: true,
+			});
+		}
+		setUIDetails({
+			passwordError: false,
+			usernameError: true,
+			loginError: false,
+		});
+		setTimeout(() => {
+			setUIDetails({
+				passwordError: false,
+				usernameError: false,
+				loginError: false,
+			});
+		}, 5000);
 	};
 
 	const handleLogin = async () => {
@@ -56,6 +88,7 @@ export default function LoginTab() {
 			});
 		}, 2000);
 	};
+
 	return (
 		<>
 			<Stack width={'full'} spacing='6'>
@@ -91,7 +124,7 @@ export default function LoginTab() {
 					/>
 				</Stack>
 
-				<Stack spacing='6'>
+				<Stack>
 					<Button
 						onClick={handleLogin}
 						colorScheme={loginError ? 'red' : 'green'}
@@ -99,6 +132,9 @@ export default function LoginTab() {
 					>
 						Sign in
 					</Button>
+					<Text textAlign={'center'} cursor={'pointer'} onClick={forgotPassword}>
+						forgot password?
+					</Text>
 				</Stack>
 			</Stack>
 		</>

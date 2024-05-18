@@ -5,12 +5,20 @@ import {
 	IS_PRODUCTION,
 	JWT_COOKIE,
 	JWT_REFRESH_COOKIE,
+	SERVER_URL,
 } from '../../config/const';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import { WhatsappProvider } from '../../provider/whatsapp_provider';
+import StorageDB from '../../repository/storage';
 import { UserService } from '../../services';
 import { DeviceService } from '../../services/user';
-import { Respond, generateClientID } from '../../utils/ExpressUtils';
+import {
+	Respond,
+	generateClientID,
+	generateRandomText,
+	idValidator,
+} from '../../utils/ExpressUtils';
+import { sendLoginCredentialsEmail, sendPasswordResetEmail } from '../../utils/email';
 import { LoginValidationResult } from './auth.validator';
 
 const JWT_EXPIRE_TIME = 3 * 60 * 1000;
@@ -172,6 +180,52 @@ async function updatePassword(req: Request, res: Response) {
 	});
 }
 
+async function forgotPassword(req: Request, res: Response, next: NextFunction) {
+	const { username } = req.body;
+
+	if (!username) {
+		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
+	}
+
+	try {
+		const userService = await UserService.getService(username);
+		const token = await userService.generatePasswordResetToken();
+
+		const resetLink = `${SERVER_URL}/auth/reset-password/${token}`;
+
+		const success = await sendPasswordResetEmail(username, resetLink);
+
+		return Respond({
+			res,
+			status: success ? 200 : 400,
+			data: {},
+		});
+	} catch (err) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.USER_NOT_FOUND_ERROR));
+	}
+}
+
+async function resetPassword(req: Request, res: Response) {
+	const user_id = await StorageDB.getString(req.params.id);
+	try {
+		if (!user_id) {
+			return res.send('Error resetting password');
+		}
+		const [valid, id] = idValidator(user_id);
+		if (!valid) {
+			return res.send('Error resetting password');
+		}
+		const userService = await UserService.getService(id);
+		const text = generateRandomText(8);
+		await userService.setPassword(text);
+		sendLoginCredentialsEmail(userService.getUser().username, userService.getUser().username, text);
+
+		return res.send('Error resetting password');
+	} catch (err) {
+		return res.send('Error resetting password');
+	}
+}
+
 async function logout(req: Request, res: Response) {
 	const refreshTokens = req.cookies[JWT_REFRESH_COOKIE] as string;
 	res.clearCookie(JWT_COOKIE);
@@ -198,10 +252,12 @@ const AuthController = {
 	logout,
 	login,
 	updatePassword,
+	forgotPassword,
 	validateLogin,
 	deviceLogout,
 	initiateWhatsapp,
 	logoutWhatsapp,
+	resetPassword,
 };
 
 export default AuthController;

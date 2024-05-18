@@ -56,6 +56,18 @@ export default class AuthService {
 			return false;
 		}
 	}
+
+	static async forgotPassword(username: string) {
+		try {
+			await APIInstance.post(`/auth/forgot-password`, {
+				username,
+			});
+			return true;
+		} catch (err) {
+			return false;
+		}
+	}
+
 	static async updatePassword(password: string) {
 		try {
 			await APIInstance.patch(`/auth/update-password`, {
@@ -66,6 +78,7 @@ export default class AuthService {
 			return false;
 		}
 	}
+
 	static async logoutWhatsapp() {
 		try {
 			await APIInstance.post(`/auth/logout-whatsapp`);

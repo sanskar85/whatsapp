@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import { getRefreshTokens, removeRefreshTokens } from '../../config/cache';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
+import StorageDB from '../../repository/storage';
 import { UserDB } from '../../repository/user';
 import { IUser } from '../../types/users';
 import { generateRandomText, idValidator } from '../../utils/ExpressUtils';
@@ -67,6 +68,12 @@ export default class UserService {
 
 	getRole() {
 		return this.user.role;
+	}
+
+	async generatePasswordResetToken() {
+		const token = generateRandomText(24);
+		await StorageDB.setString(token, this.getID().toString());
+		return token;
 	}
 
 	static async isValidAuth(
