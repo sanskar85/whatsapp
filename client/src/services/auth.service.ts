@@ -56,4 +56,21 @@ export default class AuthService {
 			return false;
 		}
 	}
+	static async updatePassword(password: string) {
+		try {
+			await APIInstance.patch(`/auth/update-password`, {
+				password,
+			});
+			return true;
+		} catch (err) {
+			return false;
+		}
+	}
+	static async logoutWhatsapp() {
+		try {
+			await APIInstance.post(`/auth/logout-whatsapp`);
+		} catch (err) {
+			//ignore
+		}
+	}
 }

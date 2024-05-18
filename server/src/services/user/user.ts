@@ -60,6 +60,11 @@ export default class UserService {
 		return this.user;
 	}
 
+	async setPassword(password: string) {
+		this.user.password = password;
+		await this.user.save();
+	}
+
 	getRole() {
 		return this.user.role;
 	}

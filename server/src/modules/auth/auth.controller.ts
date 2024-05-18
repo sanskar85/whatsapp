@@ -81,6 +81,20 @@ async function initiateWhatsapp(req: Request, res: Response, next: NextFunction)
 	}
 }
 
+async function logoutWhatsapp(req: Request, res: Response, next: NextFunction) {
+	const { client_id } = req.cookies;
+
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (whatsapp) {
+		whatsapp.logoutClient();
+	}
+	res.clearCookie(CLIENT_ID_COOKIE);
+	return Respond({
+		res,
+		status: 200,
+	});
+}
+
 async function deviceLogout(req: Request, res: Response, next: NextFunction) {
 	const { client_id } = req.locals;
 	WhatsappProvider.clientByClientID(client_id)?.logoutClient();
@@ -141,6 +155,23 @@ async function login(req: Request, res: Response, next: NextFunction) {
 	}
 }
 
+async function updatePassword(req: Request, res: Response) {
+	const { password } = req.body;
+	if (!password || password.length < 8) {
+		return Respond({
+			res,
+			status: 400,
+			data: {},
+		});
+	}
+	await req.locals.user.setPassword(password);
+	return Respond({
+		res,
+		status: 200,
+		data: {},
+	});
+}
+
 async function logout(req: Request, res: Response) {
 	const refreshTokens = req.cookies[JWT_REFRESH_COOKIE] as string;
 	res.clearCookie(JWT_COOKIE);
@@ -166,9 +197,11 @@ const AuthController = {
 	validateClientID,
 	logout,
 	login,
+	updatePassword,
 	validateLogin,
 	deviceLogout,
 	initiateWhatsapp,
+	logoutWhatsapp,
 };
 
 export default AuthController;

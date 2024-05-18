@@ -28,7 +28,8 @@ import { useTheme } from '../../../hooks/useTheme';
 import AuthService from '../../../services/auth.service';
 import PaymentService from '../../../services/payment.service';
 import { StoreNames, StoreState } from '../../../store';
-import AddDeviceDialog, { AddDeviceDialogHandle } from './AddDeviceDialog';
+import AddDeviceDialog, { AddDeviceDialogHandle } from './components/AddDeviceDialog';
+import ChangePassword, { ChangePasswordHandle } from './components/ChangePassword';
 
 type SettingsProps = {
 	isOpen: boolean;
@@ -53,6 +54,7 @@ type Subscription = {
 export default function Settings({ isOpen, onClose }: SettingsProps) {
 	const theme = useTheme();
 	const addProfileRef = useRef<AddDeviceDialogHandle | null>(null);
+	const changePasswordRef = useRef<ChangePasswordHandle | null>(null);
 
 	const { isAuthenticating, qrCode, isSocketInitialized, isAuthenticated, qrGenerated } = useAuth();
 
@@ -89,6 +91,16 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 		});
 	};
 
+	const logoutWhatsapp = async () => {
+		await AuthService.logoutWhatsapp();
+		AuthService.validateClientID().then((res) => {
+			if (res) {
+				setPhoneAuthenticated(res);
+				window.location.reload();
+			}
+		});
+	};
+
 	return (
 		<Drawer placement={'left'} onClose={onClose} isOpen={isOpen} size={'lg'}>
 			<DrawerOverlay />
@@ -98,8 +110,8 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 					Settings
 				</DrawerHeader>
 				<DrawerBody>
-					<Box width='full' py={'1rem'} px={'1rem'}>
-						<Box marginTop={'1rem'}>
+					<Box width='full' py={'1rem'} px={'1rem'} height={'calc(100% - 70px)'}>
+						<Box marginTop={'1rem'} height={'full'}>
 							{phoneState ? (
 								<section>
 									<Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -274,10 +286,30 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 									</TableContainer>
 								</VStack>
 							</section>
+
+							<section className=' flex flex-col justify-end h-full'>
+								<Button
+									width={'full'}
+									colorScheme='yellow'
+									onClick={() => changePasswordRef.current?.open()}
+								>
+									Change Password
+								</Button>
+								<Button
+									width={'full'}
+									colorScheme='red'
+									marginTop={'1rem'}
+									hidden={phoneState === null}
+									onClick={logoutWhatsapp}
+								>
+									Logout Whatsapp
+								</Button>
+							</section>
 						</Box>
 					</Box>
 				</DrawerBody>
 			</DrawerContent>
+			<ChangePassword ref={changePasswordRef} />
 			<AddDeviceDialog
 				ref={addProfileRef}
 				qr={qrCode}

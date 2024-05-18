@@ -14,8 +14,8 @@ import {
 } from '@chakra-ui/react';
 import Lottie from 'lottie-react';
 import { forwardRef, useImperativeHandle } from 'react';
-import { LOTTIE_AUTHENTICATED, LOTTIE_AUTHENTICATING } from '../../../assets/Lottie';
-import { Colors } from '../../../config/const';
+import { LOTTIE_AUTHENTICATED, LOTTIE_AUTHENTICATING } from '../../../../assets/Lottie';
+import { Colors } from '../../../../config/const';
 
 export type AddDeviceDialogHandle = {
 	open: () => void;
