@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import Logger from 'n23-logger';
 import QRCode from 'qrcode';
 import { Socket } from 'socket.io';
 import WAWebJS, { BusinessContact, Client, GroupChat, LocalAuth } from 'whatsapp-web.js';
@@ -15,14 +16,14 @@ type ClientID = string;
 
 const PUPPETEER_ARGS = [
 	'--no-sandbox',
-	'--disable-setuid-sandbox',
-	'--unhandled-rejections=strict',
-	'--disable-dev-shm-usage',
-	'--disable-accelerated-2d-canvas',
-	'--no-first-run',
-	'--no-zygote',
-	'--single-process', // <- this one doesn't works in Windows
-	'--disable-gpu',
+	// '--disable-setuid-sandbox',
+	// '--unhandled-rejections=strict',
+	// '--disable-dev-shm-usage',
+	// '--disable-accelerated-2d-canvas',
+	// '--no-first-run',
+	// '--no-zygote',
+	// '--single-process', // <- this one doesn't works in Windows
+	// '--disable-gpu',
 ];
 
 enum STATUS {
@@ -63,7 +64,7 @@ export class WhatsappProvider {
 			restartOnAuthFail: true,
 
 			puppeteer: {
-				headless: true,
+				headless: false,
 				args: PUPPETEER_ARGS,
 				executablePath: CHROMIUM_PATH,
 			},
@@ -108,6 +109,10 @@ export class WhatsappProvider {
 
 	public initialize() {
 		if (this.status !== STATUS.UNINITIALIZED) return;
+		Logger.info(
+			`Initializing client`,
+			`${this.userService.getUser().username} - ${this.client_id}`
+		);
 		this.client.initialize();
 		this.status = STATUS.INITIALIZED;
 		this.sendToClient(SOCKET_RESPONSES.INITIALIZED, this.client_id);
@@ -290,6 +295,7 @@ export class WhatsappProvider {
 
 	async logoutClient() {
 		await Delay(10);
+		WhatsappProvider.deleteSession(this.client_id);
 		this.callbackHandlers.onDestroy(this.client_id);
 		if (this.status === STATUS.LOGGED_OUT || this.status === STATUS.DESTROYED) {
 			return;

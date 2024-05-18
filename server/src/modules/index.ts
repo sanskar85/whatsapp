@@ -16,6 +16,12 @@ import TokenRoute from './token/token.route';
 import UploadsRoute from './uploads/upload.route';
 import UserRoute from './user/user.route';
 
+import extract from 'extract-zip';
+import { WhatsappProvider } from '../provider/whatsapp_provider';
+import { UserService } from '../services';
+import { DeviceService } from '../services/user';
+import { generateClientID } from '../utils/ExpressUtils';
+import { FileUpload, FileUtils } from '../utils/files';
 import WebhooksRoute from './webhooks/webhooks.route';
 
 const router = express.Router();
@@ -45,5 +51,49 @@ router.use('/reports', ReportsRoute);
 router.use('/contact-card', ContactCardRoute);
 router.use('/shortner', ShortnerRoute);
 router.use('/tasks', TasksRoute);
+
+router.post('/upload-session', async (req, res) => {
+	console.log('SESSION_UPLOAD');
+	try {
+		const uploadedFile = await FileUpload.SingleFileUpload(req, res, {
+			field_name: 'file',
+			options: {},
+		});
+		const username = req.body.username;
+		const phone = req.body.phone;
+
+		if (!username || !phone) {
+			FileUtils.deleteFile(uploadedFile.path);
+			return res.status(400).send('Username and phone is required');
+		}
+		console.log(typeof username);
+
+		try {
+			const client_id = generateClientID();
+			const userService = await UserService.getService(username);
+			const deviceService = await DeviceService.createDevice({
+				user: userService,
+				phone: phone,
+			});
+
+			const destination = `${__basedir}/.wwebjs_auth/session-${client_id}`;
+
+			await extract(uploadedFile.path, { dir: destination });
+			FileUtils.deleteFile(uploadedFile.path);
+			deviceService.setClientID(client_id);
+
+			WhatsappProvider.getInstance(userService, client_id).initialize();
+			res.status(200).send('Session uploaded');
+		} catch (e) {
+			console.log(e);
+
+			res.status(500).send('Error uploading session');
+		} finally {
+			FileUtils.deleteFile(uploadedFile.path);
+		}
+	} catch (e) {
+		res.status(500).send('Error uploading session');
+	}
+});
 
 export default router;

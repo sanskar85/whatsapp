@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+	transition-property: all;
+	transition-duration: 300ms;
+}
+
+body {
+	border-radius: 10px;
+	margin: 0;
+	font-family: 'Poppins', Arial, Helvetica, sans-serif !important;
+}
+
+@layer utilities {
+	.center {
+		@apply flex flex-col justify-center items-center;
+	}
+	.centered-axis-xy {
+		@apply absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+	}
+	.centered-axis-x {
+		@apply absolute left-1/2 -translate-x-1/2;
+	}
+	.centered-axis-y {
+		@apply absolute top-1/2 -translate-y-1/2;
+	}
+	.searchBox {
+		@apply placeholder:!text-[#252525] dark:placeholder:!text-[#A6A6A6];
+	}
+}

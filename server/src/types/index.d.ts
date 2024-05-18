@@ -8,7 +8,6 @@ export { APIError } from './server-error';
 
 declare global {
 	var __basedir: string;
-	var __augmont_auth_token: string;
 
 	namespace Express {
 		interface Request {
