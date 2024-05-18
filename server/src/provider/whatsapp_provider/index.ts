@@ -16,14 +16,14 @@ type ClientID = string;
 
 const PUPPETEER_ARGS = [
 	'--no-sandbox',
-	// '--disable-setuid-sandbox',
-	// '--unhandled-rejections=strict',
-	// '--disable-dev-shm-usage',
-	// '--disable-accelerated-2d-canvas',
-	// '--no-first-run',
-	// '--no-zygote',
-	// '--single-process', // <- this one doesn't works in Windows
-	// '--disable-gpu',
+	'--disable-setuid-sandbox',
+	'--unhandled-rejections=strict',
+	'--disable-dev-shm-usage',
+	'--disable-accelerated-2d-canvas',
+	'--no-first-run',
+	'--no-zygote',
+	'--single-process', // <- this one doesn't works in Windows
+	'--disable-gpu',
 ];
 
 enum STATUS {
@@ -64,7 +64,7 @@ export class WhatsappProvider {
 			restartOnAuthFail: true,
 
 			puppeteer: {
-				headless: false,
+				headless: true,
 				args: PUPPETEER_ARGS,
 				executablePath: CHROMIUM_PATH,
 			},
