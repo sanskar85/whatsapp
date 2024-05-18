@@ -1,10 +1,11 @@
-import { Document, Schema } from 'mongoose';
+import { Document } from 'mongoose';
 
 export interface IStorageModel extends IStorage, Document {
 	getString(key: string): Promise<string | null>;
 	getObject(key: string): Promise<object | null>;
 	setString(key: string, value: string): Promise<void>;
 	setObject(key: string, value: object): Promise<void>;
+	deleteKey(key: string): Promise<void>;
 }
 
 export default interface IStorage extends Document {

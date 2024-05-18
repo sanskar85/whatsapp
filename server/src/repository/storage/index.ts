@@ -54,6 +54,10 @@ StorageSchema.statics.setObject = async function (key: string, value: object): P
 	}
 };
 
+StorageSchema.statics.deleteKey = async function (key: string): Promise<void> {
+	await this.deleteOne({ key });
+};
+
 const StorageDB = mongoose.model<IStorage, IStorageModel>('Storage', StorageSchema);
 
 export default StorageDB;

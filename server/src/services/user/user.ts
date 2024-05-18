@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { getRefreshTokens, removeRefreshTokens } from '../../config/cache';
+import { UserRoles } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import StorageDB from '../../repository/storage';
 import { UserDB } from '../../repository/user';
@@ -103,7 +104,7 @@ export default class UserService {
 		};
 	}
 
-	static async createUser(username: string) {
+	static async createUser(username: string, password?: string) {
 		const user = await UserDB.findOne({ username });
 
 		if (user) {
@@ -112,10 +113,9 @@ export default class UserService {
 
 		const createdUser = await UserDB.create({
 			username,
-			password: generateRandomText(8),
+			password: password ?? generateRandomText(8),
+			role: UserRoles.USER,
 		});
-		//TODO Send welcome mail
-
 		return new UserService(createdUser);
 	}
 

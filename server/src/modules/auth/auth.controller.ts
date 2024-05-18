@@ -163,6 +163,53 @@ async function login(req: Request, res: Response, next: NextFunction) {
 	}
 }
 
+async function register(req: Request, res: Response, next: NextFunction) {
+	const { username, password } = req.locals.data as LoginValidationResult;
+	try {
+		const userService = await UserService.createUser(username, password);
+
+		sendLoginCredentialsEmail(username, username, password);
+
+		res.cookie(JWT_COOKIE, userService.getToken(), {
+			sameSite: 'strict',
+			expires: new Date(Date.now() + JWT_EXPIRE_TIME),
+			httpOnly: IS_PRODUCTION,
+			secure: IS_PRODUCTION,
+		});
+		const t = userService.getRefreshToken();
+
+		saveRefreshTokens(t, userService.getID().toString());
+		res.cookie(JWT_REFRESH_COOKIE, t, {
+			sameSite: 'strict',
+			expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
+			httpOnly: IS_PRODUCTION,
+			secure: IS_PRODUCTION,
+		});
+
+		const client_id = WhatsappProvider.clientByUser(userService.getID());
+
+		if (client_id) {
+			const whatsapp = WhatsappProvider.clientByClientID(client_id);
+			if (whatsapp?.isReady()) {
+				res.cookie(CLIENT_ID_COOKIE, client_id, {
+					sameSite: 'strict',
+					expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
+					httpOnly: IS_PRODUCTION,
+					secure: IS_PRODUCTION,
+				});
+			}
+		}
+
+		return Respond({
+			res,
+			status: 200,
+			data: {},
+		});
+	} catch (err) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.USER_NOT_FOUND_ERROR));
+	}
+}
+
 async function updatePassword(req: Request, res: Response) {
 	const { password } = req.body;
 	if (!password || password.length < 8) {
@@ -207,6 +254,7 @@ async function forgotPassword(req: Request, res: Response, next: NextFunction) {
 
 async function resetPassword(req: Request, res: Response) {
 	const user_id = await StorageDB.getString(req.params.id);
+
 	try {
 		if (!user_id) {
 			return res.send('Error resetting password');
@@ -215,12 +263,13 @@ async function resetPassword(req: Request, res: Response) {
 		if (!valid) {
 			return res.send('Error resetting password');
 		}
+		StorageDB.deleteKey(req.params.id);
 		const userService = await UserService.getService(id);
 		const text = generateRandomText(8);
 		await userService.setPassword(text);
 		sendLoginCredentialsEmail(userService.getUser().username, userService.getUser().username, text);
 
-		return res.send('Error resetting password');
+		return res.send('Password reset successfully');
 	} catch (err) {
 		return res.send('Error resetting password');
 	}
@@ -251,6 +300,7 @@ const AuthController = {
 	validateClientID,
 	logout,
 	login,
+	register,
 	updatePassword,
 	forgotPassword,
 	validateLogin,
