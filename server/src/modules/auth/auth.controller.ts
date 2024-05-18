@@ -117,6 +117,20 @@ async function login(req: Request, res: Response, next: NextFunction) {
 			secure: IS_PRODUCTION,
 		});
 
+		const client_id = WhatsappProvider.clientByUser(userService.getID());
+
+		if (client_id) {
+			const whatsapp = WhatsappProvider.clientByClientID(client_id);
+			if (whatsapp?.isReady()) {
+				res.cookie(CLIENT_ID_COOKIE, client_id, {
+					sameSite: 'strict',
+					expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
+					httpOnly: IS_PRODUCTION,
+					secure: IS_PRODUCTION,
+				});
+			}
+		}
+
 		return Respond({
 			res,
 			status: 200,
