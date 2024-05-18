@@ -15,34 +15,26 @@ import BotDB from '../../repository/bot/Bot';
 import ContactCardDB from '../../repository/contact-cards';
 import TimeGenerator from '../../structures/TimeGenerator';
 import IUpload from '../../types/uploads';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import { Delay, randomMessageText } from '../../utils/ExpressUtils';
 import VCardBuilder from '../../utils/VCardBuilder';
 import { MessageService } from '../messenger';
 import TokenService from '../token';
 import UploadService from '../uploads';
-import UserService from '../user';
+import UserService from '../user/user';
 
-export default class BotService {
-	private user: IUser;
-	private userService: UserService;
+export default class BotService extends UserService {
 	private messageSchedulerService: MessageService;
-	private whatsapp: WhatsappProvider | undefined;
 
 	public constructor(user: IUser) {
-		this.user = user;
-		this.userService = new UserService(user);
+		super(user);
 		this.messageSchedulerService = new MessageService(user);
-	}
-
-	public attachWhatsappProvider(whatsapp_provider: WhatsappProvider) {
-		this.whatsapp = whatsapp_provider;
 	}
 
 	public async allBots() {
 		const bots = await BotDB.find({
-			user: this.user,
+			user: this.getUser(),
 		}).populate('attachments shared_contact_cards ');
 		return bots.map((bot) => ({
 			bot_id: bot._id as Types.ObjectId,
@@ -139,7 +131,7 @@ export default class BotService {
 
 	private async lastMessages(ids: Types.ObjectId[], recipient: string) {
 		const responses = await BotResponseDB.find({
-			user: this.user,
+			user: this.getUser(),
 			recipient,
 			bot: { $in: ids },
 		});
@@ -238,34 +230,35 @@ export default class BotService {
 		triggered_from: string,
 		body: string,
 		contact: WAWebJS.Contact,
-		opts: {
-			isGroup: boolean;
-			fromPoll: boolean;
-			message_id: string;
-		} = {
-			isGroup: false,
-			fromPoll: false,
-			message_id: '',
+		{
+			isSubscribed,
+			isNew,
+			...opts
+		}: {
+			isGroup?: boolean;
+			fromPoll?: boolean;
+			message_id?: string;
+			client_id: string;
+			device_id: Types.ObjectId;
+			isSubscribed: boolean;
+			isNew: boolean;
 		}
 	) {
-		if (!this.whatsapp) {
-			throw new Error('Whatsapp Provider not attached.');
-		}
-
-		const { isSubscribed, isNew } = this.userService.isSubscribed();
-		if (!isSubscribed && !isNew) {
+		if (!opts.client_id) {
 			return;
 		}
-
 		const { message_1: PROMOTIONAL_MESSAGE_1, message_2: PROMOTIONAL_MESSAGE_2 } =
 			await TokenService.getPromotionalMessage();
 
 		const message_from = triggered_from.split('@')[0];
 
 		const botsEngaged = await this.botsEngaged({ message_body: body, message_from, contact });
-		const uploadService = new UploadService(this.user);
+		const uploadService = new UploadService(this.getUser());
 
-		const whatsapp = this.whatsapp;
+		const whatsapp = WhatsappProvider.clientByClientID(opts.client_id);
+		if (!whatsapp) {
+			return;
+		}
 
 		botsEngaged.forEach(async (bot) => {
 			if (!bot.group_respond && (opts.isGroup || message_from.length > 12)) {
@@ -428,6 +421,7 @@ export default class BotService {
 				this.messageSchedulerService.scheduleLeadNurturingMessage(nurtured_messages, {
 					scheduled_by: MESSAGE_SCHEDULER_TYPE.BOT,
 					scheduler_id: bot.bot_id,
+					device_id: opts.device_id,
 				});
 			}
 		});
@@ -443,7 +437,7 @@ export default class BotService {
 		}
 	) {
 		const bot_response = await BotResponseDB.findOne({
-			user: this.user,
+			user: this.getUser(),
 			recipient: message_from,
 			bot: bot_id,
 		});
@@ -454,7 +448,7 @@ export default class BotService {
 			await bot_response.save();
 		} else {
 			await BotResponseDB.create({
-				user: this.user,
+				user: this.getUser(),
 				recipient: message_from,
 				bot: bot_id,
 				last_message: DateUtils.getMomentNow().toDate(),
@@ -505,7 +499,7 @@ export default class BotService {
 	}) {
 		const bot = new BotDB({
 			...data,
-			user: this.user,
+			user: this.getUser(),
 		});
 
 		bot.save();
@@ -573,7 +567,7 @@ export default class BotService {
 		}
 	) {
 		const bot = await BotDB.findById(id).populate('attachments shared_contact_cards');
-		const uploadService = new UploadService(this.user);
+		const uploadService = new UploadService(this.getUser());
 		if (!bot) {
 			throw new InternalError(INTERNAL_ERRORS.COMMON_ERRORS.NOT_FOUND);
 		}

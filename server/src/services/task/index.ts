@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import { TASK_RESULT_TYPE, TASK_STATUS, TASK_TYPE } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import TaskDB from '../../repository/tasks';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 
 export default class TaskService {

@@ -214,7 +214,7 @@ export default function Scheduler() {
 				if (!success) {
 					return toast({
 						title: 'Campaign scheduler.',
-						description: 'Campaign name already exists',
+						description: 'Cannot schedule campaign. Please try again later.',
 						status: 'error',
 						duration: 3000,
 						isClosable: true,

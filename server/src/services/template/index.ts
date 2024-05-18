@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import TemplateDB from '../../repository/template';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 
 export default class TemplateService {
 	private user: IUser;

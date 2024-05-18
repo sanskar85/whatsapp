@@ -3,8 +3,8 @@ import { INVOICE_PATH } from '../../config/const';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import PaymentDB from '../../repository/payments/payment';
-import { UserService } from '../../services';
 import PaymentBucketService from '../../services/payments/payment-bucket';
+import { DeviceService } from '../../services/user';
 import CSVParser from '../../utils/CSVParser';
 import { Respond, RespondCSV, RespondFile, idValidator } from '../../utils/ExpressUtils';
 import { FileUtils } from '../../utils/files';
@@ -46,7 +46,9 @@ async function fetchUserTransactions(req: Request, res: Response, next: NextFunc
 		options.csv = true;
 	}
 	try {
-		const payments = await PaymentBucketService.getPaymentRecords(req.locals.user);
+		const device = await DeviceService.getServiceByClientID(req.locals.client_id);
+
+		const payments = await PaymentBucketService.getPaymentRecords(device.getPhoneNumber());
 
 		if (options.csv) {
 			return RespondCSV({
@@ -289,8 +291,8 @@ async function confirmTransaction(req: Request, res: Response, next: NextFunctio
 
 async function pauseSubscription(req: Request, res: Response, next: NextFunction) {
 	try {
-		const userService = new UserService(req.locals.user);
-		await userService.pauseSubscription(req.locals.data);
+		const userService = await DeviceService.getServiceByClientID(req.locals.client_id);
+		await userService.resumeSubscription(req.locals.data);
 		return Respond({
 			res,
 			status: 200,
@@ -309,7 +311,7 @@ async function pauseSubscription(req: Request, res: Response, next: NextFunction
 
 async function resumeSubscription(req: Request, res: Response, next: NextFunction) {
 	try {
-		const userService = new UserService(req.locals.user);
+		const userService = await DeviceService.getServiceByClientID(req.locals.client_id);
 		await userService.resumeSubscription(req.locals.data);
 		return Respond({
 			res,

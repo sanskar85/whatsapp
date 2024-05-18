@@ -21,11 +21,14 @@ import {
 	Tr,
 	VStack,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { startAuth, useAuth } from '../../../hooks/useAuth';
 import { useTheme } from '../../../hooks/useTheme';
+import AuthService from '../../../services/auth.service';
 import PaymentService from '../../../services/payment.service';
 import { StoreNames, StoreState } from '../../../store';
+import AddDeviceDialog, { AddDeviceDialogHandle } from './AddDeviceDialog';
 
 type SettingsProps = {
 	isOpen: boolean;
@@ -49,16 +52,42 @@ type Subscription = {
 
 export default function Settings({ isOpen, onClose }: SettingsProps) {
 	const theme = useTheme();
+	const addProfileRef = useRef<AddDeviceDialogHandle | null>(null);
 
-	const { name, isSubscribed, phoneNumber, subscriptionExpiration, userType } = useSelector(
+	const { isAuthenticating, qrCode, isSocketInitialized, isAuthenticated, qrGenerated } = useAuth();
+
+	const { isSubscribed, subscriptionExpiration, userType } = useSelector(
 		(state: StoreState) => state[StoreNames.USER]
 	);
+
+	const [phoneState, setPhoneAuthenticated] = useState<{
+		session_expires_at: string;
+		isWhatsappReady: boolean;
+		status: string;
+		phone_number: string;
+		name: string;
+	} | null>(null);
 
 	const [PAYMENT_RECORDS, setPaymentRecords] = useState<(Payment | Subscription)[]>([]);
 
 	useEffect(() => {
+		AuthService.validateClientID().then(setPhoneAuthenticated);
 		PaymentService.paymentRecords().then(setPaymentRecords);
 	}, []);
+
+	const handleLinkWhatsapp = () => {
+		startAuth();
+		addProfileRef.current?.open();
+	};
+
+	const handleDeviceAdded = () => {
+		AuthService.validateClientID().then((res) => {
+			if (res) {
+				setPhoneAuthenticated(res);
+				window.location.reload();
+			}
+		});
+	};
 
 	return (
 		<Drawer placement={'left'} onClose={onClose} isOpen={isOpen} size={'lg'}>
@@ -71,62 +100,70 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 				<DrawerBody>
 					<Box width='full' py={'1rem'} px={'1rem'}>
 						<Box marginTop={'1rem'}>
-							<section>
-								<Flex justifyContent={'space-between'} alignItems={'center'}>
-									<Text
-										className='text-black dark:text-white'
-										fontSize={'md'}
-										fontWeight={'medium'}
-									>
-										{name}
-									</Text>
-									<Text className='text-gray-800 dark:text-gray-300'>{userType}</Text>
-								</Flex>
-								<Box
-									marginTop={'0.25rem'}
-									className='bg-[#C6E3FF] dark:bg-[#234768]'
-									paddingX={'1rem'}
-									paddingY={'0.5rem'}
-									width={'max-content'}
-									rounded={'md'}
-								>
-									<Text className='text-[#158FFF] dark:text-[#158FFF]'>
-										{phoneNumber ? `+${phoneNumber}` : ''}
-									</Text>
-								</Box>
-							</section>
-
-							<section>
-								<Flex marginTop={'1rem'} rounded={'md'} alignItems={'center'}>
-									<Text color='gray.400' fontWeight={'semibold'}>
-										Plan
-									</Text>
-									<Box bgColor={'gray.400'} width={'full'} height={'2px'} marginLeft={'1rem'} />
-								</Flex>
-
-								<Box
-									marginTop={'0.25rem'}
-									className={`${
-										isSubscribed
-											? 'dark:bg-[#235C39] bg-[#B4FED0]'
-											: 'dark:bg-[#541919] bg-[#FFC9C9]'
-									}`}
-									paddingX={'1rem'}
-									paddingY={'0.5rem'}
-									width={'max-content'}
-									rounded={'md'}
-								>
-									<Text textColor={isSubscribed ? '#34F27B' : '#FF2626'}>
-										{isSubscribed ? 'Active' : 'Not Subscribed'}
-									</Text>
-								</Box>
-								{isSubscribed ? (
-									<Flex marginTop={'0.5rem'} gap={'0.5rem'} alignItems={'center'}>
-										<InfoOutlineIcon color={'#BB2525'} width={4} />
-										<Text color={'#BB2525'}>Expires On {subscriptionExpiration}</Text>
+							{phoneState ? (
+								<section>
+									<Flex justifyContent={'space-between'} alignItems={'center'}>
+										<Text
+											className='text-black dark:text-white'
+											fontSize={'md'}
+											fontWeight={'medium'}
+										>
+											{phoneState.name}
+										</Text>
+										<Text className='text-gray-800 dark:text-gray-300'>{userType}</Text>
 									</Flex>
-								) : null}
-							</section>
+									<Box
+										marginTop={'0.25rem'}
+										className='bg-[#C6E3FF] dark:bg-[#234768]'
+										paddingX={'1rem'}
+										paddingY={'0.5rem'}
+										width={'max-content'}
+										rounded={'md'}
+									>
+										<Text className='text-[#158FFF] dark:text-[#158FFF]'>
+											{phoneState.phone_number ? `+${phoneState.phone_number}` : ''}
+										</Text>
+									</Box>
+								</section>
+							) : (
+								<Button colorScheme='green' width={'full'} onClick={handleLinkWhatsapp}>
+									Link Whatsapp
+								</Button>
+							)}
+
+							{phoneState ? (
+								<section>
+									<Flex marginTop={'1rem'} rounded={'md'} alignItems={'center'}>
+										<Text color='gray.400' fontWeight={'semibold'}>
+											Plan
+										</Text>
+										<Box bgColor={'gray.400'} width={'full'} height={'2px'} marginLeft={'1rem'} />
+									</Flex>
+
+									<Box
+										marginTop={'0.25rem'}
+										className={`${
+											isSubscribed
+												? 'dark:bg-[#235C39] bg-[#B4FED0]'
+												: 'dark:bg-[#541919] bg-[#FFC9C9]'
+										}`}
+										paddingX={'1rem'}
+										paddingY={'0.5rem'}
+										width={'max-content'}
+										rounded={'md'}
+									>
+										<Text textColor={isSubscribed ? '#34F27B' : '#FF2626'}>
+											{isSubscribed ? 'Active' : 'Not Subscribed'}
+										</Text>
+									</Box>
+									{isSubscribed ? (
+										<Flex marginTop={'0.5rem'} gap={'0.5rem'} alignItems={'center'}>
+											<InfoOutlineIcon color={'#BB2525'} width={4} />
+											<Text color={'#BB2525'}>Expires On {subscriptionExpiration}</Text>
+										</Flex>
+									) : null}
+								</section>
+							) : null}
 
 							<section>
 								<Flex
@@ -241,6 +278,22 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 					</Box>
 				</DrawerBody>
 			</DrawerContent>
+			<AddDeviceDialog
+				ref={addProfileRef}
+				qr={qrCode}
+				status={
+					isSocketInitialized
+						? 'READY'
+						: isAuthenticated
+						? 'AUTHENTICATED'
+						: qrGenerated
+						? 'QR_GENERATED'
+						: isAuthenticating
+						? 'INITIALIZED'
+						: 'UNINITIALIZED'
+				}
+				onCompleted={handleDeviceAdded}
+			/>
 		</Drawer>
 	);
 }

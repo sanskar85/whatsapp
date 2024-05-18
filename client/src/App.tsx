@@ -7,7 +7,6 @@ import { Flex, Image, Progress, Text } from '@chakra-ui/react';
 import { LOGO } from './assets/Images';
 import { useNavbar } from './hooks/useNavbar';
 import { useTheme } from './hooks/useTheme';
-import useUserData from './hooks/useUserData';
 import Open from './views/pages/open';
 
 const Welcome = lazy(() => import('./views/pages/welcome'));
@@ -27,7 +26,6 @@ const NetworkError = lazy(() => import('./views/pages/network-error'));
 function App() {
 	useTheme();
 	useNavbar();
-	useUserData();
 	return (
 		<Flex minHeight={'100vh'} width={'100vw'} className='bg-background dark:bg-background-dark'>
 			<Router>

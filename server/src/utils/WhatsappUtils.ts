@@ -5,6 +5,7 @@ import { COUNTRIES, IS_PRODUCTION, SESSION_STARTUP_WAIT_TIME } from '../config/c
 import InternalError, { INTERNAL_ERRORS } from '../errors/internal-errors';
 import { WhatsappProvider } from '../provider/whatsapp_provider';
 import { UserService } from '../services';
+import { DeviceService } from '../services/user';
 import {
 	GroupDetails,
 	TBusinessContact,
@@ -374,45 +375,25 @@ export default class WhatsappUtils {
 	}
 
 	static async removeUnwantedSessions() {
-		const sessions = await UserService.getRevokedSessions();
-		for (const session of sessions) {
-			WhatsappProvider.getInstance(session.client_id).logoutClient();
-			const session_deleted = WhatsappUtils.deleteSession(session.client_id);
-			if (session_deleted) {
-				session.remove();
-			}
+		if (!IS_PRODUCTION) return;
+		const path = __basedir + '/.wwebjs_auth';
+		if (!fs.existsSync(path)) {
+			return;
+		}
+		const client_ids = (await fs.promises.readdir(path, { withFileTypes: true }))
+			.filter((dirent) => dirent.isDirectory())
+			.map((dirent) => dirent.name.split('session-')[1]);
+
+		for (const client_id of client_ids) {
+			const { valid } = await DeviceService.isValidDevice(client_id);
 
 			const path = __basedir + '/.wwebjs_auth';
-			if (!fs.existsSync(path)) {
+			if (valid || !fs.existsSync(path)) {
 				return;
 			}
-			const client_ids = (await fs.promises.readdir(path, { withFileTypes: true }))
-				.filter((dirent) => dirent.isDirectory())
-				.map((dirent) => dirent.name.split('session-')[1]);
-
-			const invalid_sessions_promises = client_ids.map(async (client_id) => {
-				const { valid } = await UserService.isValidAuth(client_id);
-				if (valid) {
-					return null;
-				}
-				return client_id;
-			});
-
-			const invalid_sessions = await Promise.all(invalid_sessions_promises);
-
-			invalid_sessions.forEach((id) => id && WhatsappUtils.deleteSession(id));
-
-			Logger.info('WHATSAPP-HELPER', `Removed ${invalid_sessions.length} unwanted folders`);
+			WhatsappUtils.deleteSession(client_id);
+			Logger.info('WHATSAPP-HELPER', `Removed ${client_id} as unwanted session`);
 		}
-		Logger.info('WHATSAPP-HELPER', `Removed ${sessions.length} unwanted sessions`);
-	}
-
-	static async removeInactiveSessions() {
-		const sessions = await UserService.getInactiveSessions();
-		for (const session of sessions) {
-			WhatsappProvider.getInstance(session.client_id).destroyClient();
-		}
-		Logger.info('WHATSAPP-HELPER', `Removed ${sessions.length} inactive sessions`);
 	}
 
 	static deleteSession(client_id: string) {
@@ -437,13 +418,10 @@ export default class WhatsappUtils {
 		const client_ids = (await fs.promises.readdir(path, { withFileTypes: true }))
 			.filter((dirent) => dirent.isDirectory())
 			.map((dirent) => dirent.name.split('session-')[1]);
-		const inactive_client_ids = (await UserService.getInactiveSessions()).map(
-			(session) => session.client_id
-		);
 
 		const valid_sessions_promises = client_ids.map(async (client_id) => {
-			const { valid } = await UserService.isValidAuth(client_id);
-			if (valid && !inactive_client_ids.includes(client_id)) {
+			const { valid } = await DeviceService.isValidDevice(client_id);
+			if (valid) {
 				return client_id;
 			}
 			return null;
@@ -453,9 +431,14 @@ export default class WhatsappUtils {
 			(client_id) => client_id !== null
 		) as string[];
 
-		active_client_ids.forEach((client_id) => {
-			const instance = WhatsappProvider.getInstance(client_id);
+		active_client_ids.forEach(async (client_id) => {
+			const device = await DeviceService.getServiceByClientID(client_id);
+			const instance = WhatsappProvider.getInstance(new UserService(device.getUser()), client_id);
+			if (!instance) {
+				return;
+			}
 			instance.initialize();
+			Logger.info('WHATSAPP-HELPER', `Starting ${client_id} session`);
 
 			setTimeout(() => {
 				if (instance.isReady()) {

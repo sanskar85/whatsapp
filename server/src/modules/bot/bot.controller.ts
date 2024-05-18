@@ -8,7 +8,7 @@ import { Respond, RespondCSV } from '../../utils/ExpressUtils';
 import { CreateBotValidationResult } from './bot.validator';
 
 async function allBots(req: Request, res: Response, next: NextFunction) {
-	const botService = new BotService(req.locals.user);
+	const botService = new BotService(req.locals.user.getUser());
 	const bots = await botService.allBots();
 
 	return Respond({
@@ -25,7 +25,7 @@ async function allBots(req: Request, res: Response, next: NextFunction) {
 }
 
 async function botById(req: Request, res: Response, next: NextFunction) {
-	const botService = new BotService(req.locals.user);
+	const botService = new BotService(req.locals.user.getUser());
 
 	try {
 		const bot = await botService.boyByID(req.locals.id);
@@ -48,8 +48,8 @@ async function botById(req: Request, res: Response, next: NextFunction) {
 async function createBot(req: Request, res: Response, next: NextFunction) {
 	const data = req.locals.data as CreateBotValidationResult;
 
-	const botService = new BotService(req.locals.user);
-	const [_, media_attachments] = await new UploadService(req.locals.user).listAttachments(
+	const botService = new BotService(req.locals.user.getUser());
+	const [_, media_attachments] = await new UploadService(req.locals.user.getUser()).listAttachments(
 		data.attachments
 	);
 
@@ -72,8 +72,8 @@ async function createBot(req: Request, res: Response, next: NextFunction) {
 
 async function updateBot(req: Request, res: Response, next: NextFunction) {
 	const data = req.locals.data as CreateBotValidationResult;
-	const botService = new BotService(req.locals.user);
-	const [_, media_attachments] = await new UploadService(req.locals.user).listAttachments(
+	const botService = new BotService(req.locals.user.getUser());
+	const [_, media_attachments] = await new UploadService(req.locals.user.getUser()).listAttachments(
 		data.attachments
 	);
 
@@ -101,7 +101,7 @@ async function updateBot(req: Request, res: Response, next: NextFunction) {
 
 async function toggleActive(req: Request, res: Response, next: NextFunction) {
 	try {
-		const botService = new BotService(req.locals.user);
+		const botService = new BotService(req.locals.user.getUser());
 		const bot = await botService.toggleActive(req.locals.id);
 
 		return Respond({
@@ -122,7 +122,7 @@ async function toggleActive(req: Request, res: Response, next: NextFunction) {
 }
 
 async function deleteBot(req: Request, res: Response, next: NextFunction) {
-	const botService = new BotService(req.locals.user);
+	const botService = new BotService(req.locals.user.getUser());
 	botService.deleteBot(req.locals.id);
 
 	return Respond({
@@ -133,7 +133,7 @@ async function deleteBot(req: Request, res: Response, next: NextFunction) {
 }
 
 async function downloadResponses(req: Request, res: Response, next: NextFunction) {
-	const botService = new BotService(req.locals.user);
+	const botService = new BotService(req.locals.user.getUser());
 	const responses = await botService.botResponses(req.locals.id);
 
 	return RespondCSV({

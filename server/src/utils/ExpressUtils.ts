@@ -70,8 +70,8 @@ export function generateClientID() {
 	return crypto.randomUUID();
 }
 
-export function generateBatchID() {
-	return crypto.randomBytes(6).toString('hex');
+export function generateRandomText(length: number = 6) {
+	return crypto.randomBytes(length).toString('hex');
 }
 
 export function randomMessageText() {

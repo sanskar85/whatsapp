@@ -1,7 +1,7 @@
 import Logger from 'n23-logger';
 import WAWebJS from 'whatsapp-web.js';
 import VoteResponseDB from '../../repository/vote-response';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 
 export default class VoteResponseService {

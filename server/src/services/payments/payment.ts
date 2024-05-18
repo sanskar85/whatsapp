@@ -8,7 +8,7 @@ import SubscriptionDB from '../../repository/payments/subscription';
 import IPaymentBucket from '../../types/payment/payment-bucket';
 import DateUtils from '../../utils/DateUtils';
 import { parseSubscriptionStatus } from '../../utils/ExpressUtils';
-import UserService from '../user';
+import { DeviceService } from '../user';
 
 export default class PaymentService {
 	private bucket: IPaymentBucket;
@@ -86,7 +86,7 @@ export default class PaymentService {
 
 		const month = this.bucket.plan.months;
 		for (const number of this.bucket.whatsapp_numbers) {
-			UserService.createUser({ phone: number }).then((service) => service.addMonthToExpiry(month));
+			await DeviceService.addMonthToExpiry(number, month);
 		}
 		await this.bucket.save();
 	}
@@ -152,7 +152,7 @@ export default class PaymentService {
 
 		const month = this.bucket.plan.months;
 		for (const number of this.bucket.whatsapp_numbers) {
-			UserService.createUser({ phone: number }).then((service) => service.addMonthToExpiry(month));
+			await DeviceService.addMonthToExpiry(number, month);
 		}
 		await this.bucket.save();
 	}

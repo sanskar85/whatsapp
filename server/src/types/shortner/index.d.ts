@@ -1,5 +1,5 @@
 import { Document } from 'mongoose';
-import { IUser } from '../user';
+import { IUser } from '../users';
 
 export default interface IShortner extends Document {
 	user: IUser;

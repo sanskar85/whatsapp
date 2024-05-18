@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import InternalError, { COMMON_ERRORS, INTERNAL_ERRORS } from '../../errors/internal-errors';
 import ContactCardDB from '../../repository/contact-cards';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 
 type ContactCardType = {
 	first_name?: string;

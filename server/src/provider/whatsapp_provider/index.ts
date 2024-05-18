@@ -4,9 +4,8 @@ import { Socket } from 'socket.io';
 import WAWebJS, { BusinessContact, Client, GroupChat, LocalAuth } from 'whatsapp-web.js';
 import { CHROMIUM_PATH, SOCKET_RESPONSES } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
-import { UserService } from '../../services';
-import BotService from '../../services/bot';
 import GroupMergeService from '../../services/merged-groups';
+import { DeviceService, UserService } from '../../services/user';
 import VoteResponseService from '../../services/vote-response';
 import DateUtils from '../../utils/DateUtils';
 import { Delay } from '../../utils/ExpressUtils';
@@ -46,11 +45,9 @@ export class WhatsappProvider {
 	private qrCode: string | undefined;
 	private number: string | undefined;
 	private contact: WAWebJS.Contact | undefined;
-	private user_service: UserService | undefined;
 	private socket: Socket | undefined;
-	private bot_service: BotService | undefined;
-	private group_service: GroupMergeService | undefined;
-	private vote_response_service: VoteResponseService | undefined;
+	private userService: UserService;
+	private deviceService: DeviceService | undefined;
 
 	private status: STATUS;
 
@@ -58,7 +55,8 @@ export class WhatsappProvider {
 		onDestroy: (client_id: ClientID) => void;
 	};
 
-	private constructor(cid: ClientID) {
+	private constructor(user: UserService, cid: ClientID) {
+		this.userService = user;
 		this.client_id = cid;
 
 		this.client = new Client({
@@ -89,7 +87,7 @@ export class WhatsappProvider {
 		WhatsappProvider.clientsMap.set(this.client_id, this);
 	}
 
-	public static getInstance(client_id: ClientID) {
+	public static getInstance(user: UserService, client_id: ClientID) {
 		if (!client_id) {
 			throw new Error();
 		}
@@ -97,7 +95,7 @@ export class WhatsappProvider {
 			return WhatsappProvider.clientsMap.get(client_id)!;
 		}
 
-		return new WhatsappProvider(client_id);
+		return new WhatsappProvider(user, client_id);
 	}
 
 	public getClient() {
@@ -145,29 +143,24 @@ export class WhatsappProvider {
 						address: '',
 				  };
 
-			this.user_service = await UserService.createUser({
+			this.deviceService = await DeviceService.createDevice({
+				user: this.userService,
 				name: this.client.info.pushname,
 				phone: this.number,
 				isBusiness: this.contact.isBusiness,
 				business_details,
 			});
 
-			await this.user_service.login(this.client_id);
+			this.deviceService.setClientID(this.client_id);
 			this.status = STATUS.READY;
-
-			this.bot_service = new BotService(this.user_service.getUser());
-			this.group_service = new GroupMergeService(this.user_service.getUser());
-			this.bot_service.attachWhatsappProvider(this);
-			this.vote_response_service = new VoteResponseService(this.user_service.getUser());
 
 			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_READY);
 		});
 
 		this.client.on('vote_update', async (vote) => {
-			/** The vote that was affected: */
-			if (!this.vote_response_service) return;
 			if (!vote.parentMessage.id?.fromMe) return;
-			const pollDetails = this.vote_response_service.getPollDetails(vote.parentMessage);
+			const vote_response_service = new VoteResponseService(this.userService.getUser());
+			const pollDetails = vote_response_service.getPollDetails(vote.parentMessage);
 			const contact = await this.client.getContactById(vote.voter);
 			if (!this.contact || contact.id._serialized === this.contact.id._serialized) {
 				return;
@@ -189,13 +182,15 @@ export class WhatsappProvider {
 			details.voter_number = contact.number;
 			details.voter_name = (contact.name || contact.pushname) ?? '';
 
-			await this.vote_response_service.saveVote(details);
-
+			await vote_response_service.saveVote(details);
 			details.selected_option.map((opt) => {
-				if (!this.bot_service) return;
-				this.bot_service.handleMessage(chat.id._serialized, opt, contact, {
-					fromPoll: true,
+				this.deviceService!.handleMessage({
+					triggered_from: chat.id._serialized,
+					body: opt,
+					contact,
 					isGroup: chat.isGroup,
+					fromPoll: true,
+					client_id: this.client_id,
 					message_id: 'VOTE UPDATE',
 				});
 			});
@@ -204,14 +199,16 @@ export class WhatsappProvider {
 		this.client.on('disconnected', () => {
 			this.status = STATUS.DISCONNECTED;
 
-			this.user_service?.logout(this.client_id);
+			this.deviceService?.logout();
 			this.logoutClient();
 
 			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_CLOSED);
 		});
 
 		this.client.on('message', async (_message) => {
-			if (!this.bot_service) return;
+			if (!this.deviceService) {
+				return;
+			}
 			if (this.handledMessage.has(_message.id._serialized)) {
 				return;
 			}
@@ -229,16 +226,23 @@ export class WhatsappProvider {
 			if (!this.contact || contact.id._serialized === this.contact.id._serialized) {
 				return;
 			}
-			this.bot_service.handleMessage(message.from, message.body, contact, {
+
+			this.deviceService!.handleMessage({
+				triggered_from: message.from,
+				body: message.body,
+				contact,
 				isGroup,
 				fromPoll: false,
+				client_id: this.client_id,
 				message_id: message.id._serialized,
 			});
 			if (isGroup) {
-				this.group_service?.sendGroupReply(this.client, {
+				const groupService = new GroupMergeService(this.userService.getUser());
+				groupService.sendGroupReply(this.client, {
 					chat: chat as GroupChat,
 					message,
 					contact,
+					deviceService: this.deviceService!,
 				});
 			}
 		});
@@ -340,10 +344,14 @@ export class WhatsappProvider {
 		return WhatsappProvider.clientsMap.size;
 	}
 
+	static clientByClientID(id: string) {
+		return WhatsappProvider.clientsMap.get(id);
+	}
+
 	static clientByUser(id: Types.ObjectId) {
 		for (const [cid, client] of WhatsappProvider.clientsMap.entries()) {
-			if (!client.user_service || !client.isReady()) continue;
-			if (client.user_service.getID().toString() === id.toString()) {
+			if (!client.isReady()) continue;
+			if (client.userService.getID().toString() === id.toString()) {
 				return cid;
 			}
 		}

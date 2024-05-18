@@ -10,7 +10,6 @@ import IPaymentBucket, {
 	PaymentRecord,
 	SubscriptionRecord,
 } from '../../types/payment/payment-bucket';
-import { IUser } from '../../types/user';
 import DateUtils from '../../utils/DateUtils';
 import PaymentService from './payment';
 
@@ -155,7 +154,7 @@ export default class PaymentBucketService {
 		await this.bucket.save();
 	}
 
-	static async getPaymentRecords(user: IUser) {
+	static async getPaymentRecords(phone: string) {
 		const paymentRecords = await PaymentDB.aggregate([
 			{
 				$lookup: {
@@ -169,7 +168,7 @@ export default class PaymentBucketService {
 			{ $addFields: { whatsapp_numbers: '$payment_bucket.whatsapp_numbers' } },
 			{
 				$match: {
-					$and: [{ whatsapp_numbers: user.phone }, { payment_id: { $ne: null } }],
+					$and: [{ whatsapp_numbers: phone }, { payment_id: { $ne: null } }],
 				},
 			},
 		]);
@@ -187,7 +186,7 @@ export default class PaymentBucketService {
 			{ $addFields: { whatsapp_numbers: '$payment_bucket.whatsapp_numbers' } },
 			{
 				$match: {
-					$and: [{ whatsapp_numbers: user.phone }],
+					$and: [{ whatsapp_numbers: phone }],
 				},
 			},
 			{

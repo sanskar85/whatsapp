@@ -86,3 +86,10 @@ export enum SETTINGS {
 export const COUNTRIES: {
 	[country_code: string]: string;
 } = countries;
+
+export enum Colors {
+	ACCENT_LIGHT = '#E8F2ED',
+	ACCENT_DARK = '#4F966E',
+	PRIMARY_DARK = '#0D1C12',
+	BACKGROUND_LIGHT = '#F7FCFA',
+}

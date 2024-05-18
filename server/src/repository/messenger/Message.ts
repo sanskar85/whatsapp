@@ -8,6 +8,11 @@ const messageSchema = new mongoose.Schema<IMessage>({
 		ref: 'User',
 		required: true,
 	},
+	device: {
+		type: Schema.Types.ObjectId,
+		ref: 'Device',
+		required: true,
+	},
 	receiver: {
 		type: String,
 		required: true,

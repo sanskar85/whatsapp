@@ -1,31 +1,120 @@
-import { Box, Flex, Image, Progress, Text } from '@chakra-ui/react';
+import { Box, Flex, Image, Progress, Text, useToast } from '@chakra-ui/react';
 import Lottie from 'lottie-react';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { Navigate, useNavigate, useOutlet } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Navigate, useOutlet } from 'react-router-dom';
 import { LOGO } from '../../../assets/Images';
 import { LOTTIE_LOADER } from '../../../assets/Lottie';
-import { NAVIGATION } from '../../../config/const';
-import { useAuth } from '../../../hooks/useAuth';
-import { useNetwork } from '../../../hooks/useNetwork';
+import { DATA_LOADED_DELAY, NAVIGATION } from '../../../config/const';
 import '../../../index.css';
-import { StoreNames, StoreState } from '../../../store';
+import AttachmentService from '../../../services/attachment.service';
+import AuthService from '../../../services/auth.service';
+import BotService from '../../../services/bot.service';
+import ContactCardService from '../../../services/contact-card.service';
+import GroupService from '../../../services/group.service';
+import LabelService from '../../../services/label.service';
+import MessageService from '../../../services/message.service';
+import ShortenerService from '../../../services/shortener.service';
+import UploadsService from '../../../services/uploads.service';
+import { StoreNames, StoreState, store } from '../../../store';
+import { setAttachments } from '../../../store/reducers/AttachmentReducers';
+import { setBots } from '../../../store/reducers/BotReducers';
+import { setCSVFileList } from '../../../store/reducers/CSVFileReducers';
+import { setContactList } from '../../../store/reducers/ContactCardReducers';
+import { setLinksList } from '../../../store/reducers/LinkShortnerReducers';
+import { setMergedGroupList } from '../../../store/reducers/MergeGroupReducer';
+import { setAllSchedulers } from '../../../store/reducers/SchedulerReducer';
+import { setUserDetails } from '../../../store/reducers/UserDetailsReducers';
 import Navbar from '../../components/navbar';
 import NavigationDrawer from '../../components/navigation-drawer';
 
 export default function Home() {
-	const navigate = useNavigate();
-	const status = useNetwork();
 	const outlet = useOutlet();
-	const { isAuthenticated, isAuthenticating } = useAuth();
+	const [isAuthenticated, setAuthenticated] = useState(false);
+	const [isAuthenticating, setAuthenticating] = useState(true);
+	const toast = useToast();
+	const dispatch = useDispatch();
 
 	const { data_loaded } = useSelector((state: StoreState) => state[StoreNames.USER]);
 
-	useEffect(() => {
-		if (status === 'NO-NETWORK') {
-			navigate(NAVIGATION.NETWORK_ERROR);
+	const fetchUserDetails = useCallback(async () => {
+		try {
+			toast.promise(GroupService.listGroups(), {
+				success: (res) => {
+					store.dispatch(
+						setUserDetails({
+							groups: res,
+						})
+					);
+					return {
+						title: 'Groups loaded.',
+						duration: 3000,
+					};
+				},
+				error: {
+					title: 'Error loading groups.',
+					duration: 3000,
+				},
+				loading: {
+					title: 'Loading groups.',
+				},
+			});
+
+			const promises = [
+				addDelay(DATA_LOADED_DELAY),
+				ContactCardService.ListContactCards(),
+				AttachmentService.getAttachments(),
+				UploadsService.listCSV(),
+				LabelService.listLabels(),
+				BotService.listBots(),
+				ShortenerService.listAll(),
+				GroupService.mergedGroups(),
+				MessageService.getScheduledMessages(),
+			];
+
+			const results = await Promise.all(promises);
+
+			dispatch(
+				setUserDetails({
+					labels: results[4],
+					contactsCount: null,
+					data_loaded: true,
+				})
+			);
+			dispatch(setContactList(results[1]));
+			dispatch(setAttachments(results[2]));
+			dispatch(setCSVFileList(results[3]));
+			dispatch(setBots(results[5]));
+			dispatch(setLinksList(results[6]));
+			dispatch(setMergedGroupList(results[7]));
+			dispatch(setAllSchedulers(results[8]));
+
+			AuthService.validateClientID().then((res) => {
+				if (res) {
+					dispatch(
+						setUserDetails({
+							canSendMessage: res.canSendMessage,
+							isSubscribed: res.isSubscribed,
+						})
+					);
+				}
+			});
+		} catch (e) {
+			return;
 		}
-	}, [status, navigate]);
+	}, [dispatch, toast]);
+
+	useEffect(() => {
+		AuthService.isAuthenticated()
+			.then(setAuthenticated)
+			.finally(() => setAuthenticating(false));
+	}, []);
+
+	useEffect(() => {
+		if (isAuthenticated) {
+			fetchUserDetails();
+		}
+	}, [fetchUserDetails, isAuthenticated]);
 
 	if (isAuthenticating) {
 		return (
@@ -106,4 +195,12 @@ function Loading({ isLoaded }: { isLoaded: boolean }) {
 			</Flex>
 		</Flex>
 	);
+}
+
+function addDelay(delay: number) {
+	return new Promise((resolve: (value?: null) => void) => {
+		setTimeout(() => {
+			resolve();
+		}, delay);
+	});
 }

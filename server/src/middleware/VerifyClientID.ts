@@ -1,32 +1,26 @@
 import { NextFunction, Request, Response } from 'express';
+import { CLIENT_ID_COOKIE } from '../config/const';
 import APIError, { API_ERRORS } from '../errors/api-errors';
 import { WhatsappProvider } from '../provider/whatsapp_provider';
-import { UserService } from '../services';
-import { Locals } from '../types';
+import { DeviceService } from '../services/user';
 
 export default async function VerifyClientID(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.headers['client-id'] as string;
+	const client_id = req.cookies[CLIENT_ID_COOKIE];
 
 	if (!client_id) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.AUTHORIZATION_ERROR));
 	}
 
 	try {
-		const { valid, user } = await UserService.isValidAuth(client_id);
+		const { valid } = await DeviceService.isValidDevice(client_id);
 
 		if (!valid) {
 			WhatsappProvider.deleteSession(client_id);
+
 			return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 		}
-
-		req.locals = {
-			client_id,
-			user,
-		} as Locals;
-
-		res.locals = {
-			client_id,
-		} as Locals;
+		req.locals.client_id = client_id;
+		res.locals.client_id = client_id;
 
 		next();
 	} catch (e: unknown) {

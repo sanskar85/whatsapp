@@ -8,10 +8,10 @@ import { WhatsappProvider } from '../../provider/whatsapp_provider';
 import { MessageDB } from '../../repository/messenger';
 import UploadDB from '../../repository/uploads';
 import { IMessage } from '../../types/messenger';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import TokenService from '../token';
-import UserService from '../user';
+import { DeviceService } from '../user';
 
 export type Message = {
 	receiver: string;
@@ -33,6 +33,7 @@ export type Message = {
 type MessageSchedulerOptions = {
 	scheduled_by: MESSAGE_SCHEDULER_TYPE;
 	scheduler_id: Types.ObjectId;
+	device_id: Types.ObjectId;
 };
 
 type TextMessage = string;
@@ -47,6 +48,7 @@ export default class MessageService {
 	scheduleMessage(message: Message, opts: MessageSchedulerOptions) {
 		const msg = new MessageDB({
 			sender: this.user,
+			device: opts.device_id,
 			receiver: message.receiver,
 			message: message.message ?? '',
 			attachments: message.attachments ?? [],
@@ -62,7 +64,7 @@ export default class MessageService {
 		return msg;
 	}
 
-	async isAttachmentInUse(id: Types.ObjectId) {
+	static async isAttachmentInUse(id: Types.ObjectId) {
 		const attachment = await UploadDB.findById(id);
 		if (!attachment) {
 			throw new InternalError(INTERNAL_ERRORS.COMMON_ERRORS.NOT_FOUND);
@@ -86,6 +88,7 @@ export default class MessageService {
 		for (const message of messages) {
 			await MessageDB.create({
 				sender: this.user,
+				device: opts.device_id,
 				receiver: message.receiver,
 				message: message.message,
 				attachments: message.attachments ?? [],
@@ -104,7 +107,7 @@ export default class MessageService {
 		const scheduledMessages = await MessageDB.find({
 			sendAt: { $lte: DateUtils.getMomentNow().toDate() },
 			status: MESSAGE_STATUS.PENDING,
-		}).populate('attachments sender shared_contact_cards');
+		}).populate('attachments sender shared_contact_cards device');
 
 		const { message_1: PROMOTIONAL_MESSAGE_1, message_2: PROMOTIONAL_MESSAGE_2 } =
 			await TokenService.getPromotionalMessage();
@@ -116,10 +119,10 @@ export default class MessageService {
 				msg.save();
 				return;
 			}
-			const whatsapp = WhatsappProvider.getInstance(cid);
+			const whatsapp = WhatsappProvider.clientByClientID(cid)!;
 
-			const userService = new UserService(msg.sender);
-			const { isSubscribed, isNew } = userService.isSubscribed();
+			const deviceService = new DeviceService(msg.device, msg.sender);
+			const { isSubscribed, isNew } = deviceService.isSubscribed();
 
 			if (!isSubscribed && !isNew) {
 				msg.status = MESSAGE_STATUS.FAILED;

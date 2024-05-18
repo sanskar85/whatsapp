@@ -1,9 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import { JwtPayload, verify } from 'jsonwebtoken';
 import { saveRefreshTokens } from '../config/cache';
-import { IS_PRODUCTION, JWT_COOKIE, JWT_REFRESH_COOKIE, JWT_SECRET } from '../config/const';
+import {
+	IS_PRODUCTION,
+	JWT_COOKIE,
+	JWT_REFRESH_COOKIE,
+	JWT_SECRET,
+	UserRoles,
+} from '../config/const';
 import APIError, { API_ERRORS } from '../errors/api-errors';
-import AdminService from '../services/user/admin-service';
+import { UserService } from '../services';
+import { AdminService } from '../services/user';
 import { idValidator } from '../utils/ExpressUtils';
 
 const JWT_EXPIRE_TIME = 3 * 60 * 1000;
@@ -25,11 +32,11 @@ export default async function VerifyAdmin(req: Request, res: Response, next: Nex
 			return next(new APIError(API_ERRORS.USER_ERRORS.AUTHORIZATION_ERROR));
 		}
 
-		const { valid: valid_auth, user } = await AdminService.isValidAuth(refreshToken);
-		if (!valid_auth) {
+		const { valid: valid_auth, user } = await UserService.isValidAuth(refreshToken);
+		if (!valid_auth || user.role !== UserRoles.ADMIN) {
 			return next(new APIError(API_ERRORS.USER_ERRORS.AUTHORIZATION_ERROR));
 		}
-		req.locals.admin = user;
+		req.locals.admin = new AdminService(user);
 
 		res.cookie(JWT_COOKIE, user.getSignedToken(), {
 			sameSite: 'strict',
@@ -55,8 +62,8 @@ export default async function VerifyAdmin(req: Request, res: Response, next: Nex
 		return next(new APIError(API_ERRORS.USER_ERRORS.AUTHORIZATION_ERROR));
 	}
 	try {
-		const user = await AdminService.getServiceByID(valid_id);
-		req.locals.admin = user.getUser();
+		const user = await UserService.getService(valid_id);
+		req.locals.admin = new AdminService(user.getUser());
 
 		res.cookie(JWT_COOKIE, user.getToken(), {
 			sameSite: 'strict',

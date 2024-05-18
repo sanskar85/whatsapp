@@ -6,7 +6,7 @@ import { Respond, RespondCSV, RespondVCF } from '../../utils/ExpressUtils';
 import { FileUtils } from '../../utils/files';
 
 async function listTasks(req: Request, res: Response, next: NextFunction) {
-	const tasks = await new TaskService(req.locals.user).listTasks();
+	const tasks = await new TaskService(req.locals.user.getUser()).listTasks();
 	return Respond({
 		res,
 		status: 200,
@@ -18,7 +18,9 @@ async function listTasks(req: Request, res: Response, next: NextFunction) {
 
 async function downloadTask(req: Request, res: Response, next: NextFunction) {
 	try {
-		const { data, result_type, id } = await new TaskService(req.locals.user).getFile(req.locals.id);
+		const { data, result_type, id } = await new TaskService(req.locals.user.getUser()).getFile(
+			req.locals.id
+		);
 
 		const file_path =
 			__basedir + TASK_PATH + id + (result_type === TASK_RESULT_TYPE.VCF ? '.vcf' : '.csv');
@@ -45,7 +47,7 @@ async function downloadTask(req: Request, res: Response, next: NextFunction) {
 
 async function deleteTask(req: Request, res: Response, next: NextFunction) {
 	try {
-		const filename = await new TaskService(req.locals.user).deleteTask(req.locals.id);
+		const filename = await new TaskService(req.locals.user.getUser()).deleteTask(req.locals.id);
 
 		const file_path = __basedir + TASK_PATH + filename;
 		FileUtils.deleteFile(file_path);

@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError, { API_ERRORS } from '../errors/api-errors';
-import { UserService } from '../services';
+import { DeviceService } from '../services/user';
 
 export async function isSubscribed(req: Request, res: Response, next: NextFunction) {
 	try {
-		const { isSubscribed } = new UserService(req.locals.user).isSubscribed();
+		const { isSubscribed } = (
+			await DeviceService.getServiceByClientID(req.locals.client_id)
+		).isSubscribed();
 
 		if (!isSubscribed) {
 			return next(new APIError(API_ERRORS.PAYMENT_ERRORS.PAYMENT_REQUIRED));
@@ -18,7 +20,9 @@ export async function isSubscribed(req: Request, res: Response, next: NextFuncti
 
 export async function isPseudoSubscribed(req: Request, res: Response, next: NextFunction) {
 	try {
-		const { isSubscribed, isNew } = new UserService(req.locals.user).isSubscribed();
+		const { isSubscribed, isNew } = (
+			await DeviceService.getServiceByClientID(req.locals.client_id)
+		).isSubscribed();
 		if (isSubscribed) {
 			return next();
 		}

@@ -8,13 +8,13 @@ import IContactCard from '../../types/contact-cards';
 import IMergedGroup from '../../types/merged-group';
 import IPolls from '../../types/polls';
 import IUpload from '../../types/uploads';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 import { Delay, getRandomNumber, idValidator, randomMessageText } from '../../utils/ExpressUtils';
 import { FileUtils } from '../../utils/files';
 import ContactCardService from '../contact-card';
 import TokenService from '../token';
 import UploadService from '../uploads';
-import UserService from '../user';
+import { DeviceService } from '../user';
 
 const processGroup = (group: IMergedGroup) => {
 	return {
@@ -238,10 +238,12 @@ export default class GroupMergeService {
 			chat,
 			message,
 			contact,
+			deviceService,
 		}: {
 			chat: WAWebJS.GroupChat;
 			message: WAWebJS.Message;
 			contact: WAWebJS.Contact;
+			deviceService: DeviceService;
 		}
 	) {
 		const group_id = chat.id._serialized;
@@ -253,7 +255,7 @@ export default class GroupMergeService {
 			active: true,
 		}).populate('restricted_numbers');
 
-		const { isSubscribed, isNew } = new UserService(this.user).isSubscribed();
+		const { isSubscribed, isNew } = deviceService.isSubscribed();
 
 		const { message_1: PROMOTIONAL_MESSAGE_1, message_2: PROMOTIONAL_MESSAGE_2 } =
 			await TokenService.getPromotionalMessage();

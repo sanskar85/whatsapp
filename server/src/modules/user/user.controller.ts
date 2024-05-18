@@ -1,15 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import Logger from 'n23-logger';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
-import { WhatsappProvider } from '../../provider/whatsapp_provider';
-import { UserService } from '../../services';
-import AdminService from '../../services/user/admin-service';
+import { DeviceService } from '../../services/user';
 import CSVParser from '../../utils/CSVParser';
 import DateUtils from '../../utils/DateUtils';
 import { Respond, RespondCSV } from '../../utils/ExpressUtils';
 
 async function listUsers(req: Request, res: Response, next: NextFunction) {
-	const userService = new AdminService(req.locals.admin);
+	const userService = req.locals.admin;
 
 	const options = {
 		csv: false,
@@ -40,8 +37,8 @@ async function extendUserExpiry(req: Request, res: Response, next: NextFunction)
 		if (!req.body.date) {
 			return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
 		}
-		const userService = await UserService.getService(req.locals.id);
-		userService.setExpiry(DateUtils.getMoment(req.body.date, 'YYYY-MM-DD'));
+		const deviceService = await DeviceService.getDeviceService(req.locals.id);
+		deviceService.setExpiry(DateUtils.getMoment(req.body.date, 'YYYY-MM-DD'));
 
 		return Respond({
 			res,
@@ -54,9 +51,8 @@ async function extendUserExpiry(req: Request, res: Response, next: NextFunction)
 }
 
 async function logoutUsers(req: Request, res: Response, next: NextFunction) {
-	const userService = await UserService.getService(req.locals.id);
-	const client_ids = await userService.logout();
-	client_ids.forEach((id) => WhatsappProvider.getInstance(id).logoutClient());
+	const deviceService = await DeviceService.getDeviceService(req.locals.id);
+	await deviceService.logout();
 	return Respond({
 		res,
 		status: 200,
@@ -65,18 +61,18 @@ async function logoutUsers(req: Request, res: Response, next: NextFunction) {
 }
 
 async function paymentRemainder(req: Request, res: Response, next: NextFunction) {
-	const adminService = new AdminService(req.locals.admin);
+	// const adminService = new AdminService(req.locals.admin);
 
-	const whatsapp = WhatsappProvider.getInstance(adminService.getClientID());
-	if (!whatsapp.isReady()) {
-		return next(new APIError(API_ERRORS.USER_ERRORS.WHATSAPP_NOT_READY));
-	}
-	const userService = await UserService.getService(req.locals.id);
+	// const whatsapp = WhatsappProvider.getInstance(adminService.getClientID());
+	// if (!whatsapp.isReady()) {
+	// 	return next(new APIError(API_ERRORS.USER_ERRORS.WHATSAPP_NOT_READY));
+	// }
+	// const userService = await UserService.getService(req.locals.id);
 
-	whatsapp
-		.getClient()
-		.sendMessage(userService.getPhoneNumber() + '@c.us', req.locals.data)
-		.catch((err) => Logger.error('Error sending message:', err));
+	// whatsapp
+	// 	.getClient()
+	// 	.sendMessage(userService.getPhoneNumber() + '@c.us', req.locals.data)
+	// 	.catch((err) => Logger.error('Error sending message:', err));
 
 	return Respond({
 		res,

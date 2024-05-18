@@ -2,10 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 import { SOCKET_RESPONSES, TASK_RESULT_TYPE, TASK_TYPE } from '../../config/const';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import { WhatsappProvider } from '../../provider/whatsapp_provider';
-import { CampaignService, UserService } from '../../services';
+import { CampaignService } from '../../services';
 import GroupMergeService from '../../services/merged-groups';
 import TaskService from '../../services/task';
 import UploadService from '../../services/uploads';
+import { DeviceService } from '../../services/user';
 import { Respond } from '../../utils/ExpressUtils';
 import MessagesUtils from '../../utils/Messages';
 import WhatsappUtils from '../../utils/WhatsappUtils';
@@ -13,7 +14,7 @@ import { FileUtils } from '../../utils/files';
 import { ScheduleMessageValidationResult } from './message.validator';
 
 export async function scheduleMessage(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.locals.client_id;
+	const { client_id } = req.locals;
 
 	const req_data = req.locals.data as ScheduleMessageValidationResult;
 	const {
@@ -39,23 +40,27 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 		  }[][]
 		| null = null;
 
-	const { isSubscribed, isNew } = new UserService(req.locals.user).isSubscribed();
+	const deviceService = await DeviceService.getServiceByClientID(req.locals.client_id);
+	const { isSubscribed, isNew } = deviceService.isSubscribed();
 
 	if (!isSubscribed && !isNew) {
 		return next(new APIError(API_ERRORS.PAYMENT_ERRORS.PAYMENT_REQUIRED));
 	}
 
-	const whatsapp = WhatsappProvider.getInstance(client_id);
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return;
+	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 
-	const taskService = new TaskService(req.locals.user);
+	const taskService = new TaskService(req.locals.user.getUser());
 	const task_id = await taskService.createTask(TASK_TYPE.SCHEDULE_CAMPAIGN, TASK_RESULT_TYPE.NONE, {
 		description: req_data.campaign_name,
 	});
-	const campaignService = new CampaignService(req.locals.user);
+	const campaignService = new CampaignService(req.locals.user.getUser());
 	const campaign_exists = await campaignService.alreadyExists(req_data.campaign_name);
 	if (campaign_exists) {
 		return next(new APIError(API_ERRORS.COMMON_ERRORS.ALREADY_EXISTS));
@@ -66,9 +71,9 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 		status: 201,
 	});
 
-	const groupMergeService = new GroupMergeService(req.locals.user);
+	const groupMergeService = new GroupMergeService(req.locals.user.getUser());
 
-	const uploadService = new UploadService(req.locals.user);
+	const uploadService = new UploadService(req.locals.user.getUser());
 	const [uploaded_attachments] = await uploadService.listAttachments(attachments);
 
 	if (type === 'NUMBERS') {
@@ -145,6 +150,7 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 			startsFrom: req_data.startDate,
 			startTime: req_data.startTime,
 			endTime: req_data.endTime,
+			device_id: deviceService.getID(),
 		});
 
 		taskService.markCompleted(task_id, campaign._id);

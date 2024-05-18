@@ -1,8 +1,6 @@
 import * as http from 'http';
 import { Socket, Server as SocketServer } from 'socket.io';
 import { SOCKET_EVENTS } from '../../config/const';
-import { UserService } from '../../services';
-import { generateClientID } from '../../utils/ExpressUtils';
 import { WhatsappProvider } from '../whatsapp_provider';
 
 type WhatsappClientID = string;
@@ -35,39 +33,31 @@ export default class SocketServerProvider {
 	private attachListeners() {
 		this.io.of('/auth').on('connection', (socket) => {
 			socket.on(SOCKET_EVENTS.INITIALIZE, async (cid: string | undefined) => {
-				let client_id = '';
 				if (cid) {
-					const { valid } = await UserService.isValidAuth(cid);
-					if (!valid) {
-						WhatsappProvider.deleteSession(cid);
-						client_id = generateClientID();
-					} else {
-						client_id = cid;
-					}
-				} else {
-					client_id = generateClientID();
+					SocketServerProvider.socketsMap.set(socket.id, cid);
+					this.initializeWhatsappClient(socket, cid);
 				}
-				SocketServerProvider.socketsMap.set(socket.id, client_id);
-				this.initializeWhatsappClient(socket, client_id);
 			});
 			socket.on('disconnect', () => {
 				const client_id = SocketServerProvider.socketsMap.get(socket.id);
 				if (!client_id) {
 					return;
 				}
-				UserService.sessionDisconnected(client_id);
 			});
 		});
 	}
 
 	private initializeWhatsappClient(socketClient: Socket, client_id: string) {
-		const whatsappInstance = WhatsappProvider.getInstance(client_id);
+		const whatsappInstance = WhatsappProvider.clientByClientID(client_id);
+
+		if (!whatsappInstance) {
+			return;
+		}
 		whatsappInstance.initialize();
 		whatsappInstance.attachToSocket(socketClient);
 		whatsappInstance.onDestroy(function (client_id) {
 			SocketServerProvider.clientsMap.delete(client_id);
 		});
-
 		SocketServerProvider.clientsMap.set(client_id, whatsappInstance);
 	}
 }

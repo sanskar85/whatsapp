@@ -96,7 +96,6 @@ const UsersPage = () => {
 		}
 		if (action === 'payment_reminder') {
 			if (!clientId) {
-				console.log('error');
 				toast({
 					title: 'Error',
 					description: 'Client ID not found',

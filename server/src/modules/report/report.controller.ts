@@ -7,7 +7,7 @@ import CSVParser from '../../utils/CSVParser';
 import { Respond, RespondCSV } from '../../utils/ExpressUtils';
 
 async function listCampaigns(req: Request, res: Response, next: NextFunction) {
-	const messages = await new CampaignService(req.locals.user).allCampaigns();
+	const messages = await new CampaignService(req.locals.user.getUser()).allCampaigns();
 	return Respond({
 		res,
 		status: 200,
@@ -17,7 +17,7 @@ async function listCampaigns(req: Request, res: Response, next: NextFunction) {
 	});
 }
 async function pauseCampaign(req: Request, res: Response, next: NextFunction) {
-	new CampaignService(req.locals.user).pauseCampaign(req.locals.id);
+	new CampaignService(req.locals.user.getUser()).pauseCampaign(req.locals.id);
 
 	return Respond({
 		res,
@@ -26,7 +26,7 @@ async function pauseCampaign(req: Request, res: Response, next: NextFunction) {
 	});
 }
 async function deleteCampaign(req: Request, res: Response, next: NextFunction) {
-	new CampaignService(req.locals.user).deleteCampaign(req.locals.id);
+	new CampaignService(req.locals.user.getUser()).deleteCampaign(req.locals.id);
 
 	return Respond({
 		res,
@@ -35,7 +35,7 @@ async function deleteCampaign(req: Request, res: Response, next: NextFunction) {
 	});
 }
 async function resumeCampaign(req: Request, res: Response, next: NextFunction) {
-	new CampaignService(req.locals.user).resumeCampaign(req.locals.id);
+	new CampaignService(req.locals.user.getUser()).resumeCampaign(req.locals.id);
 
 	return Respond({
 		res,
@@ -46,7 +46,7 @@ async function resumeCampaign(req: Request, res: Response, next: NextFunction) {
 
 async function generateReport(req: Request, res: Response, next: NextFunction) {
 	try {
-		const scheduler = new CampaignService(req.locals.user);
+		const scheduler = new CampaignService(req.locals.user.getUser());
 		const reports = await scheduler.generateReport(req.locals.id);
 		return RespondCSV({
 			res,
@@ -64,7 +64,7 @@ async function generateReport(req: Request, res: Response, next: NextFunction) {
 }
 
 async function listPolls(req: Request, res: Response, next: NextFunction) {
-	const service = new VoteResponseService(req.locals.user);
+	const service = new VoteResponseService(req.locals.user.getUser());
 	const { title, options, isMultiSelect, export_csv } = req.query;
 
 	if (!title || !options || !isMultiSelect) {

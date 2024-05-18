@@ -5,7 +5,7 @@ import ContactCardDB from '../../repository/contact-cards';
 import { MessageDB } from '../../repository/messenger';
 import SchedulerDB from '../../repository/scheduler';
 import IUpload from '../../types/uploads';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import { randomMessageText } from '../../utils/ExpressUtils';
 import { FileUtils } from '../../utils/files';
@@ -247,7 +247,7 @@ export default class SchedulerService {
 		const scheduler = await SchedulerDB.findOne({
 			_id: id,
 			active: true,
-		}).populate('attachments shared_contact_cards csv');
+		}).populate('attachments shared_contact_cards csv device');
 		const today = DateUtils.getMomentNow().format('MM-DD');
 
 		if (
@@ -303,6 +303,7 @@ export default class SchedulerService {
 				{
 					scheduled_by: MESSAGE_SCHEDULER_TYPE.SCHEDULER,
 					scheduler_id: scheduler._id,
+					device_id: scheduler.device._id,
 				}
 			);
 		}
@@ -311,7 +312,7 @@ export default class SchedulerService {
 	public static async scheduleDailyMessages() {
 		const schedulers = await SchedulerDB.find({
 			active: true,
-		}).populate('attachments shared_contact_cards csv');
+		}).populate('attachments shared_contact_cards csv device');
 		const today = DateUtils.getMomentNow().format('MM-DD');
 
 		for (const scheduler of schedulers) {
@@ -367,6 +368,7 @@ export default class SchedulerService {
 					{
 						scheduled_by: MESSAGE_SCHEDULER_TYPE.SCHEDULER,
 						scheduler_id: scheduler._id,
+						device_id: scheduler.device._id,
 					}
 				);
 			}

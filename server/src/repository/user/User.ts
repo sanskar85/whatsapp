@@ -1,31 +1,62 @@
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import mongoose, { Schema } from 'mongoose';
-import { IUser } from '../../types/user';
+import {
+	JWT_EXPIRE,
+	JWT_SECRET,
+	REFRESH_EXPIRE,
+	REFRESH_SECRET,
+	UserRoles,
+} from '../../config/const';
+import { IUser } from '../../types/users';
+import { generateHashedPassword } from '../../utils/ExpressUtils';
 
-const userSchema = new Schema<IUser>(
-	{
-		phone: {
-			type: String,
-			required: true,
-		},
-		name: {
-			type: String,
-		},
-		userType: {
-			type: String,
-		},
-		business_details: {
-			description: String,
-			email: String,
-			websites: [String],
-			latitude: Number,
-			longitude: Number,
-			address: String,
-		},
-		subscription_expiry: Date,
+const schema = new Schema<IUser>({
+	name: String,
+	username: {
+		type: String,
+		unique: true,
+		index: true,
 	},
-	{ timestamps: true }
-);
+	password: {
+		type: String,
+		select: false,
+	},
+	role: {
+		type: String,
+		enum: Object.values(UserRoles),
+		default: UserRoles.USER,
+	},
+});
 
-const User = mongoose.model<IUser>('User', userSchema);
+schema.pre('save', async function (next) {
+	if (!this.isModified('password')) return next();
 
-export default User;
+	try {
+		this.password = await generateHashedPassword(this.password);
+		return next();
+	} catch (err: any) {
+		return next(err);
+	}
+});
+
+schema.methods.verifyPassword = async function (password: string) {
+	return await bcrypt.compare(password, this.password);
+};
+
+schema.methods.getSignedToken = function () {
+	return jwt.sign({ id: this._id }, JWT_SECRET, {
+		expiresIn: JWT_EXPIRE,
+	});
+};
+
+schema.methods.getRefreshToken = function () {
+	const token = jwt.sign({ id: this._id }, REFRESH_SECRET, {
+		expiresIn: REFRESH_EXPIRE,
+	});
+	return token;
+};
+
+const UserDB = mongoose.model<IUser>('User', schema);
+
+export default UserDB;

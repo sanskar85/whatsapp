@@ -25,9 +25,12 @@ import { FileUtils } from '../../utils/files';
 import { AssignLabelValidationResult } from './labels.validator';
 
 async function labels(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.locals.client_id;
+	const { client_id } = req.locals;
 
-	const whatsapp = WhatsappProvider.getInstance(client_id);
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return;
+	}
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
@@ -54,10 +57,13 @@ async function labels(req: Request, res: Response, next: NextFunction) {
 }
 
 async function exportLabels(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.locals.client_id;
 	const { label_ids } = req.body as { label_ids: string[] };
+	const { client_id } = req.locals;
 
-	const whatsapp = WhatsappProvider.getInstance(client_id);
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return;
+	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
@@ -65,7 +71,7 @@ async function exportLabels(req: Request, res: Response, next: NextFunction) {
 		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
 	}
 
-	const taskService = new TaskService(req.locals.user);
+	const taskService = new TaskService(req.locals.user.getUser());
 	const options = {
 		saved: req.body.saved ?? true,
 		unsaved: req.body.unsaved ?? true,
@@ -89,8 +95,9 @@ async function exportLabels(req: Request, res: Response, next: NextFunction) {
 		const saved_contacts = (
 			await Promise.all(
 				(
-					await getOrCache(CACHE_TOKEN_GENERATOR.CONTACTS(req.locals.user._id), async () =>
-						whatsappUtils.getContacts()
+					await getOrCache(
+						CACHE_TOKEN_GENERATOR.CONTACTS(req.locals.user.getUser()._id),
+						async () => whatsappUtils.getContacts()
 					)
 				).saved.map(async (contact) => ({
 					...(await whatsappUtils.getContactDetails(contact)),
@@ -151,11 +158,14 @@ async function exportLabels(req: Request, res: Response, next: NextFunction) {
 }
 
 async function addLabel(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.locals.client_id;
-
 	const { group_ids, csv_file, type, label_id } = req.locals.data as AssignLabelValidationResult;
 
-	const whatsapp = WhatsappProvider.getInstance(client_id);
+	const { client_id } = req.locals;
+
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return;
+	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
@@ -209,11 +219,14 @@ async function addLabel(req: Request, res: Response, next: NextFunction) {
 }
 
 async function removeLabel(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.locals.client_id;
-
 	const { group_ids, csv_file, type, label_id } = req.locals.data as AssignLabelValidationResult;
 
-	const whatsapp = WhatsappProvider.getInstance(client_id);
+	const { client_id } = req.locals;
+
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return;
+	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));

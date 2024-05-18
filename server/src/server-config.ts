@@ -19,6 +19,7 @@ import {
 	UPLOADS_PATH,
 } from './config/const';
 import APIError from './errors/api-errors';
+import InternalError from './errors/internal-errors';
 import { WhatsappProvider } from './provider/whatsapp_provider';
 import { MessageService } from './services/messenger';
 import SchedulerService from './services/scheduler';
@@ -103,7 +104,7 @@ export default function (app: Express) {
 	app.use(routes);
 
 	app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-		if (err instanceof APIError) {
+		if (err instanceof APIError || err instanceof InternalError) {
 			if (err.status === 500) {
 				Logger.http(res.locals.url, {
 					type: 'response-error',
@@ -146,10 +147,7 @@ export default function (app: Express) {
 		WhatsappUtils.removeUnwantedSessions();
 	});
 
-	cron.schedule('0 */3 * * *', function () {
-		WhatsappUtils.removeInactiveSessions();
-	});
-	cron.schedule('* * * * * *', function () {
+	cron.schedule('* * * * * *', () => {
 		MessageService.sendScheduledMessage();
 	});
 	cron.schedule('30 3 * * *', function () {

@@ -16,7 +16,7 @@ async function createWhatsappLink(req: Request, res: Response, next: NextFunctio
 	const doc = await ShortnerDB.create({
 		title,
 		link,
-		user: req.locals.user,
+		user: req.locals.user.getID(),
 	});
 
 	return Respond({
@@ -37,7 +37,7 @@ async function createLink(req: Request, res: Response, next: NextFunction) {
 
 	const doc = await ShortnerDB.create({
 		link,
-		user: req.locals.user,
+		user: req.locals.user.getID(),
 		title,
 	});
 
@@ -58,7 +58,7 @@ async function updateLink(req: Request, res: Response, next: NextFunction) {
 	const { link, title, number, message } = req.locals.data as UpdateLinkValidationResult;
 	const doc = await ShortnerDB.findOne({
 		_id: req.locals.id,
-		user: req.locals.user,
+		user: req.locals.user.getID(),
 	});
 
 	if (!doc) {
@@ -89,7 +89,7 @@ async function updateLink(req: Request, res: Response, next: NextFunction) {
 async function deleteLink(req: Request, res: Response, next: NextFunction) {
 	const doc = await ShortnerDB.findOne({
 		_id: req.locals.id,
-		user: req.locals.user,
+		user: req.locals.user.getID(),
 	});
 
 	if (!doc) {
@@ -114,7 +114,7 @@ async function open(req: Request, res: Response, next: NextFunction) {
 }
 
 async function listAll(req: Request, res: Response, next: NextFunction) {
-	const docs = await ShortnerDB.find({ user: req.locals.user });
+	const docs = await ShortnerDB.find({ user: req.locals.user.getID() });
 
 	const promises = docs.map((doc) => ({
 		id: doc._id,

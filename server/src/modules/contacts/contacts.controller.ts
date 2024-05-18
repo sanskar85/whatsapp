@@ -14,7 +14,6 @@ import {
 } from '../../config/const';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import { WhatsappProvider } from '../../provider/whatsapp_provider';
-import { UserService } from '../../services';
 import TaskService from '../../services/task';
 import { TBusinessContact, TContact } from '../../types/whatsapp';
 import CSVParser from '../../utils/CSVParser';
@@ -25,8 +24,12 @@ import { FileUtils } from '../../utils/files';
 import { ValidateNumbersValidationResult } from './contacts.validator';
 
 async function contacts(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.locals.client_id;
-	const whatsapp = WhatsappProvider.getInstance(client_id);
+	const { client_id } = req.locals;
+
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return;
+	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
@@ -40,7 +43,7 @@ async function contacts(req: Request, res: Response, next: NextFunction) {
 		vcf: req.body.vcf ?? false,
 	};
 
-	const taskService = new TaskService(req.locals.user);
+	const taskService = new TaskService(req.locals.user.getUser());
 	let task_id: Types.ObjectId | null = null;
 	if (options.chat_contacts) {
 		task_id = await taskService.createTask(
@@ -73,7 +76,7 @@ async function contacts(req: Request, res: Response, next: NextFunction) {
 			saved,
 			non_saved,
 			chat_contacts: saved_chat,
-		} = await getOrCache(CACHE_TOKEN_GENERATOR.CONTACTS(req.locals.user._id), () =>
+		} = await getOrCache(CACHE_TOKEN_GENERATOR.CONTACTS(req.locals.user.getUser()._id), () =>
 			whatsappUtils.getContacts()
 		);
 
@@ -113,9 +116,12 @@ async function contacts(req: Request, res: Response, next: NextFunction) {
 }
 
 async function countContacts(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.locals.client_id;
+	const { client_id } = req.locals;
 
-	const whatsapp = WhatsappProvider.getInstance(client_id);
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return;
+	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
@@ -123,7 +129,7 @@ async function countContacts(req: Request, res: Response, next: NextFunction) {
 
 	try {
 		const { saved, non_saved, chat_contacts, groups } = await getOrCache(
-			CACHE_TOKEN_GENERATOR.CONTACTS(req.locals.user._id),
+			CACHE_TOKEN_GENERATOR.CONTACTS(req.locals.user.getUser()._id),
 			async () => whatsappUtils.getContacts()
 		);
 
@@ -143,9 +149,12 @@ async function countContacts(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function validate(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.locals.client_id;
+	const { client_id } = req.locals;
 
-	const whatsapp = WhatsappProvider.getInstance(client_id);
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return;
+	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
@@ -155,12 +164,6 @@ export async function validate(req: Request, res: Response, next: NextFunction) 
 		csv_file,
 		numbers: requestedNumberList,
 	} = req.locals.data as ValidateNumbersValidationResult;
-
-	const { isSubscribed, isNew } = new UserService(req.locals.user).isSubscribed();
-
-	if (!isSubscribed && !isNew) {
-		return next(new APIError(API_ERRORS.PAYMENT_ERRORS.PAYMENT_REQUIRED));
-	}
 
 	let numbers_to_be_checked: string[] = [];
 

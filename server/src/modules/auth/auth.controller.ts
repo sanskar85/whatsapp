@@ -1,24 +1,33 @@
 import { NextFunction, Request, Response } from 'express';
 import { saveRefreshTokens } from '../../config/cache';
-import { IS_PRODUCTION, JWT_COOKIE, JWT_REFRESH_COOKIE } from '../../config/const';
+import {
+	CLIENT_ID_COOKIE,
+	IS_PRODUCTION,
+	JWT_COOKIE,
+	JWT_REFRESH_COOKIE,
+} from '../../config/const';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import { WhatsappProvider } from '../../provider/whatsapp_provider';
 import { UserService } from '../../services';
-import AdminService from '../../services/user/admin-service';
-import { Respond } from '../../utils/ExpressUtils';
-import { AdminLoginValidationResult } from './auth.validator';
+import { DeviceService } from '../../services/user';
+import { Respond, generateClientID } from '../../utils/ExpressUtils';
+import { LoginValidationResult } from './auth.validator';
 
 const JWT_EXPIRE_TIME = 3 * 60 * 1000;
 const REFRESH_EXPIRE_TIME = 30 * 24 * 60 * 60 * 1000;
 
 async function validateClientID(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.headers['client-id'] as string;
+	const client_id = req.cookies[CLIENT_ID_COOKIE];
 	if (!client_id) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 
-	const authStatus = await UserService.isValidAuth(client_id);
-	const whatsapp = WhatsappProvider.getInstance(client_id);
+	const authStatus = await DeviceService.isValidDevice(client_id);
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+
+	if (!whatsapp) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
+	}
 
 	if (!authStatus.valid) {
 		if (client_id) {
@@ -26,40 +35,55 @@ async function validateClientID(req: Request, res: Response, next: NextFunction)
 		}
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
-
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			session_expires_at: authStatus.revoke_at,
-			isWhatsappReady: whatsapp.isReady(),
-			status: whatsapp.getStatus(),
-		},
-	});
+	try {
+		const device = await DeviceService.getDeviceService(whatsapp.getContact().id.user);
+		const { isNew, isSubscribed } = device.isSubscribed();
+		return Respond({
+			res,
+			status: 200,
+			data: {
+				session_expires_at: device.getExpiration(null).toDate(),
+				isWhatsappReady: whatsapp.isReady(),
+				status: whatsapp.getStatus(),
+				phone_number: whatsapp.getContact().id.user,
+				name: whatsapp.getContact().pushname,
+				isSubscribed,
+				canSendMessage: isNew || isSubscribed,
+			},
+		});
+	} catch (err) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
+	}
 }
 
-async function details(req: Request, res: Response, next: NextFunction) {
-	const userService = new UserService(req.locals.user);
-	const paymentRecords = await userService.getPaymentRecords();
-	const { isSubscribed, isNew } = userService.isSubscribed();
+async function initiateWhatsapp(req: Request, res: Response, next: NextFunction) {
+	const client_id = generateClientID();
 
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			name: userService.getName(),
-			phoneNumber: userService.getPhoneNumber(),
-			isSubscribed: isSubscribed,
-			canSendMessage: isSubscribed || isNew,
-			subscriptionExpiration: isSubscribed ? userService.getExpiration('DD/MM/YYYY') : '',
-			userType: userService.getUserType(),
-			paymentRecords: paymentRecords,
-		},
-	});
+	const whatsapp = WhatsappProvider.getInstance(req.locals.user, client_id);
+	whatsapp.initialize();
+
+	try {
+		res.cookie(CLIENT_ID_COOKIE, client_id, {
+			sameSite: 'strict',
+			expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
+			httpOnly: IS_PRODUCTION,
+			secure: IS_PRODUCTION,
+		});
+		return Respond({
+			res,
+			status: 200,
+			data: {
+				client_id,
+			},
+		});
+	} catch (err) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
+	}
 }
 
-async function logout(req: Request, res: Response, next: NextFunction) {
-	WhatsappProvider.getInstance(req.locals.client_id).logoutClient();
+async function deviceLogout(req: Request, res: Response, next: NextFunction) {
+	const { client_id } = req.locals;
+	WhatsappProvider.clientByClientID(client_id)?.logoutClient();
 
 	return Respond({
 		res,
@@ -68,19 +92,24 @@ async function logout(req: Request, res: Response, next: NextFunction) {
 	});
 }
 
-async function adminLogin(req: Request, res: Response, next: NextFunction) {
-	const { username, password } = req.locals.data as AdminLoginValidationResult;
+async function login(req: Request, res: Response, next: NextFunction) {
+	const { username, password, role } = req.locals.data as LoginValidationResult;
 	try {
-		const adminService = await AdminService.getService(username, password);
+		const userService = await UserService.getServiceByCredentials(username, password);
 
-		res.cookie(JWT_COOKIE, adminService.getToken(), {
+		if (userService.getRole().toLowerCase() !== role) {
+			return next(new APIError(API_ERRORS.USER_ERRORS.USER_NOT_FOUND_ERROR));
+		}
+
+		res.cookie(JWT_COOKIE, userService.getToken(), {
 			sameSite: 'strict',
 			expires: new Date(Date.now() + JWT_EXPIRE_TIME),
 			httpOnly: IS_PRODUCTION,
 			secure: IS_PRODUCTION,
 		});
-		const t = adminService.getRefreshToken();
-		saveRefreshTokens(t, adminService.getUser()._id);
+		const t = userService.getRefreshToken();
+
+		saveRefreshTokens(t, userService.getID().toString());
 		res.cookie(JWT_REFRESH_COOKIE, t, {
 			sameSite: 'strict',
 			expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
@@ -98,11 +127,11 @@ async function adminLogin(req: Request, res: Response, next: NextFunction) {
 	}
 }
 
-async function adminLogout(req: Request, res: Response, next: NextFunction) {
+async function logout(req: Request, res: Response) {
 	const refreshTokens = req.cookies[JWT_REFRESH_COOKIE] as string;
 	res.clearCookie(JWT_COOKIE);
 	res.clearCookie(JWT_REFRESH_COOKIE);
-	await AdminService.logout(refreshTokens);
+	await UserService.logout(refreshTokens);
 	return Respond({
 		res,
 		status: 200,
@@ -110,34 +139,7 @@ async function adminLogout(req: Request, res: Response, next: NextFunction) {
 	});
 }
 
-async function setAdminClientID(req: Request, res: Response, next: NextFunction) {
-	const { client_id } = req.body;
-	if (!client_id) {
-		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
-	}
-	const adminService = new AdminService(req.locals.admin);
-	await adminService.setClientID(client_id);
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			client_id,
-		},
-	});
-}
-
-async function getAdminClientID(req: Request, res: Response, next: NextFunction) {
-	const adminService = new AdminService(req.locals.admin);
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			client_id: adminService.getClientID(),
-		},
-	});
-}
-
-async function validateAdmin(req: Request, res: Response, next: NextFunction) {
+async function validateLogin(req: Request, res: Response) {
 	return Respond({
 		res,
 		status: 200,
@@ -147,13 +149,11 @@ async function validateAdmin(req: Request, res: Response, next: NextFunction) {
 
 const AuthController = {
 	validateClientID,
-	details,
 	logout,
-	adminLogin,
-	adminLogout,
-	validateAdmin,
-	getAdminClientID,
-	setAdminClientID,
+	login,
+	validateLogin,
+	deviceLogout,
+	initiateWhatsapp,
 };
 
 export default AuthController;

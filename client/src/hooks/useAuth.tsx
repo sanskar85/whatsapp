@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { singletonHook } from 'react-singleton-hook';
 import { io } from 'socket.io-client';
 import { SERVER_URL, SOCKET_EVENT } from '../config/const';
+import AuthService from '../services/auth.service';
 import UserService from '../services/user.service';
-import { getClientID, saveClientID } from '../utils/ChromeUtils';
+import { saveClientID } from '../utils/ChromeUtils';
 import { recheckNetwork } from './useNetwork';
 
 const initStatus = {
@@ -116,7 +117,7 @@ export const startAuth = async () => {
 		isAuthenticated: false,
 		qrCode: '',
 	});
-	const client_id = getClientID();
+	const client_id = await AuthService.initiateWhatsapp();
 	socket.emit(SOCKET_EVENT.INITIALIZE, client_id);
 };
 

@@ -36,7 +36,7 @@ export async function saveCSV(req: Request, res: Response, next: NextFunction) {
 
 		const name = req.body.name;
 
-		const { id } = await new UploadService(req.locals.user).addCSV(
+		const { id } = await new UploadService(req.locals.user.getUser()).addCSV(
 			name,
 			uploadedFile.filename,
 			headers
@@ -63,7 +63,7 @@ export async function saveCSV(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function listCSV(req: Request, res: Response, next: NextFunction) {
-	const csv_docs = await new UploadService(req.locals.user).listCSVs();
+	const csv_docs = await new UploadService(req.locals.user.getUser()).listCSVs();
 	return Respond({
 		res,
 		status: 200,
@@ -79,7 +79,7 @@ export async function deleteCSV(req: Request, res: Response, next: NextFunction)
 		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
 	}
 	try {
-		const filename = await new UploadService(req.locals.user).delete(id);
+		const filename = await new UploadService(req.locals.user.getUser()).delete(id);
 		const path = __basedir + CSV_PATH + filename;
 		FileUtils.deleteFile(path);
 
@@ -113,7 +113,7 @@ export async function addAttachment(req: Request, res: Response, next: NextFunct
 		const caption = req.body.caption as string;
 		const custom_caption = req.body.custom_caption as boolean;
 
-		const attachment = new UploadService(req.locals.user).addAttachment(
+		const attachment = new UploadService(req.locals.user.getUser()).addAttachment(
 			name,
 			caption,
 			uploadedFile.filename,
@@ -148,7 +148,7 @@ export async function updateAttachmentFile(req: Request, res: Response, next: Ne
 		const destination = __basedir + ATTACHMENTS_PATH + uploadedFile.filename;
 		FileUtils.moveFile(uploadedFile.path, destination);
 
-		const { previous } = await new UploadService(req.locals.user).updateAttachmentFile(
+		const { previous } = await new UploadService(req.locals.user.getUser()).updateAttachmentFile(
 			id,
 			uploadedFile.filename
 		);
@@ -177,7 +177,7 @@ export async function updateAttachment(req: Request, res: Response, next: NextFu
 		const caption = req.body.caption as string;
 		const custom_caption = req.body.custom_caption as boolean;
 
-		const attachment = await new UploadService(req.locals.user).updateAttachment(id, {
+		const attachment = await new UploadService(req.locals.user.getUser()).updateAttachment(id, {
 			name,
 			caption,
 			custom_caption,
@@ -202,7 +202,7 @@ export async function downloadCSV(req: Request, res: Response, next: NextFunctio
 		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
 	}
 	try {
-		const attachment = await new UploadService(req.locals.user).getAttachment(id);
+		const attachment = await new UploadService(req.locals.user.getUser()).getAttachment(id);
 		const path = __basedir + CSV_PATH + attachment.filename;
 		return RespondFile({
 			res,
@@ -220,7 +220,7 @@ export async function downloadAttachment(req: Request, res: Response, next: Next
 		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
 	}
 	try {
-		const attachment = await new UploadService(req.locals.user).getAttachment(id);
+		const attachment = await new UploadService(req.locals.user.getUser()).getAttachment(id);
 		const path = __basedir + ATTACHMENTS_PATH + attachment.filename;
 		return RespondFile({
 			res,
@@ -239,12 +239,11 @@ export async function deleteAttachment(req: Request, res: Response, next: NextFu
 		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
 	}
 	try {
-		const scheduler = new MessageService(req.locals.user);
-		const inUse = await scheduler.isAttachmentInUse(id);
+		const inUse = await MessageService.isAttachmentInUse(id);
 		if (inUse) {
 			return next(new APIError(API_ERRORS.USER_ERRORS.ATTACHMENT_IN_USE));
 		}
-		const attachment = await new UploadService(req.locals.user).delete(id);
+		const attachment = await new UploadService(req.locals.user.getUser()).delete(id);
 		const path = __basedir + ATTACHMENTS_PATH + attachment;
 		FileUtils.deleteFile(path);
 		return Respond({
@@ -263,18 +262,22 @@ export async function attachmentById(req: Request, res: Response, next: NextFunc
 	if (!isIDValid) {
 		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
 	}
-	const attachment = await new UploadService(req.locals.user).getAttachment(id);
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			attachment,
-		},
-	});
+	try {
+		const attachment = await new UploadService(req.locals.user.getUser()).getAttachment(id);
+		return Respond({
+			res,
+			status: 200,
+			data: {
+				attachment,
+			},
+		});
+	} catch (err: unknown) {
+		return next(new APIError(API_ERRORS.COMMON_ERRORS.NOT_FOUND));
+	}
 }
 
 export async function listAttachments(req: Request, res: Response, next: NextFunction) {
-	const [attachments] = await new UploadService(req.locals.user).listAttachments();
+	const [attachments] = await new UploadService(req.locals.user.getUser()).listAttachments();
 	return Respond({
 		res,
 		status: 200,

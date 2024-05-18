@@ -4,7 +4,6 @@ export default class ClientIdService {
 	static async getClientID() {
 		try {
 			const { data } = await APIInstance.get('/auth/admin/client-id');
-			console.log(data.client_id);
 			return data.client_id;
 		} catch (err) {
 			//ignore

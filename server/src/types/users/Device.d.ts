@@ -1,8 +1,10 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export default interface IUser extends Document {
+export default interface IDevice extends Document {
+	user: Types.ObjectId;
 	phone: string;
 	name: string;
+	client_id: string;
 	userType: 'BUSINESS' | 'PERSONAL';
 	subscription_expiry: Date;
 	business_details: {
@@ -14,5 +16,5 @@ export default interface IUser extends Document {
 		address: string;
 	};
 	createdAt: Date;
-	updateAt: Date;
+	revoke_at: Date;
 }

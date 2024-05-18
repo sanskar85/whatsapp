@@ -3,7 +3,7 @@ import { CAMPAIGN_STATUS, MESSAGE_SCHEDULER_TYPE, MESSAGE_STATUS } from '../../c
 import { CampaignDB, MessageDB } from '../../repository/messenger';
 import TimeGenerator from '../../structures/TimeGenerator';
 import { IMessage } from '../../types/messenger';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import { randomMessageText } from '../../utils/ExpressUtils';
 import MessageService from './Message';
@@ -38,6 +38,7 @@ type Batch = {
 	startsFrom?: string;
 	startTime?: string;
 	endTime?: string;
+	device_id: Types.ObjectId;
 };
 
 export default class CampaignService {
@@ -79,6 +80,7 @@ export default class CampaignService {
 				{
 					scheduled_by: MESSAGE_SCHEDULER_TYPE.CAMPAIGN,
 					scheduler_id: campaign._id,
+					device_id: opts.device_id,
 				}
 			);
 			_messages.push(msg);
@@ -145,7 +147,7 @@ export default class CampaignService {
 			.sort((a, b) =>
 				DateUtils.getMoment(a.createdAt).isAfter(DateUtils.getMoment(b.createdAt)) ? -1 : 1
 			)
-			.map((message) => ({
+			.map((message: { [key: string]: any }) => ({
 				campaign_id: message.campaign_id as string,
 				campaignName: message.name as string,
 				description: message.description as string,

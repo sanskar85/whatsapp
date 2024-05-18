@@ -2,15 +2,17 @@ import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 import APIError from '../../errors/api-errors';
 
-export type AdminLoginValidationResult = {
+export type LoginValidationResult = {
 	username: string;
 	password: string;
+	role: 'admin' | 'user';
 };
 
-export async function AdminLoginValidator(req: Request, res: Response, next: NextFunction) {
+export async function LoginValidator(req: Request, res: Response, next: NextFunction) {
 	const validator = z.object({
 		username: z.string(),
 		password: z.string(),
+		role: z.enum(['admin', 'user']),
 	});
 	const validationResult = validator.safeParse(req.body);
 	if (validationResult.success) {

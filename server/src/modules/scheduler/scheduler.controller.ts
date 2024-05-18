@@ -8,7 +8,7 @@ import { Respond, RespondCSV } from '../../utils/ExpressUtils';
 import { CreateSchedulerValidationResult } from './scheduler.validator';
 
 async function allSchedulers(req: Request, res: Response, next: NextFunction) {
-	const service = new SchedulerService(req.locals.user);
+	const service = new SchedulerService(req.locals.user.getUser());
 	const schedulers = await service.allScheduler();
 
 	return Respond({
@@ -25,7 +25,7 @@ async function allSchedulers(req: Request, res: Response, next: NextFunction) {
 }
 
 async function schedulerById(req: Request, res: Response, next: NextFunction) {
-	const service = new SchedulerService(req.locals.user);
+	const service = new SchedulerService(req.locals.user.getUser());
 
 	try {
 		const scheduler = await service.schedulerByID(req.locals.id);
@@ -48,8 +48,8 @@ async function schedulerById(req: Request, res: Response, next: NextFunction) {
 async function createScheduler(req: Request, res: Response, next: NextFunction) {
 	const data = req.locals.data as CreateSchedulerValidationResult;
 
-	const schedulerService = new SchedulerService(req.locals.user);
-	const [_, media_attachments] = await new UploadService(req.locals.user).listAttachments(
+	const schedulerService = new SchedulerService(req.locals.user.getUser());
+	const [_, media_attachments] = await new UploadService(req.locals.user.getUser()).listAttachments(
 		data.attachments
 	);
 
@@ -72,8 +72,8 @@ async function createScheduler(req: Request, res: Response, next: NextFunction) 
 
 async function updateScheduler(req: Request, res: Response, next: NextFunction) {
 	const data = req.locals.data as CreateSchedulerValidationResult;
-	const schedulerService = new SchedulerService(req.locals.user);
-	const [_, media_attachments] = await new UploadService(req.locals.user).listAttachments(
+	const schedulerService = new SchedulerService(req.locals.user.getUser());
+	const [_, media_attachments] = await new UploadService(req.locals.user.getUser()).listAttachments(
 		data.attachments
 	);
 
@@ -101,7 +101,7 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 
 async function toggleActive(req: Request, res: Response, next: NextFunction) {
 	try {
-		const schedulerService = new SchedulerService(req.locals.user);
+		const schedulerService = new SchedulerService(req.locals.user.getUser());
 
 		const scheduler = await schedulerService.toggleActive(req.locals.id);
 
@@ -124,7 +124,7 @@ async function toggleActive(req: Request, res: Response, next: NextFunction) {
 
 async function reschedule(req: Request, res: Response, next: NextFunction) {
 	try {
-		const schedulerService = new SchedulerService(req.locals.user);
+		const schedulerService = new SchedulerService(req.locals.user.getUser());
 
 		await schedulerService.scheduleMessagesByID(req.locals.id);
 
@@ -144,7 +144,7 @@ async function reschedule(req: Request, res: Response, next: NextFunction) {
 }
 
 async function deleteScheduler(req: Request, res: Response, next: NextFunction) {
-	const schedulerService = new SchedulerService(req.locals.user);
+	const schedulerService = new SchedulerService(req.locals.user.getUser());
 	schedulerService.deleteBot(req.locals.id);
 
 	return Respond({
@@ -156,7 +156,7 @@ async function deleteScheduler(req: Request, res: Response, next: NextFunction) 
 
 async function downloadSchedulerReport(req: Request, res: Response, next: NextFunction) {
 	try {
-		const schedulerService = new SchedulerService(req.locals.user);
+		const schedulerService = new SchedulerService(req.locals.user.getUser());
 		const reports = await schedulerService.generateReport(req.locals.id);
 
 		return RespondCSV({
@@ -177,7 +177,7 @@ const BotController = {
 	toggleActive,
 	schedulerById,
 	downloadSchedulerReport,
-	reschedule
+	reschedule,
 };
 
 export default BotController;

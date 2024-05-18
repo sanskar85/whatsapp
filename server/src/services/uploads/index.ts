@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import UploadDB from '../../repository/uploads';
 import IUpload from '../../types/uploads';
-import { IUser } from '../../types/user';
+import { IUser } from '../../types/users';
 
 export default class UploadService {
 	private user: IUser;
