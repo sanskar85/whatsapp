@@ -1,11 +1,13 @@
 import { Button, FormControl, FormLabel, Input, Stack, Text } from '@chakra-ui/react';
-import { useState } from 'react';
-import { Colors } from '../../../../config/const';
+import { useRef, useState } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { CAPTCHA_KEY, Colors } from '../../../../config/const';
 import { useAuth } from '../../../../hooks/useAuth';
 import AuthService from '../../../../services/auth.service';
 import { PasswordInput } from './PasswordInput';
 
 export default function SignupTab() {
+	const recaptchaRef = useRef<ReCAPTCHA>(null);
 	const { isAuthenticating } = useAuth();
 	const [{ username, password, confirm_password }, setCredentials] = useState({
 		username: '',
@@ -34,6 +36,7 @@ export default function SignupTab() {
 	};
 
 	const handleSignup = async () => {
+		await recaptchaRef.current?.executeAsync();
 		if (!username || !password || !confirm_password) {
 			return setUIDetails({
 				usernameError: !username,
@@ -115,6 +118,8 @@ export default function SignupTab() {
 						Sign Up
 					</Button>
 				</Stack>
+
+				<ReCAPTCHA ref={recaptchaRef} size='invisible' sitekey={CAPTCHA_KEY} />
 			</Stack>
 		</>
 	);
