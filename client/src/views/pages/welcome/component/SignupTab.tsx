@@ -1,4 +1,4 @@
-import { Button, FormControl, FormLabel, Input, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, Stack, Text } from '@chakra-ui/react';
 import { useRef, useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { CAPTCHA_KEY, Colors } from '../../../../config/const';
@@ -118,8 +118,9 @@ export default function SignupTab() {
 						Sign Up
 					</Button>
 				</Stack>
-
-				<ReCAPTCHA ref={recaptchaRef} size='invisible' sitekey={CAPTCHA_KEY} />
+				<Box display={'none'}>
+					<ReCAPTCHA ref={recaptchaRef} size='invisible' sitekey={CAPTCHA_KEY} />
+				</Box>
 			</Stack>
 		</>
 	);
