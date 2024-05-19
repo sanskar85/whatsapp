@@ -115,7 +115,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 						px={'1rem'}
 						height={'calc(100% - 10px)'}
 					>
-						<Box marginTop={'1rem'} height={'full'}>
+						<Flex direction={'column'} marginTop={'1rem'} height={'full'}>
 							{phoneState ? (
 								<section>
 									<Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -311,7 +311,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 									Logout Whatsapp
 								</Button>
 							</section>
-						</Box>
+						</Flex>
 					</Flex>
 				</DrawerBody>
 			</DrawerContent>
