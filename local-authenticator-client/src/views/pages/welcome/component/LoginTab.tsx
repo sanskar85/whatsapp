@@ -39,7 +39,7 @@ export default function LoginTab({ onSignIn }: { onSignIn: (text: string) => voi
 				<Stack spacing='3'>
 					<FormControl isInvalid={usernameError}>
 						<FormLabel htmlFor='email' color={Colors.PRIMARY_DARK}>
-							Username
+							Email
 						</FormLabel>
 						<Input
 							type='email'
@@ -48,7 +48,7 @@ export default function LoginTab({ onSignIn }: { onSignIn: (text: string) => voi
 							variant='unstyled'
 							bgColor={Colors.ACCENT_LIGHT}
 							onChange={handleChange}
-							placeholder='username'
+							placeholder='email'
 							_placeholder={{
 								color: usernameError ? 'red.400' : Colors.ACCENT_DARK,
 								opacity: 0.7,
