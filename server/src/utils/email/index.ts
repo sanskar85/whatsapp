@@ -14,7 +14,7 @@ export async function sendPasswordResetEmail(to: string, token: string) {
 	});
 
 	if (error) {
-		Logger.error('Resend Error', error, { details: 'Error Sending reset message' });
+		Logger.error('Resend Error', error, { ...error, details: 'Error Sending reset message' });
 		return false;
 	}
 	return true;
@@ -29,7 +29,7 @@ export async function sendLoginCredentialsEmail(to: string, username: string, pa
 	});
 
 	if (error) {
-		Logger.error('Resend Error', error, { details: 'Error Sending reset message' });
+		Logger.error('Resend Error', error, { ...error, details: 'Error Sending reset message' });
 		return false;
 	}
 	return true;
