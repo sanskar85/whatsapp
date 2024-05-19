@@ -297,6 +297,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 								<Button
 									width={'full'}
 									colorScheme='yellow'
+									color={'white'}
 									onClick={() => changePasswordRef.current?.open()}
 								>
 									Change Password
