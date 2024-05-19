@@ -1,4 +1,13 @@
-import { Button, Center, FormControl, FormLabel, Input, Stack, Text } from '@chakra-ui/react';
+import {
+	Button,
+	Center,
+	FormControl,
+	FormLabel,
+	Input,
+	Stack,
+	Text,
+	useToast,
+} from '@chakra-ui/react';
 import { useRef, useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { CAPTCHA_KEY, Colors } from '../../../../config/const';
@@ -8,6 +17,7 @@ import AuthService from '../../../../services/auth.service';
 export default function SignupTab() {
 	const recaptchaRef = useRef<ReCAPTCHA>(null);
 	const { isAuthenticating } = useAuth();
+	const toast = useToast();
 	const [{ username }, setCredentials] = useState({
 		username: '',
 	});
@@ -41,15 +51,29 @@ export default function SignupTab() {
 			});
 		}
 
-		const error = await AuthService.register(username);
-		if (!error) {
-			return;
-		}
+		const success = await AuthService.register(username);
+
 		setUIDetails((prev) => ({
 			...prev,
-			usernameError: error,
-			loginError: error,
+			usernameError: !success,
+			loginError: !success,
 		}));
+		if (!success) {
+			toast({
+				title: 'Account creation failed.',
+				description: "Email already exists or couldn't send email.",
+				status: 'error',
+				duration: 5000,
+			});
+			return;
+		}
+
+		toast({
+			title: 'Account created.',
+			description: 'Login credentials sent to your email.',
+			status: 'success',
+			duration: 5000,
+		});
 	};
 	return (
 		<>
