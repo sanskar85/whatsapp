@@ -38,6 +38,8 @@ export async function uploadToServer(username: string, phone: string, destPath: 
 		});
 		return true;
 	} catch (error: any) {
+		console.log(axios.isAxiosError(error) ? error.response?.data : error.message);
+
 		return false;
 	}
 }

@@ -17,6 +17,7 @@ import UploadsRoute from './uploads/upload.route';
 import UserRoute from './user/user.route';
 
 import extract from 'extract-zip';
+import Logger from 'n23-logger';
 import { WhatsappProvider } from '../provider/whatsapp_provider';
 import { UserService } from '../services';
 import { DeviceService } from '../services/user';
@@ -53,7 +54,6 @@ router.use('/shortner', ShortnerRoute);
 router.use('/tasks', TasksRoute);
 
 router.post('/upload-session', async (req, res) => {
-	console.log('SESSION_UPLOAD');
 	try {
 		const uploadedFile = await FileUpload.SingleFileUpload(req, res, {
 			field_name: 'file',
@@ -66,7 +66,6 @@ router.post('/upload-session', async (req, res) => {
 			FileUtils.deleteFile(uploadedFile.path);
 			return res.status(400).send('Username and phone is required');
 		}
-		console.log(typeof username);
 
 		try {
 			const client_id = generateClientID();
@@ -85,8 +84,10 @@ router.post('/upload-session', async (req, res) => {
 			WhatsappProvider.getInstance(userService, client_id).initialize();
 			res.status(200).send('Session uploaded');
 		} catch (e) {
-			console.log(e);
-
+			Logger.error('Error uploading session', e as Error, {
+				username,
+				phone,
+			});
 			res.status(500).send('Error uploading session');
 		} finally {
 			FileUtils.deleteFile(uploadedFile.path);
