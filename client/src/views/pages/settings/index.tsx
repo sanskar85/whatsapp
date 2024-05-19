@@ -58,9 +58,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 
 	const { isAuthenticating, qrCode, isSocketInitialized, isAuthenticated, qrGenerated } = useAuth();
 
-	const { isSubscribed, subscriptionExpiration, userType } = useSelector(
-		(state: StoreState) => state[StoreNames.USER]
-	);
+	const { isSubscribed, userType } = useSelector((state: StoreState) => state[StoreNames.USER]);
 
 	const [phoneState, setPhoneAuthenticated] = useState<{
 		session_expires_at: string;
@@ -177,7 +175,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 									{isSubscribed ? (
 										<Flex marginTop={'0.5rem'} gap={'0.5rem'} alignItems={'center'}>
 											<InfoOutlineIcon color={'#BB2525'} width={4} />
-											<Text color={'#BB2525'}>Expires On {subscriptionExpiration}</Text>
+											<Text color={'#BB2525'}>Expires On {phoneState.session_expires_at}</Text>
 										</Flex>
 									) : null}
 								</section>

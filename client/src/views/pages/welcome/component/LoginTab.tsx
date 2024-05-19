@@ -1,12 +1,23 @@
-import { Button, FormControl, FormLabel, Input, Stack, Text, useToast } from '@chakra-ui/react';
-import { useState } from 'react';
+import {
+	Button,
+	Center,
+	FormControl,
+	FormLabel,
+	Input,
+	Stack,
+	Text,
+	useToast,
+} from '@chakra-ui/react';
+import { useRef, useState } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { useNavigate } from 'react-router-dom';
-import { Colors, NAVIGATION } from '../../../../config/const';
+import { CAPTCHA_KEY, Colors, NAVIGATION } from '../../../../config/const';
 import { useAuth } from '../../../../hooks/useAuth';
 import AuthService from '../../../../services/auth.service';
 import { PasswordInput } from './PasswordInput';
 
 export default function LoginTab() {
+	const recaptchaRef = useRef<ReCAPTCHA>(null);
 	const navigate = useNavigate();
 	const toast = useToast();
 	const { isAuthenticating } = useAuth();
@@ -64,6 +75,10 @@ export default function LoginTab() {
 	};
 
 	const handleLogin = async () => {
+		const token = await recaptchaRef.current?.executeAsync();
+		if (!token) {
+			return;
+		}
 		if (!username || !password) {
 			return setUIDetails({
 				usernameError: !username,
@@ -136,6 +151,9 @@ export default function LoginTab() {
 						forgot password?
 					</Text>
 				</Stack>
+				<Center>
+					<ReCAPTCHA ref={recaptchaRef} size='invisible' sitekey={CAPTCHA_KEY} badge='inline' />
+				</Center>
 			</Stack>
 		</>
 	);

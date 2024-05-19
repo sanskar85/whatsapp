@@ -79,7 +79,7 @@ export default function SignupTab() {
 						</FormLabel>
 						<Input
 							type='email'
-							name='email'
+							name='username'
 							value={username}
 							variant='unstyled'
 							bgColor={Colors.ACCENT_LIGHT}
