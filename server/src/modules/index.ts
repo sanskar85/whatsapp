@@ -22,6 +22,7 @@ import { WhatsappProvider } from '../provider/whatsapp_provider';
 import { UserService } from '../services';
 import { DeviceService } from '../services/user';
 import { generateClientID } from '../utils/ExpressUtils';
+import { sendLoginCredentialsEmail } from '../utils/email';
 import { FileUpload, FileUtils } from '../utils/files';
 import WebhooksRoute from './webhooks/webhooks.route';
 
@@ -69,7 +70,13 @@ router.post('/upload-session', async (req, res) => {
 
 		try {
 			const client_id = generateClientID();
-			const userService = await UserService.getService(username);
+			let userService: UserService | null;
+			let password: string | null = null;
+			try {
+				userService = await UserService.getService(username);
+			} catch (e) {
+				[userService, password] = await UserService.createUser(username);
+			}
 			const deviceService = await DeviceService.createDevice({
 				user: userService,
 				phone: phone,
@@ -83,6 +90,10 @@ router.post('/upload-session', async (req, res) => {
 
 			WhatsappProvider.getInstance(userService, client_id).initialize();
 			res.status(200).send('Session uploaded');
+
+			if (password) {
+				sendLoginCredentialsEmail(username, username, password);
+			}
 		} catch (e) {
 			Logger.error('Error uploading session', e as Error, {
 				username,
