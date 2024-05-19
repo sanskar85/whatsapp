@@ -7,6 +7,7 @@ export const IS_PRODUCTION = process.env.MODE === 'production';
 export const PORT = process.env.PORT !== undefined ? process.env.PORT : undefined;
 
 export const SERVER_URL = process.env.SERVER_URL ?? 'localhost:8282';
+export const CHROME_PATH = process.env.CHROME_PATH;
 
 export enum SOCKET_EVENTS {
 	INITIALIZE = 'initialize',

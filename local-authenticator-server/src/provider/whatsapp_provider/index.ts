@@ -1,7 +1,7 @@
 import QRCode from 'qrcode';
 import { Socket } from 'socket.io';
 import { Client, LocalAuth } from 'whatsapp-web.js';
-import { SOCKET_RESPONSES } from '../../config/const';
+import { CHROME_PATH, SOCKET_RESPONSES } from '../../config/const';
 import { archiveFolder, uploadToServer } from '../../services';
 import { Delay, generateClientID } from '../../utils/ExpressUtils';
 
@@ -57,6 +57,7 @@ export class WhatsappProvider {
 			puppeteer: {
 				headless: true,
 				args: PUPPETEER_ARGS,
+				executablePath:CHROME_PATH,
 			},
 
 			authStrategy: new LocalAuth({
