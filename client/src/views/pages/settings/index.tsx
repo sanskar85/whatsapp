@@ -175,7 +175,9 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 									{isSubscribed ? (
 										<Flex marginTop={'0.5rem'} gap={'0.5rem'} alignItems={'center'}>
 											<InfoOutlineIcon color={'#BB2525'} width={4} />
-											<Text color={'#BB2525'}>Expires On {phoneState.session_expires_at}</Text>
+											<Text color={'#BB2525'}>
+												Expires On {phoneState.session_expires_at?.split('T')?.[0]}
+											</Text>
 										</Flex>
 									) : null}
 								</section>
