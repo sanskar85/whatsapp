@@ -110,7 +110,13 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 					Settings
 				</DrawerHeader>
 				<DrawerBody>
-					<Box width='full' py={'1rem'} px={'1rem'} height={'calc(100% - 70px)'}>
+					<Flex
+						direction={'column'}
+						width='full'
+						py={'1rem'}
+						px={'1rem'}
+						height={'calc(100% - 10px)'}
+					>
 						<Box marginTop={'1rem'} height={'full'}>
 							{phoneState ? (
 								<section>
@@ -287,7 +293,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 								</VStack>
 							</section>
 
-							<section className=' flex flex-col justify-end h-full'>
+							<section className=' flex flex-col justify-end flex-1'>
 								<Button
 									width={'full'}
 									colorScheme='yellow'
@@ -306,7 +312,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 								</Button>
 							</section>
 						</Box>
-					</Box>
+					</Flex>
 				</DrawerBody>
 			</DrawerContent>
 			<ChangePassword ref={changePasswordRef} />
