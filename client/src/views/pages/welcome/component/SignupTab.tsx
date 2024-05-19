@@ -72,16 +72,16 @@ export default function SignupTab() {
 					</FormControl>
 					<FormControl isInvalid={usernameError}>
 						<FormLabel htmlFor='email' color={Colors.PRIMARY_DARK}>
-							Username
+							Email
 						</FormLabel>
 						<Input
 							type='email'
-							name='username'
+							name='email'
 							value={username}
 							variant='unstyled'
 							bgColor={Colors.ACCENT_LIGHT}
 							onChange={handleChange}
-							placeholder='username'
+							placeholder='email'
 							_placeholder={{
 								color: usernameError ? 'red.400' : Colors.ACCENT_DARK,
 								opacity: 0.7,
