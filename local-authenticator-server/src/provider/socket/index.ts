@@ -39,6 +39,12 @@ export default class SocketServerProvider {
 				}
 			});
 			socket.on('disconnect', () => {
+				const provider = SocketServerProvider.clientsMap.get(
+					SocketServerProvider.socketsMap.get(socket.id)!
+				);
+				if (provider) {
+					provider.destroyClient();
+				}
 				SocketServerProvider.socketsMap.delete(socket.id);
 			});
 		});

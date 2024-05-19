@@ -2,6 +2,7 @@ import archiver from 'archiver';
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
+import { SERVER_URL } from '../config/const';
 
 export function archiveFolder(srcPath: string, destPath: string) {
 	const output = fs.createWriteStream(destPath);
@@ -28,7 +29,7 @@ export async function uploadToServer(username: string, phone: string, destPath: 
 		form.append('username', username);
 		form.append('phone', phone);
 
-		await axios.post('http://localhost:8282/upload-session', form, {
+		await axios.post(`${SERVER_URL}/upload-session`, form, {
 			headers: {
 				'Content-Type': 'multipart/form-data',
 			},
