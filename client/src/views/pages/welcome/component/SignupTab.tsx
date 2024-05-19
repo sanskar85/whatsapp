@@ -4,24 +4,18 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { CAPTCHA_KEY, Colors } from '../../../../config/const';
 import { useAuth } from '../../../../hooks/useAuth';
 import AuthService from '../../../../services/auth.service';
-import { PasswordInput } from './PasswordInput';
 
 export default function SignupTab() {
 	const recaptchaRef = useRef<ReCAPTCHA>(null);
 	const { isAuthenticating } = useAuth();
-	const [{ username, password, confirm_password }, setCredentials] = useState({
+	const [{ username }, setCredentials] = useState({
 		username: '',
-		password: '',
-		confirm_password: '',
 	});
 
-	const [{ usernameError, passwordError, loginError, confirm_passwordError }, setUIDetails] =
-		useState({
-			usernameError: false,
-			passwordError: false,
-			confirm_passwordError: false,
-			loginError: false,
-		});
+	const [{ usernameError, loginError }, setUIDetails] = useState({
+		usernameError: false,
+		loginError: false,
+	});
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setCredentials((prev) => ({
@@ -37,24 +31,14 @@ export default function SignupTab() {
 
 	const handleSignup = async () => {
 		await recaptchaRef.current?.executeAsync();
-		if (!username || !password || !confirm_password) {
+		if (!username) {
 			return setUIDetails({
 				usernameError: !username,
-				passwordError: !password,
-				confirm_passwordError: !confirm_password,
 				loginError: false,
 			});
 		}
 
-		if (password !== confirm_password) {
-			return setUIDetails((prev) => ({
-				...prev,
-				passwordError: true,
-				confirm_passwordError: true,
-			}));
-		}
-
-		const error = await AuthService.register(username, password);
+		const error = await AuthService.register(username);
 		if (!error) {
 			return;
 		}
@@ -68,6 +52,24 @@ export default function SignupTab() {
 		<>
 			<Stack width={'full'} spacing='6'>
 				<Stack spacing='2'>
+					<FormControl isInvalid={usernameError}>
+						<FormLabel htmlFor='email' color={Colors.PRIMARY_DARK}>
+							Full Name
+						</FormLabel>
+						<Input
+							type='text'
+							variant='unstyled'
+							bgColor={Colors.ACCENT_LIGHT}
+							placeholder='full name'
+							_placeholder={{
+								color: Colors.ACCENT_DARK,
+								opacity: 0.7,
+							}}
+							borderColor={Colors.ACCENT_DARK}
+							borderWidth={'1px'}
+							padding={'0.5rem'}
+						/>
+					</FormControl>
 					<FormControl isInvalid={usernameError}>
 						<FormLabel htmlFor='email' color={Colors.PRIMARY_DARK}>
 							Username
@@ -89,21 +91,6 @@ export default function SignupTab() {
 							padding={'0.5rem'}
 						/>
 					</FormControl>
-					<PasswordInput
-						isInvalid={passwordError}
-						name='password'
-						value={password}
-						onChange={handleChange}
-						placeholder='********'
-					/>
-					<PasswordInput
-						label='Confirm Password'
-						isInvalid={confirm_passwordError}
-						name='confirm_password'
-						value={confirm_password}
-						onChange={handleChange}
-						placeholder='********'
-					/>
 				</Stack>
 
 				<Stack spacing='0'>
@@ -118,8 +105,15 @@ export default function SignupTab() {
 						Sign Up
 					</Button>
 				</Stack>
-				<Box display={'none'}>
-					<ReCAPTCHA ref={recaptchaRef} size='invisible' sitekey={CAPTCHA_KEY} />
+				<Box>
+					<ReCAPTCHA
+						ref={recaptchaRef}
+						size='invisible'
+						sitekey={CAPTCHA_KEY}
+						style={{
+							display: 'none',
+						}}
+					/>
 				</Box>
 			</Stack>
 		</>

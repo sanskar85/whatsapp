@@ -44,11 +44,10 @@ export default class AuthService {
 			return false;
 		}
 	}
-	static async register(username: string, password: string) {
+	static async register(username: string) {
 		try {
 			await APIInstance.post(`/auth/register`, {
 				username,
-				password,
 				role: 'user',
 			});
 			return true;

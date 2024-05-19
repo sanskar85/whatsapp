@@ -11,7 +11,7 @@ export type LoginValidationResult = {
 export async function LoginValidator(req: Request, res: Response, next: NextFunction) {
 	const validator = z.object({
 		username: z.string(),
-		password: z.string(),
+		password: z.string().default(''),
 		role: z.enum(['admin', 'user']),
 	});
 	const validationResult = validator.safeParse(req.body);

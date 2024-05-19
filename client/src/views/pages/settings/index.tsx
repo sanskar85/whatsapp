@@ -299,7 +299,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 									width={'full'}
 									colorScheme='red'
 									marginTop={'1rem'}
-									hidden={phoneState === null}
+									hidden={phoneState !== null}
 									onClick={logoutWhatsapp}
 								>
 									Logout Whatsapp

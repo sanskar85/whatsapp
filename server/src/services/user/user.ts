@@ -104,19 +104,19 @@ export default class UserService {
 		};
 	}
 
-	static async createUser(username: string, password?: string) {
+	static async createUser(username: string, password?: string): Promise<[UserService, string]> {
 		const user = await UserDB.findOne({ username });
 
 		if (user) {
 			throw new InternalError(INTERNAL_ERRORS.USER_ERRORS.USERNAME_ALREADY_EXISTS);
 		}
-
+		password = password ?? generateRandomText(8);
 		const createdUser = await UserDB.create({
 			username,
-			password: password ?? generateRandomText(8),
+			password: password,
 			role: UserRoles.USER,
 		});
-		return new UserService(createdUser);
+		return [new UserService(createdUser), password];
 	}
 
 	static async logout(refreshToken: string) {

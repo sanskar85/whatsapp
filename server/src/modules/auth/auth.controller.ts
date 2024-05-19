@@ -164,9 +164,9 @@ async function login(req: Request, res: Response, next: NextFunction) {
 }
 
 async function register(req: Request, res: Response, next: NextFunction) {
-	const { username, password } = req.locals.data as LoginValidationResult;
+	const { username } = req.locals.data as LoginValidationResult;
 	try {
-		const userService = await UserService.createUser(username, password);
+		const [userService, password] = await UserService.createUser(username);
 
 		sendLoginCredentialsEmail(username, username, password);
 
