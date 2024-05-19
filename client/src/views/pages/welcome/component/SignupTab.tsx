@@ -1,4 +1,4 @@
-import { Box, Button, FormControl, FormLabel, Input, Stack, Text } from '@chakra-ui/react';
+import { Button, Center, FormControl, FormLabel, Input, Stack, Text } from '@chakra-ui/react';
 import { useRef, useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { CAPTCHA_KEY, Colors } from '../../../../config/const';
@@ -30,7 +30,10 @@ export default function SignupTab() {
 	};
 
 	const handleSignup = async () => {
-		await recaptchaRef.current?.executeAsync();
+		const token = await recaptchaRef.current?.executeAsync();
+		if (!token) {
+			return;
+		}
 		if (!username) {
 			return setUIDetails({
 				usernameError: !username,
@@ -105,16 +108,9 @@ export default function SignupTab() {
 						Sign Up
 					</Button>
 				</Stack>
-				<Box>
-					<ReCAPTCHA
-						ref={recaptchaRef}
-						size='invisible'
-						sitekey={CAPTCHA_KEY}
-						style={{
-							display: 'none',
-						}}
-					/>
-				</Box>
+				<Center>
+					<ReCAPTCHA ref={recaptchaRef} size='invisible' sitekey={CAPTCHA_KEY} badge='inline' />
+				</Center>
 			</Stack>
 		</>
 	);
