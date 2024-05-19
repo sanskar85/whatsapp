@@ -18,8 +18,9 @@ export default function SignupTab() {
 	const recaptchaRef = useRef<ReCAPTCHA>(null);
 	const { isAuthenticating } = useAuth();
 	const toast = useToast();
-	const [{ username }, setCredentials] = useState({
+	const [{ username, name }, setCredentials] = useState({
 		username: '',
+		name: '',
 	});
 
 	const [{ usernameError, loginError }, setUIDetails] = useState({
@@ -68,6 +69,11 @@ export default function SignupTab() {
 			return;
 		}
 
+		setCredentials({
+			username: '',
+			name: '',
+		});
+
 		toast({
 			title: 'Account created.',
 			description: 'Login credentials sent to your email.',
@@ -95,6 +101,9 @@ export default function SignupTab() {
 							borderColor={Colors.ACCENT_DARK}
 							borderWidth={'1px'}
 							padding={'0.5rem'}
+							name='name'
+							value={name}
+							onChange={handleChange}
 						/>
 					</FormControl>
 					<FormControl isInvalid={usernameError}>
