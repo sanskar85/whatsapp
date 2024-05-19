@@ -57,7 +57,7 @@ export class WhatsappProvider {
 			puppeteer: {
 				headless: true,
 				args: PUPPETEER_ARGS,
-				executablePath:CHROME_PATH,
+				executablePath: CHROME_PATH,
 			},
 
 			authStrategy: new LocalAuth({
@@ -109,6 +109,8 @@ export class WhatsappProvider {
 			this.status = STATUS.READY;
 			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_READY);
 			await Delay(120);
+			await this.client.destroy();
+
 			this.number = this.client.info.wid.user;
 			console.log('Whatsapp Ready to be synced', this.username, 'Number:', this.number);
 
@@ -124,8 +126,6 @@ export class WhatsappProvider {
 				this.status = STATUS.SERVER_SESSION_FAILED;
 				this.sendToClient(SOCKET_RESPONSES.SERVER_SESSION_FAILED);
 			}
-
-			this.destroyClient();
 		});
 
 		this.client.on('disconnected', () => {
