@@ -150,7 +150,7 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 			startsFrom: req_data.startDate,
 			startTime: req_data.startTime,
 			endTime: req_data.endTime,
-			device_id: deviceService.getID(),
+			device_id: deviceService.getUserId(),
 		});
 
 		taskService.markCompleted(task_id, campaign._id);

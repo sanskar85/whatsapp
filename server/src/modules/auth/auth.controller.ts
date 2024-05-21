@@ -131,7 +131,7 @@ async function login(req: Request, res: Response, next: NextFunction) {
 		});
 		const t = userService.getRefreshToken();
 
-		saveRefreshTokens(t, userService.getID().toString());
+		saveRefreshTokens(t, userService.getUserId().toString());
 		res.cookie(JWT_REFRESH_COOKIE, t, {
 			sameSite: 'strict',
 			expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
@@ -139,7 +139,7 @@ async function login(req: Request, res: Response, next: NextFunction) {
 			secure: IS_PRODUCTION,
 		});
 
-		const client_id = WhatsappProvider.clientByUser(userService.getID());
+		const client_id = WhatsappProvider.clientByUser(userService.getUserId());
 
 		if (client_id) {
 			const whatsapp = WhatsappProvider.clientByClientID(client_id);
@@ -178,7 +178,7 @@ async function register(req: Request, res: Response, next: NextFunction) {
 		});
 		const t = userService.getRefreshToken();
 
-		saveRefreshTokens(t, userService.getID().toString());
+		saveRefreshTokens(t, userService.getUserId().toString());
 		res.cookie(JWT_REFRESH_COOKIE, t, {
 			sameSite: 'strict',
 			expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
@@ -186,7 +186,7 @@ async function register(req: Request, res: Response, next: NextFunction) {
 			secure: IS_PRODUCTION,
 		});
 
-		const client_id = WhatsappProvider.clientByUser(userService.getID());
+		const client_id = WhatsappProvider.clientByUser(userService.getUserId());
 
 		if (client_id) {
 			const whatsapp = WhatsappProvider.clientByClientID(client_id);

@@ -6,10 +6,6 @@ const schedulerSchema = new mongoose.Schema<IScheduler>({
 		type: Schema.Types.ObjectId,
 		ref: 'User',
 	},
-	device: {
-		type: Schema.Types.ObjectId,
-		ref: 'Device',
-	},
 	csv: {
 		type: Schema.Types.ObjectId,
 		ref: 'Upload',

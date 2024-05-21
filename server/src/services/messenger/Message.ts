@@ -11,7 +11,6 @@ import { IMessage } from '../../types/messenger';
 import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import TokenService from '../token';
-import { DeviceService } from '../user';
 
 export type Message = {
 	receiver: string;
@@ -33,7 +32,6 @@ export type Message = {
 type MessageSchedulerOptions = {
 	scheduled_by: MESSAGE_SCHEDULER_TYPE;
 	scheduler_id: Types.ObjectId;
-	device_id: Types.ObjectId;
 };
 
 type TextMessage = string;
@@ -48,7 +46,6 @@ export default class MessageService {
 	scheduleMessage(message: Message, opts: MessageSchedulerOptions) {
 		const msg = new MessageDB({
 			sender: this.user,
-			device: opts.device_id,
 			receiver: message.receiver,
 			message: message.message ?? '',
 			attachments: message.attachments ?? [],
@@ -88,7 +85,6 @@ export default class MessageService {
 		for (const message of messages) {
 			await MessageDB.create({
 				sender: this.user,
-				device: opts.device_id,
 				receiver: message.receiver,
 				message: message.message,
 				attachments: message.attachments ?? [],
@@ -121,7 +117,7 @@ export default class MessageService {
 			}
 			const whatsapp = WhatsappProvider.clientByClientID(cid)!;
 
-			const deviceService = new DeviceService(msg.device, msg.sender);
+			const deviceService = whatsapp.getDeviceService()!;
 			const { isSubscribed, isNew } = deviceService.isSubscribed();
 
 			if (!isSubscribed && !isNew) {

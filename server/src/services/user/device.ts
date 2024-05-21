@@ -2,7 +2,6 @@ import moment from 'moment';
 import { Types } from 'mongoose';
 import WAWebJS from 'whatsapp-web.js';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
-import { WhatsappProvider } from '../../provider/whatsapp_provider';
 import { DeviceDB } from '../../repository/user';
 import { IDevice, IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
@@ -43,7 +42,7 @@ export default class DeviceService extends UserService {
 		return new DeviceService(device, user.getUser());
 	}
 
-	getID() {
+	getUserId() {
 		return new Types.ObjectId(this.device._id);
 	}
 
@@ -64,7 +63,6 @@ export default class DeviceService extends UserService {
 	}
 
 	async logout() {
-		WhatsappProvider.clientByClientID(this.device.client_id)?.logoutClient();
 		DeviceService.logout(this.device.client_id);
 	}
 
@@ -158,7 +156,7 @@ export default class DeviceService extends UserService {
 		const device = await DeviceDB.findOne({ phone });
 
 		if (device) {
-			device.user = user.getID();
+			device.user = user.getUserId();
 			device.userType = isBusiness ? 'BUSINESS' : 'PERSONAL';
 			device.name = name ?? '';
 			device.business_details = business_details ?? {
@@ -174,7 +172,7 @@ export default class DeviceService extends UserService {
 		}
 
 		const created_device = await DeviceDB.create({
-			user: user.getID(),
+			user: user.getUserId(),
 			name,
 			phone,
 			userType: isBusiness ? 'BUSINESS' : 'PERSONAL',

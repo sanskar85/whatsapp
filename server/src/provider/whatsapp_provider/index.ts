@@ -5,7 +5,9 @@ import { Socket } from 'socket.io';
 import WAWebJS, { BusinessContact, Client, GroupChat, LocalAuth } from 'whatsapp-web.js';
 import { CHROMIUM_PATH, SOCKET_RESPONSES } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
+import { BotService, CampaignService } from '../../services';
 import GroupMergeService from '../../services/merged-groups';
+import SchedulerService from '../../services/scheduler';
 import { DeviceService, UserService } from '../../services/user';
 import VoteResponseService from '../../services/vote-response';
 import DateUtils from '../../utils/DateUtils';
@@ -204,6 +206,10 @@ export class WhatsappProvider {
 		this.client.on('disconnected', () => {
 			this.status = STATUS.DISCONNECTED;
 
+			new BotService(this.userService.getUser()).pauseAll();
+			new CampaignService(this.userService.getUser()).pauseAll();
+			new SchedulerService(this.userService.getUser()).pauseAll();
+
 			this.deviceService?.logout();
 			this.logoutClient();
 
@@ -338,6 +344,10 @@ export class WhatsappProvider {
 		WhatsappProvider.clientsMap.delete(this.client_id);
 	}
 
+	getDeviceService() {
+		return this.deviceService;
+	}
+
 	onDestroy(func: (client_id: ClientID) => void) {
 		this.callbackHandlers.onDestroy = func;
 	}
@@ -357,7 +367,7 @@ export class WhatsappProvider {
 	static clientByUser(id: Types.ObjectId) {
 		for (const [cid, client] of WhatsappProvider.clientsMap.entries()) {
 			if (!client.isReady()) continue;
-			if (client.userService.getID().toString() === id.toString()) {
+			if (client.userService.getUserId().toString() === id.toString()) {
 				return cid;
 			}
 		}

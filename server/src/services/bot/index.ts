@@ -421,7 +421,6 @@ export default class BotService extends UserService {
 				this.messageSchedulerService.scheduleLeadNurturingMessage(nurtured_messages, {
 					scheduled_by: MESSAGE_SCHEDULER_TYPE.BOT,
 					scheduler_id: bot.bot_id,
-					device_id: opts.device_id,
 				});
 			}
 		});
@@ -685,6 +684,10 @@ export default class BotService extends UserService {
 			isActive: bot.active,
 			group_respond: bot.group_respond,
 		};
+	}
+
+	public async pauseAll() {
+		await BotDB.updateMany({ user: this.getUserId() }, { active: false });
 	}
 
 	public async deleteBot(bot_id: Types.ObjectId) {

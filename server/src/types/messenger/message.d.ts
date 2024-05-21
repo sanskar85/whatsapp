@@ -1,10 +1,9 @@
 import { Document, Types } from 'mongoose';
 import { MESSAGE_SCHEDULER_TYPE, MESSAGE_STATUS } from '../../config/const';
-import { IDevice, IUser } from '../users';
+import { IUser } from '../users';
 
 export default interface IMessage extends Document {
 	sender: IUser;
-	device: IDevice;
 	receiver: string;
 	message: string;
 	status: MESSAGE_STATUS;

@@ -10,17 +10,16 @@ import DateUtils from '../../utils/DateUtils';
 import { randomMessageText } from '../../utils/ExpressUtils';
 import { FileUtils } from '../../utils/files';
 import { MessageService } from '../messenger';
+import { UserService } from '../user';
 
-export default class SchedulerService {
-	private user: IUser;
-
+export default class SchedulerService extends UserService {
 	public constructor(user: IUser) {
-		this.user = user;
+		super(user);
 	}
 
 	public async allScheduler() {
 		const scheduler = await SchedulerDB.find({
-			user: this.user,
+			user: this.getUserId(),
 		}).populate('attachments');
 		return scheduler.map((e) => ({
 			id: e._id as Types.ObjectId,
@@ -79,7 +78,7 @@ export default class SchedulerService {
 	}) {
 		const scheduler = new SchedulerDB({
 			...data,
-			user: this.user,
+			user: this.getUserId(),
 		});
 
 		scheduler.save();
@@ -214,6 +213,39 @@ export default class SchedulerService {
 		};
 	}
 
+	public async pauseAll() {
+		const schedulers = await SchedulerDB.find({
+			user: this.getUserId(),
+		});
+		if (schedulers.length === 0) {
+			return;
+		}
+		const ids = schedulers.map((e) => e._id);
+		await MessageDB.updateMany(
+			{
+				'scheduled_by.id': {
+					$in: ids,
+				},
+				status: MESSAGE_STATUS.PAUSED,
+			},
+			{
+				$set: {
+					status: MESSAGE_STATUS.PENDING,
+				},
+			}
+		);
+		await SchedulerDB.updateMany(
+			{
+				_id: {
+					$in: ids,
+				},
+			},
+			{
+				active: false,
+			}
+		);
+	}
+
 	public async deleteBot(id: Types.ObjectId) {
 		await SchedulerDB.deleteOne({ _id: id });
 	}
@@ -247,7 +279,7 @@ export default class SchedulerService {
 		const scheduler = await SchedulerDB.findOne({
 			_id: id,
 			active: true,
-		}).populate('attachments shared_contact_cards csv device');
+		}).populate('attachments shared_contact_cards csv');
 		const today = DateUtils.getMomentNow().format('MM-DD');
 
 		if (
@@ -303,7 +335,6 @@ export default class SchedulerService {
 				{
 					scheduled_by: MESSAGE_SCHEDULER_TYPE.SCHEDULER,
 					scheduler_id: scheduler._id,
-					device_id: scheduler.device._id,
 				}
 			);
 		}
@@ -312,7 +343,7 @@ export default class SchedulerService {
 	public static async scheduleDailyMessages() {
 		const schedulers = await SchedulerDB.find({
 			active: true,
-		}).populate('attachments shared_contact_cards csv device');
+		}).populate('attachments shared_contact_cards csv');
 		const today = DateUtils.getMomentNow().format('MM-DD');
 
 		for (const scheduler of schedulers) {
@@ -368,7 +399,6 @@ export default class SchedulerService {
 					{
 						scheduled_by: MESSAGE_SCHEDULER_TYPE.SCHEDULER,
 						scheduler_id: scheduler._id,
-						device_id: scheduler.device._id,
 					}
 				);
 			}

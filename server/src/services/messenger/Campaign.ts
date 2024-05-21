@@ -6,6 +6,7 @@ import { IMessage } from '../../types/messenger';
 import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import { randomMessageText } from '../../utils/ExpressUtils';
+import { UserService } from '../user';
 import MessageService from './Message';
 
 export type Message = {
@@ -41,16 +42,15 @@ type Batch = {
 	device_id: Types.ObjectId;
 };
 
-export default class CampaignService {
-	private user: IUser;
+export default class CampaignService extends UserService {
 	private messageService: MessageService;
 
 	public constructor(user: IUser) {
-		this.user = user;
+		super(user);
 		this.messageService = new MessageService(user);
 	}
 	async alreadyExists(name: string) {
-		const exists = await CampaignDB.exists({ user: this.user, campaign_name: name });
+		const exists = await CampaignDB.exists({ user: this.getUserId(), campaign_name: name });
 		return exists !== null;
 	}
 
@@ -59,7 +59,7 @@ export default class CampaignService {
 			...opts,
 			name: opts.campaign_name,
 			description: opts.description,
-			user: this.user,
+			user: this.getUserId(),
 		});
 		const _messages: IMessage[] = [];
 		const dateGenerator = new TimeGenerator(opts);
@@ -80,7 +80,6 @@ export default class CampaignService {
 				{
 					scheduled_by: MESSAGE_SCHEDULER_TYPE.CAMPAIGN,
 					scheduler_id: campaign._id,
-					device_id: opts.device_id,
 				}
 			);
 			_messages.push(msg);
@@ -94,7 +93,7 @@ export default class CampaignService {
 
 	async allCampaigns() {
 		const campaigns = await CampaignDB.aggregate([
-			{ $match: { user: this.user._id } },
+			{ $match: { user: this.getUserId() } },
 			{
 				$lookup: {
 					from: MessageDB.collection.name, // Name of the OtherModel collection
@@ -168,6 +167,33 @@ export default class CampaignService {
 			}
 			await MessageDB.deleteMany({ _id: campaign.messages });
 			await campaign.remove();
+		} catch (err) {}
+	}
+
+	async pauseAll() {
+		try {
+			const campaigns = await CampaignDB.find({ user: this.getUserId() });
+			if (campaigns.length === 0) {
+				return;
+			}
+			const messages = campaigns.map((campaign) => campaign.messages).flat();
+			await MessageDB.updateMany(
+				{ _id: messages, status: MESSAGE_STATUS.PENDING },
+				{
+					$set: {
+						status: MESSAGE_STATUS.PAUSED,
+					},
+				}
+			);
+
+			await CampaignDB.updateMany(
+				{ user: this.getUserId() },
+				{
+					$set: {
+						status: CAMPAIGN_STATUS.PAUSED,
+					},
+				}
+			);
 		} catch (err) {}
 	}
 

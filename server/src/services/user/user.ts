@@ -42,7 +42,7 @@ export default class UserService {
 		return new UserService(user);
 	}
 
-	getID() {
+	getUserId() {
 		return new Types.ObjectId(this.user._id);
 	}
 
@@ -73,7 +73,7 @@ export default class UserService {
 
 	async generatePasswordResetToken() {
 		const token = generateRandomText(24);
-		await StorageDB.setString(token, this.getID().toString());
+		await StorageDB.setString(token, this.getUserId().toString());
 		return token;
 	}
 

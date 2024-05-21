@@ -1,12 +1,10 @@
 import { Document } from 'mongoose';
 import IContactCard from '../contact-cards';
 import IUpload from '../uploads';
-import { IDevice, IUser } from '../users';
+import { IUser } from '../users';
 
 export default interface IScheduler extends Document {
 	user: IUser;
-	device: IDevice;
-
 	csv: IUpload;
 
 	message: string;
