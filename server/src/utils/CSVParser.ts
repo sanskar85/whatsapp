@@ -15,8 +15,10 @@ import {
 
 type UserDetails = {
 	name: string;
+	username: string;
+	profile_name: string;
 	phone: string;
-	type: 'BUSINESS' | 'PERSONAL';
+	type: 'BUSINESS' | 'PERSONAL' | 'N/A';
 	subscription_expiry: string;
 	description: string;
 	email: string;
@@ -623,6 +625,14 @@ export default class CSVParser {
 			{
 				field: 'name',
 				title: 'Name',
+			},
+			{
+				field: 'username',
+				title: 'Email',
+			},
+			{
+				field: 'WhatsApp Public Name',
+				title: 'Profile Name',
 			},
 			{
 				field: 'phone',

@@ -138,8 +138,14 @@ const UsersPage = () => {
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'5%'}>
 								sl no
 							</Th>
-							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'45%'}>
+							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'15%'}>
 								Name
+							</Th>
+							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'15%'}>
+								Email
+							</Th>
+							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'15%'}>
+								Whatsapp Public Name
 							</Th>
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'15%'} isNumeric>
 								Phone
@@ -162,11 +168,15 @@ const UsersPage = () => {
 								<Td>
 									<LineSkeleton />
 								</Td>
-
 								<Td>
 									<LineSkeleton />
 								</Td>
-
+								<Td>
+									<LineSkeleton />
+								</Td>
+								<Td>
+									<LineSkeleton />
+								</Td>
 								<Td>
 									<LineSkeleton />
 								</Td>
@@ -186,6 +196,8 @@ const UsersPage = () => {
 									<Tr key={index} color={theme === 'dark' ? 'white' : 'black'}>
 										<Td>{index + 1}.</Td>
 										<Td>{user.name}</Td>
+										<Td>{user.username}</Td>
+										<Td>{user.profile_name}</Td>
 										<Td isNumeric>{user.phone}</Td>
 										<Td>{user.type}</Td>
 										<Td>{user.subscription_expiry}</Td>

@@ -14,8 +14,10 @@ export type UsersState = {
 type User = {
 	id: string;
 	name: string;
+	username: string;
+	profile_name: string;
 	phone: string;
 	type: 'BUSINESS' | 'PERSONAL';
 	subscription_expiry: string;
-	isOnline:boolean;
+	isOnline: boolean;
 };

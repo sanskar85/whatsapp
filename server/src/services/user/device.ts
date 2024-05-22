@@ -1,7 +1,9 @@
 import moment from 'moment';
 import { Types } from 'mongoose';
+import Logger from 'n23-logger';
 import WAWebJS from 'whatsapp-web.js';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
+import { WhatsappProvider } from '../../provider/whatsapp_provider';
 import { DeviceDB } from '../../repository/user';
 import { IDevice, IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
@@ -153,10 +155,9 @@ export default class DeviceService extends UserService {
 			address: string;
 		};
 	}) {
-		const device = await DeviceDB.findOne({ phone });
+		const device = await DeviceDB.findOne({ user: user.getUserId(), phone });
 
 		if (device) {
-			device.user = user.getUserId();
 			device.userType = isBusiness ? 'BUSINESS' : 'PERSONAL';
 			device.name = name ?? '';
 			device.business_details = business_details ?? {
@@ -206,6 +207,37 @@ export default class DeviceService extends UserService {
 			}
 		} else {
 			device.subscription_expiry = DateUtils.getMomentNow().add(months, 'months').toDate();
+		}
+	}
+
+	static async logoutUser(user_id: Types.ObjectId) {
+		try {
+			const devices = await DeviceDB.find({
+				user: user_id,
+			});
+
+			await DeviceDB.updateOne(
+				{
+					user: user_id,
+				},
+				{
+					client_id: '',
+				}
+			);
+
+			devices.forEach((device) => {
+				if (!device.client_id) return;
+				const whatsapp = WhatsappProvider.clientByClientID(device.client_id);
+				if (!whatsapp) return;
+				whatsapp.logoutClient().catch((error: unknown) => {
+					Logger.error('Error logging out client', error as Error, {
+						user_id,
+						client_id: device.client_id,
+					});
+				});
+			});
+		} catch (e) {
+			//ignored
 		}
 	}
 

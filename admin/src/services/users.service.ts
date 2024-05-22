@@ -37,6 +37,8 @@ export default class UsersService {
 				return response.data.users.map((user: User) => ({
 					id: (user.id as string) ?? '',
 					name: (user.name as string) ?? '',
+					username: (user.username as string) ?? '',
+					profile_name: (user.profile_name as string) ?? '',
 					phone: (user.phone as string) ?? '',
 					type: (user.type as string) ?? 'PERSONAL',
 					isOnline: (user.isOnline as boolean) ?? false,

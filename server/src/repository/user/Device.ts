@@ -49,6 +49,8 @@ const schema = new mongoose.Schema<IDevice>(
 	{ timestamps: { createdAt: true } }
 );
 
+schema.index({ user: 1, phone: 1 }, { unique: true });
+
 const DeviceDB = mongoose.model<IDevice>('Device', schema);
 
 export default DeviceDB;

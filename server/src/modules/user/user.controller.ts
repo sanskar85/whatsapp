@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
-import { DeviceService } from '../../services/user';
+import { DeviceService, UserService } from '../../services/user';
 import CSVParser from '../../utils/CSVParser';
 import DateUtils from '../../utils/DateUtils';
 import { Respond, RespondCSV } from '../../utils/ExpressUtils';
@@ -51,8 +51,8 @@ async function extendUserExpiry(req: Request, res: Response, next: NextFunction)
 }
 
 async function logoutUsers(req: Request, res: Response, next: NextFunction) {
-	const deviceService = await DeviceService.getDeviceService(req.locals.id);
-	await deviceService.logout();
+	const userService = await UserService.getService(req.locals.id);
+	await DeviceService.logoutUser(userService.getUserId());
 	return Respond({
 		res,
 		status: 200,
