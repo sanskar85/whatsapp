@@ -5,7 +5,7 @@ import { SERVER_URL } from '../config/const';
 export default class AuthService {
 	static async isAuthenticated() {
 		try {
-			await axios.get(SERVER_URL + 'auth/admin/validate', {
+			await axios.get(SERVER_URL + 'auth/validate', {
 				headers: {
 					'Cache-Control': 'no-cache',
 					Pragma: 'no-cache',
@@ -21,9 +21,10 @@ export default class AuthService {
 
 	static async login(username: string, password: string) {
 		try {
-			await APIInstance.post(`/auth/admin/login`, {
+			await APIInstance.post(`/auth/login`, {
 				username,
 				password,
+				role: 'admin',
 			});
 			return true;
 		} catch (err) {
@@ -33,7 +34,7 @@ export default class AuthService {
 
 	static async logout() {
 		try {
-			await APIInstance.post(`/auth/admin/logout`);
+			await APIInstance.post(`/auth/logout`);
 			return true;
 		} catch (err) {
 			return false;
