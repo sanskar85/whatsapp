@@ -103,7 +103,18 @@ export default class MessageService {
 		const scheduledMessages = await MessageDB.find({
 			sendAt: { $lte: DateUtils.getMomentNow().toDate() },
 			status: MESSAGE_STATUS.PENDING,
-		}).populate('attachments sender shared_contact_cards device');
+		}).populate('attachments sender shared_contact_cards');
+
+		const message_ids = scheduledMessages.map((msg) => msg._id);
+
+		await MessageDB.updateMany(
+			{ _id: { $in: message_ids } },
+			{
+				$set: {
+					status: MESSAGE_STATUS.SENDING,
+				},
+			}
+		);
 
 		const { message_1: PROMOTIONAL_MESSAGE_1, message_2: PROMOTIONAL_MESSAGE_2 } =
 			await TokenService.getPromotionalMessage();
