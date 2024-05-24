@@ -15,9 +15,11 @@ import {
 	useToast,
 } from '@chakra-ui/react';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MdGroups3 } from 'react-icons/md';
 import { TbDatabaseExport } from 'react-icons/tb';
+import { VscLayersActive } from 'react-icons/vsc';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import { NAVIGATION } from '../../../config/const';
@@ -42,6 +44,7 @@ const UsersPage = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const toast = useToast();
+	const [activeOnly, setActiveOnly] = useState(false);
 	const {
 		list,
 		uiDetails: { isFetching },
@@ -78,7 +81,11 @@ const UsersPage = () => {
 		};
 	}, [handleExportUsers]);
 
-	const filtered = useFilteredList(list, { name: 1, phone: 1 });
+	let filtered = useFilteredList(list, { name: 1, phone: 1 });
+
+	if (activeOnly) {
+		filtered = filtered.filter((user) => user.isOnline);
+	}
 
 	const handleAction = ({ id, phone, subscription_expiry, device_id }: User, action: string) => {
 		if (action === 'extend_expiry') {
@@ -139,6 +146,10 @@ const UsersPage = () => {
 		});
 	};
 
+	const handleActiveToggle = () => {
+		setActiveOnly((prev) => !prev);
+	};
+
 	return (
 		<Box>
 			<TableContainer>
@@ -169,7 +180,13 @@ const UsersPage = () => {
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'20%'}>
 								Actions
 							</Th>
-							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'20%'}></Th>
+							<Th
+								color={theme === 'dark' ? 'whitesmoke' : 'gray'}
+								width={'5%'}
+								onClick={handleActiveToggle}
+							>
+								<VscLayersActive size={'1.25rem'} />
+							</Th>
 						</Tr>
 					</Thead>
 					<Tbody>
