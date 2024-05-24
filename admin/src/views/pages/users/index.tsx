@@ -80,9 +80,19 @@ const UsersPage = () => {
 
 	const filtered = useFilteredList(list, { name: 1, phone: 1 });
 
-	const handleAction = ({ id, phone, subscription_expiry }: User, action: string) => {
+	const handleAction = ({ id, phone, subscription_expiry, device_id }: User, action: string) => {
 		if (action === 'extend_expiry') {
-			return extendSubscriptionDialogRef.current?.open(id, subscription_expiry);
+			if (!device_id) {
+				toast({
+					title: 'Error',
+					description: 'Device ID not found',
+					status: 'error',
+					duration: 3000,
+					isClosable: true,
+				});
+				return;
+			}
+			return extendSubscriptionDialogRef.current?.open(device_id, subscription_expiry);
 		}
 		if (action === 'payment_history') {
 			setNavbarSearchText(phone);

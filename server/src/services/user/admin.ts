@@ -23,11 +23,21 @@ export default class AdminService extends UserService {
 			},
 		});
 
-		const userLinkMap = devices.reduce(
+		const devicesMap = devices.reduce(
 			(acc, device) => {
-				acc[device.user.toString()] = {
-					user: users.find((user) => user._id.toString() === device.user.toString()) as IUser,
-					device,
+				acc[device.user.toString()] = device;
+				return acc;
+			},
+			{} as {
+				[key: string]: IDevice;
+			}
+		);
+
+		const userLinkMap = users.reduce(
+			(acc, user) => {
+				acc[user._id.toString()] = {
+					user,
+					device: devicesMap[user._id.toString()] ?? null,
 				};
 				return acc;
 			},
@@ -41,13 +51,16 @@ export default class AdminService extends UserService {
 
 		return Object.keys(userLinkMap).map((key) => {
 			const { user, device } = userLinkMap[key];
+
 			const isOnline = !!(device?.client_id
 				? WhatsappProvider.clientByClientID(device.client_id)?.isReady()
 				: false);
+
 			return {
 				id: user._id as string,
 				username: user.username,
 				name: user.name,
+				device_id: device?._id as string,
 				profile_name: device?.name ?? 'N/A',
 				phone: device?.phone ?? 'N/A',
 				type: (device?.userType ?? 'N/A') as 'BUSINESS' | 'PERSONAL' | 'N/A',

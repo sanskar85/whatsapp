@@ -13,6 +13,7 @@ export type UsersState = {
 
 type User = {
 	id: string;
+	device_id: string;
 	name: string;
 	username: string;
 	profile_name: string;

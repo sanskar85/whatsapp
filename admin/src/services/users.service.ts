@@ -36,6 +36,7 @@ export default class UsersService {
 			} else {
 				return response.data.users.map((user: User) => ({
 					id: (user.id as string) ?? '',
+					device_id: (user.device_id as string) ?? '',
 					name: (user.name as string) ?? '',
 					username: (user.username as string) ?? '',
 					profile_name: (user.profile_name as string) ?? '',
