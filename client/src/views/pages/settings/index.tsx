@@ -324,6 +324,15 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 										onChange={(e) => handleUserPref('message-logger', e.target.checked)}
 									/>
 								</FormControl>
+								<Flex
+									color={theme === 'dark' ? 'lightgray' : 'darkgray'}
+									alignItems={'center'}
+									hidden={!messageLoggerEnabled}
+									gap={'0.5rem'}
+								>
+									<InfoOutlineIcon />
+									Ask to admin to access the Google Sheet File.
+								</Flex>
 							</section>
 
 							<section className=' flex flex-col justify-end flex-1'>
