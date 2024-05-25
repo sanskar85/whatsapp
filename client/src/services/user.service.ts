@@ -25,15 +25,24 @@ export default class UserService {
 			};
 		}
 	}
-	static async getUserDetails() {
-		const { data } = await APIInstance.get(`/auth/details`);
+	static async getUserPreferences() {
+		const { data } = await APIInstance.get(`/users/preferences`);
 		return {
-			name: data.name as string,
-			phoneNumber: data.phoneNumber as string,
-			isSubscribed: data.isSubscribed as boolean,
-			canSendMessage: data.canSendMessage as boolean,
-			subscriptionExpiration: data.subscriptionExpiration as string,
-			userType: data.userType as 'BUSINESS' | 'PERSONAL',
+			messageLoggerEnabled: data.messageLoggerEnabled as boolean,
+		};
+	}
+
+	static async enableMessageLogging() {
+		const { data } = await APIInstance.post(`/users/enable-message-logger`);
+		return {
+			messageLoggerEnabled: data.messageLoggerEnabled as boolean,
+		};
+	}
+
+	static async disableMessageLogging() {
+		const { data } = await APIInstance.post(`/users/disable-message-logger`);
+		return {
+			messageLoggerEnabled: data.messageLoggerEnabled as boolean,
 		};
 	}
 

@@ -19,6 +19,8 @@ export const SERVER_URL = process.env.SERVER_URL ?? 'localhost:8282';
 
 export const RESEND_API_KEY = process.env.RESEND_API_KEY ?? 'resend-api-key';
 
+export const DRIVE_SHARE_LINK = process.env.DRIVE_SHARE_LINK ?? 'drive-share-link';
+
 export const JWT_COOKIE = 'jwt';
 export const CLIENT_ID_COOKIE = 'client_id';
 export const JWT_REFRESH_COOKIE = 'jwt_refresh';

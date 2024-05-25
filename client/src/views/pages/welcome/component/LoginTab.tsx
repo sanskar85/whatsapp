@@ -44,6 +44,10 @@ export default function LoginTab() {
 	};
 
 	const forgotPassword = async () => {
+		const token = await recaptchaRef.current?.executeAsync();
+		if (!token) {
+			return;
+		}
 		if (!username || !password) {
 			return setUIDetails({
 				usernameError: !username,

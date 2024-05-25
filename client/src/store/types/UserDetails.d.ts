@@ -8,6 +8,8 @@ export type UserDetailsState = {
 	subscriptionExpiration: string;
 	userType: 'BUSINESS' | 'PERSONAL';
 
+	messageLoggerEnabled: boolean;
+
 	groups: {
 		id: string;
 		name: string;

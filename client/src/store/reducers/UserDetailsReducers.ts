@@ -10,6 +10,8 @@ const initialState: UserDetailsState = {
 	userType: 'PERSONAL',
 	canSendMessage: false,
 
+	messageLoggerEnabled: false,
+
 	groups: [],
 	labels: [],
 	contactsCount: null,
@@ -62,6 +64,9 @@ const UserDetailsSlice = createSlice({
 			}
 			if (action.payload.data_loaded !== undefined) {
 				state.data_loaded = action.payload.data_loaded;
+			}
+			if (action.payload.messageLoggerEnabled !== undefined) {
+				state.messageLoggerEnabled = action.payload.messageLoggerEnabled;
 			}
 		},
 		setName: (state, action: PayloadAction<typeof initialState.name>) => {

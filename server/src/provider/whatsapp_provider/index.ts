@@ -9,10 +9,12 @@ import { BotService, CampaignService } from '../../services';
 import GroupMergeService from '../../services/merged-groups';
 import SchedulerService from '../../services/scheduler';
 import { DeviceService, UserService } from '../../services/user';
+import UserPreferencesService from '../../services/user/userPreferences';
 import VoteResponseService from '../../services/vote-response';
 import DateUtils from '../../utils/DateUtils';
 import { Delay } from '../../utils/ExpressUtils';
 import WhatsappUtils from '../../utils/WhatsappUtils';
+import { MessageLogger } from '../google/sheets';
 
 type ClientID = string;
 
@@ -51,6 +53,7 @@ export class WhatsappProvider {
 	private socket: Socket | undefined;
 	private userService: UserService;
 	private deviceService: DeviceService | undefined;
+	private userPrefService: UserPreferencesService | undefined;
 
 	private status: STATUS;
 
@@ -149,6 +152,8 @@ export class WhatsappProvider {
 						longitude: 0,
 						address: '',
 				  };
+
+			this.userPrefService = await UserPreferencesService.getService(this.userService.getUserId());
 
 			this.deviceService = await DeviceService.createDevice({
 				user: this.userService,
@@ -254,6 +259,24 @@ export class WhatsappProvider {
 					message,
 					contact,
 					deviceService: this.deviceService!,
+				});
+			}
+			if (this.userPrefService!.isMessagesLogEnabled()) {
+				const sheetId = this.userPrefService!.getMessageLogSheetId();
+				if (!sheetId) {
+					return;
+				}
+
+				const messageLogService = new MessageLogger(sheetId);
+				messageLogService.appendMessage({
+					timestamp: DateUtils.getMoment(message.timestamp).format('DD-MMM-YYYY HH:mm:ss'),
+					from: contact.id.user,
+					to: message.to.split('@')[0],
+					savedName: contact.name || '',
+					displayName: contact.pushname || '',
+					groupName: isGroup ? chat.name : '',
+					message: message.body,
+					isCaption: message.hasMedia && message.body ? 'Yes' : 'No',
 				});
 			}
 		});

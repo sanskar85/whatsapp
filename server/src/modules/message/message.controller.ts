@@ -49,7 +49,7 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {

@@ -40,7 +40,7 @@ async function groups(req: Request, res: Response, next: NextFunction) {
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
@@ -72,7 +72,7 @@ async function refreshGroup(req: Request, res: Response, next: NextFunction) {
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
@@ -106,7 +106,7 @@ async function exportGroups(req: Request, res: Response, next: NextFunction) {
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
@@ -236,7 +236,7 @@ async function createGroup(req: Request, res: Response, next: NextFunction) {
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
@@ -282,7 +282,7 @@ async function mergeGroup(req: Request, res: Response, next: NextFunction) {
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
@@ -320,7 +320,7 @@ async function updateMergedGroup(req: Request, res: Response, next: NextFunction
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
@@ -392,7 +392,7 @@ async function mergedGroups(req: Request, res: Response, next: NextFunction) {
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
@@ -430,7 +430,7 @@ async function updateGroupsPicture(req: Request, res: Response, next: NextFuncti
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
@@ -490,7 +490,7 @@ async function updateGroupsDetails(req: Request, res: Response, next: NextFuncti
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	if (!whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));

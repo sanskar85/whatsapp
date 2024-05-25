@@ -28,7 +28,7 @@ async function contacts(req: Request, res: Response, next: NextFunction) {
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
@@ -120,7 +120,7 @@ async function countContacts(req: Request, res: Response, next: NextFunction) {
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {
@@ -153,7 +153,7 @@ export async function validate(req: Request, res: Response, next: NextFunction) 
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
-		return;
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
 	if (!whatsapp.isReady()) {

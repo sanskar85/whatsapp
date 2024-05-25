@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import { DeviceService, UserService } from '../../services/user';
+import UserPreferencesService from '../../services/user/userPreferences';
 import CSVParser from '../../utils/CSVParser';
 import DateUtils from '../../utils/DateUtils';
 import { Respond, RespondCSV } from '../../utils/ExpressUtils';
@@ -60,6 +61,46 @@ async function logoutUsers(req: Request, res: Response, next: NextFunction) {
 	});
 }
 
+async function getPreferences(req: Request, res: Response, next: NextFunction) {
+	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
+
+	return Respond({
+		res,
+		status: 200,
+		data: {
+			messageLoggerEnabled: userPrefService.isMessagesLogEnabled(),
+		},
+	});
+}
+
+async function enableMessageLogger(req: Request, res: Response, next: NextFunction) {
+	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
+
+	await userPrefService.setMessagesLogEnabled(true);
+
+	return Respond({
+		res,
+		status: 200,
+		data: {
+			messageLoggerEnabled: true,
+		},
+	});
+}
+
+async function disableMessageLogger(req: Request, res: Response, next: NextFunction) {
+	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
+
+	await userPrefService.setMessagesLogEnabled(false);
+
+	return Respond({
+		res,
+		status: 200,
+		data: {
+			messageLoggerEnabled: false,
+		},
+	});
+}
+
 async function paymentRemainder(req: Request, res: Response, next: NextFunction) {
 	// const adminService = new AdminService(req.locals.admin);
 
@@ -81,11 +122,14 @@ async function paymentRemainder(req: Request, res: Response, next: NextFunction)
 	});
 }
 
-const AuthController = {
+const Controller = {
 	listUsers,
 	extendUserExpiry,
 	logoutUsers,
 	paymentRemainder,
+	enableMessageLogger,
+	disableMessageLogger,
+	getPreferences,
 };
 
-export default AuthController;
+export default Controller;

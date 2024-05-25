@@ -9,8 +9,11 @@ import {
 	DrawerHeader,
 	DrawerOverlay,
 	Flex,
+	FormControl,
+	FormLabel,
 	HStack,
 	IconButton,
+	Switch,
 	Table,
 	TableContainer,
 	Tbody,
@@ -22,12 +25,14 @@ import {
 	VStack,
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { startAuth, useAuth } from '../../../hooks/useAuth';
 import { useTheme } from '../../../hooks/useTheme';
 import AuthService from '../../../services/auth.service';
 import PaymentService from '../../../services/payment.service';
+import UserService from '../../../services/user.service';
 import { StoreNames, StoreState } from '../../../store';
+import { setUserDetails } from '../../../store/reducers/UserDetailsReducers';
 import AddDeviceDialog, { AddDeviceDialogHandle } from './components/AddDeviceDialog';
 import ChangePassword, { ChangePasswordHandle } from './components/ChangePassword';
 
@@ -53,12 +58,15 @@ type Subscription = {
 
 export default function Settings({ isOpen, onClose }: SettingsProps) {
 	const theme = useTheme();
+	const dispatch = useDispatch();
 	const addProfileRef = useRef<AddDeviceDialogHandle | null>(null);
 	const changePasswordRef = useRef<ChangePasswordHandle | null>(null);
 
 	const { isAuthenticating, qrCode, isSocketInitialized, isAuthenticated, qrGenerated } = useAuth();
 
-	const { isSubscribed, userType } = useSelector((state: StoreState) => state[StoreNames.USER]);
+	const { isSubscribed, userType, messageLoggerEnabled } = useSelector(
+		(state: StoreState) => state[StoreNames.USER]
+	);
 
 	const [phoneState, setPhoneAuthenticated] = useState<{
 		session_expires_at: string;
@@ -97,6 +105,17 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 				window.location.reload();
 			}
 		});
+	};
+
+	const handleUserPref = async (action: string, value: string | boolean) => {
+		if (action === 'message-logger') {
+			if (value) {
+				await UserService.enableMessageLogging();
+			} else {
+				await UserService.disableMessageLogging();
+			}
+			dispatch(setUserDetails({ messageLoggerEnabled: !!value }));
+		}
 	};
 
 	return (
@@ -291,6 +310,23 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 										</Table>
 									</TableContainer>
 								</VStack>
+							</section>
+
+							<section className='mt-6'>
+								<FormControl display='flex' alignItems='center'>
+									<FormLabel
+										htmlFor='message-logger'
+										mb='0'
+										color={theme === 'dark' ? 'white' : 'black'}
+									>
+										Enable Message Logging?
+									</FormLabel>
+									<Switch
+										id='message-logger'
+										isChecked={messageLoggerEnabled}
+										onChange={(e) => handleUserPref('message-logger', e.target.checked)}
+									/>
+								</FormControl>
 							</section>
 
 							<section className=' flex flex-col justify-end flex-1'>

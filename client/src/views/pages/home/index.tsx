@@ -16,6 +16,7 @@ import LabelService from '../../../services/label.service';
 import MessageService from '../../../services/message.service';
 import ShortenerService from '../../../services/shortener.service';
 import UploadsService from '../../../services/uploads.service';
+import UserService from '../../../services/user.service';
 import { StoreNames, StoreState, store } from '../../../store';
 import { setAttachments } from '../../../store/reducers/AttachmentReducers';
 import { setBots } from '../../../store/reducers/BotReducers';
@@ -70,6 +71,7 @@ export default function Home() {
 				ShortenerService.listAll(),
 				GroupService.mergedGroups(),
 				MessageService.getScheduledMessages(),
+				UserService.getUserPreferences(),
 			];
 
 			const results = await Promise.all(promises);
@@ -77,6 +79,7 @@ export default function Home() {
 			dispatch(
 				setUserDetails({
 					labels: results[4],
+					...results[9],
 					contactsCount: null,
 					data_loaded: true,
 				})
