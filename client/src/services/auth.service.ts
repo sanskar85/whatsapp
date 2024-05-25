@@ -80,7 +80,7 @@ export default class AuthService {
 
 	static async logoutWhatsapp() {
 		try {
-			await APIInstance.post(`/auth/logout-whatsapp`);
+			await APIInstance.patch(`/auth/logout-whatsapp`);
 		} catch (err) {
 			//ignore
 		}
