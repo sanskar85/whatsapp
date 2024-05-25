@@ -57,7 +57,7 @@ import {
 	setVariables,
 } from '../../../store/reducers/SchedulerReducer';
 import AddOns from '../../components/add-ons';
-import SubscriptionAlert, { SubscriptionPopup } from '../../components/subscription-alert';
+import SubscriptionAlert, { AddDevicePopup, SubscriptionPopup } from '../../components/subscription-alert';
 import { MessageInputSection, MessageSchedulerList } from './components';
 import CampaignDetailsSection from './components/campaign-details-section';
 
@@ -115,9 +115,7 @@ export default function Scheduler() {
 		},
 	} = useSelector((state: StoreState) => state[StoreNames.SCHEDULER]);
 
-	const { canSendMessage, groups, labels } = useSelector(
-		(state: StoreState) => state[StoreNames.USER]
-	);
+	const { groups, labels } = useSelector((state: StoreState) => state[StoreNames.USER]);
 	const { list: csvList } = useSelector((state: StoreState) => state[StoreNames.CSV]);
 	const csvListWithDate = csvList.filter(
 		(item) =>
@@ -363,7 +361,8 @@ export default function Scheduler() {
 					{/* ------------------------------Scheduler Section----------------------------- */}
 					<TabPanel width={'full'}>
 						<Flex direction={'column'} width={'full'}>
-							<SubscriptionPopup isVisible={!canSendMessage} />
+							<AddDevicePopup />
+							<SubscriptionPopup />
 							<HStack width={'full'} justifyContent={'space-between'}>
 								<Heading
 									color={theme === 'dark' ? 'white' : 'GrayText'}

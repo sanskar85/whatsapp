@@ -94,12 +94,7 @@ export default function Home() {
 
 			AuthService.validateClientID().then((res) => {
 				if (res) {
-					dispatch(
-						setUserDetails({
-							canSendMessage: res.canSendMessage,
-							isSubscribed: res.isSubscribed,
-						})
-					);
+					dispatch(setUserDetails(res));
 				}
 			});
 		} catch (e) {

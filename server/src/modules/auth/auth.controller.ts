@@ -55,6 +55,7 @@ async function validateClientID(req: Request, res: Response, next: NextFunction)
 				status: whatsapp.getStatus(),
 				phone_number: whatsapp.getContact().id.user,
 				name: whatsapp.getContact().pushname,
+				userType: whatsapp.getContact().isBusiness ? 'BUSINESS' : 'PERSONAL',
 				isSubscribed,
 				canSendMessage: isNew || isSubscribed,
 			},

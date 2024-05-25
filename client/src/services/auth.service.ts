@@ -27,6 +27,7 @@ export default class AuthService {
 				name: data.name,
 				isSubscribed: data.isSubscribed,
 				canSendMessage: data.canSendMessage,
+				userType: data.userType,
 			};
 		} catch (err) {
 			return null;

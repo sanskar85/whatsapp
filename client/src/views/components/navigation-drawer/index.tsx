@@ -1,5 +1,5 @@
 import { SettingsIcon } from '@chakra-ui/icons';
-import { Box, Flex, Icon, IconButton, Image, Text, VStack, useDisclosure } from '@chakra-ui/react';
+import { Box, Flex, Icon, IconButton, Image, Text, VStack } from '@chakra-ui/react';
 import { IconType } from 'react-icons';
 import { BiPoll } from 'react-icons/bi';
 import { FiBarChart2, FiLink2 } from 'react-icons/fi';
@@ -7,11 +7,14 @@ import { GrTasks } from 'react-icons/gr';
 import { MdGroups3, MdOutlineAttachment, MdOutlineContactPhone } from 'react-icons/md';
 import { SiProbot } from 'react-icons/si';
 import { TbCsv, TbLogout2, TbMessage2Minus } from 'react-icons/tb';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { LOGO } from '../../../assets/Images';
 import { NAVIGATION } from '../../../config/const';
 import { toggleTheme, useTheme } from '../../../hooks/useTheme';
 import UserService from '../../../services/user.service';
+import { StoreNames, StoreState } from '../../../store';
+import { setSettingsOpen } from '../../../store/reducers/UserDetailsReducers';
 import Settings from '../../pages/settings';
 
 function isActiveTab(tab: string, path: string): boolean {
@@ -22,8 +25,17 @@ function isActiveTab(tab: string, path: string): boolean {
 export default function NavigationDrawer() {
 	const theme = useTheme();
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
 
-	const { onOpen, onClose, isOpen } = useDisclosure();
+	const { settingsOpen } = useSelector((state: StoreState) => state[StoreNames.USER]);
+
+	const onOpen = () => {
+		dispatch(setSettingsOpen(true));
+	};
+
+	const onClose = () => {
+		dispatch(setSettingsOpen(false));
+	};
 
 	const handleLogout = async () => {
 		await UserService.logout();
@@ -125,7 +137,7 @@ export default function NavigationDrawer() {
 					</VStack>
 				</Flex>
 			</Flex>
-			<Settings isOpen={isOpen} onClose={onClose} />
+			<Settings isOpen={settingsOpen} onClose={onClose} />
 		</Box>
 	);
 }

@@ -25,7 +25,7 @@ import ContactService from '../../../services/contact.service';
 import GroupService from '../../../services/group.service';
 import LabelService from '../../../services/label.service';
 import { StoreNames, StoreState } from '../../../store';
-import { setContactsCount } from '../../../store/reducers/UserDetailsReducers';
+import { setContactsCount, setSettingsOpen } from '../../../store/reducers/UserDetailsReducers';
 import CheckButton from '../check-button';
 
 export type ExportsModalHandler = {
@@ -84,7 +84,7 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 		},
 	}));
 
-	const { groups, labels, isSubscribed, contactsCount, userType } = useSelector(
+	const { groups, labels, isSubscribed, isWhatsappReady, contactsCount, userType } = useSelector(
 		(state: StoreState) => state[StoreNames.USER]
 	);
 
@@ -171,6 +171,10 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 		window.open('https://whatsleads.in/pricing', '_blank');
 	};
 
+	const connectToWhatsapp = async () => {
+		dispatch(setSettingsOpen(true));
+	};
+
 	const all_contacts_count = contactsCount
 		? (SAVED ? contactsCount['SAVED'] : 0) + (UNSAVED ? contactsCount['UNSAVED'] : 0)
 		: 0;
@@ -198,7 +202,11 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 										onChange={handleChange}
 									/>
 									<Text fontSize='xs' className='text-black '>
-										{!contactsCount ? 'Loading...' : all_contacts_count + ' Contacts'}
+										{!isWhatsappReady
+											? ''
+											: !contactsCount
+											? 'Loading...'
+											: all_contacts_count + ' Contacts'}
 									</Text>
 								</Flex>
 								<Flex alignItems='flex-end' justifyContent={'space-between'}>
@@ -209,7 +217,9 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 										onChange={handleChange}
 									/>
 									<Text fontSize='xs' className='text-black '>
-										{!contactsCount
+										{!isWhatsappReady
+											? ''
+											: !contactsCount
 											? 'Loading...'
 											: `${contactsCount[EXPORTS_TYPE.SAVED_CHAT]} Contacts`}
 									</Text>
@@ -374,7 +384,20 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 					</Flex>
 				</ModalBody>
 				<ModalFooter>
-					{!isSubscribed ? (
+					{!isWhatsappReady ? (
+						<Button
+							bgColor={'yellow.400'}
+							_hover={{
+								bgColor: 'yellow.500',
+							}}
+							width={'100%'}
+							onClick={connectToWhatsapp}
+						>
+							<Flex gap={'0.5rem'}>
+								<Text color={'white'}>Connect to Whatsapp</Text>
+							</Flex>
+						</Button>
+					) : !isSubscribed ? (
 						<Button
 							bgColor={'yellow.400'}
 							_hover={{

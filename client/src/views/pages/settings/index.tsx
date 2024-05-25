@@ -64,22 +64,19 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 
 	const { isAuthenticating, qrCode, isSocketInitialized, isAuthenticated, qrGenerated } = useAuth();
 
-	const { isSubscribed, userType, messageLoggerEnabled } = useSelector(
-		(state: StoreState) => state[StoreNames.USER]
-	);
-
-	const [phoneState, setPhoneAuthenticated] = useState<{
-		session_expires_at: string;
-		isWhatsappReady: boolean;
-		status: string;
-		phone_number: string;
-		name: string;
-	} | null>(null);
+	const {
+		isSubscribed,
+		userType,
+		messageLoggerEnabled,
+		session_expires_at,
+		isWhatsappReady,
+		phone_number,
+		name,
+	} = useSelector((state: StoreState) => state[StoreNames.USER]);
 
 	const [PAYMENT_RECORDS, setPaymentRecords] = useState<(Payment | Subscription)[]>([]);
 
 	useEffect(() => {
-		AuthService.validateClientID().then(setPhoneAuthenticated);
 		PaymentService.paymentRecords().then(setPaymentRecords);
 	}, []);
 
@@ -91,7 +88,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 	const handleDeviceAdded = () => {
 		AuthService.validateClientID().then((res) => {
 			if (res) {
-				setPhoneAuthenticated(res);
+				dispatch(setUserDetails(res));
 				window.location.reload();
 			}
 		});
@@ -101,7 +98,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 		await AuthService.logoutWhatsapp();
 		AuthService.validateClientID().then((res) => {
 			if (res) {
-				setPhoneAuthenticated(res);
+				dispatch(setUserDetails(res));
 				window.location.reload();
 			}
 		});
@@ -135,7 +132,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 						height={'calc(100% - 10px)'}
 					>
 						<Flex direction={'column'} marginTop={'1rem'} height={'full'}>
-							{phoneState ? (
+							{isWhatsappReady ? (
 								<section>
 									<Flex justifyContent={'space-between'} alignItems={'center'}>
 										<Text
@@ -143,7 +140,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 											fontSize={'md'}
 											fontWeight={'medium'}
 										>
-											{phoneState.name}
+											{name}
 										</Text>
 										<Text className='text-gray-800 dark:text-gray-300'>{userType}</Text>
 									</Flex>
@@ -156,7 +153,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 										rounded={'md'}
 									>
 										<Text className='text-[#158FFF] dark:text-[#158FFF]'>
-											{phoneState.phone_number ? `+${phoneState.phone_number}` : ''}
+											{phone_number ? `+${phone_number}` : ''}
 										</Text>
 									</Box>
 								</section>
@@ -166,7 +163,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 								</Button>
 							)}
 
-							{phoneState ? (
+							{isWhatsappReady ? (
 								<section>
 									<Flex marginTop={'1rem'} rounded={'md'} alignItems={'center'}>
 										<Text color='gray.400' fontWeight={'semibold'}>
@@ -195,7 +192,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 										<Flex marginTop={'0.5rem'} gap={'0.5rem'} alignItems={'center'}>
 											<InfoOutlineIcon color={'#BB2525'} width={4} />
 											<Text color={'#BB2525'}>
-												Expires On {phoneState.session_expires_at?.split('T')?.[0]}
+												Expires On {session_expires_at?.split('T')?.[0]}
 											</Text>
 										</Flex>
 									) : null}
@@ -342,7 +339,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 									width={'full'}
 									colorScheme='red'
 									marginTop={'1rem'}
-									hidden={phoneState === null}
+									hidden={!isWhatsappReady}
 									onClick={logoutWhatsapp}
 								>
 									Logout Whatsapp

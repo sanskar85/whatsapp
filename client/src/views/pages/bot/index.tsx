@@ -51,7 +51,7 @@ import {
 } from '../../../store/reducers/BotReducers';
 import AddOns from '../../components/add-ons';
 import Info from '../../components/info';
-import { SubscriptionPopup } from '../../components/subscription-alert';
+import { AddDevicePopup, SubscriptionPopup } from '../../components/subscription-alert';
 import AllResponders from './components/AllResponders';
 import { NumberInput, SelectElement, TextAreaElement, TextInput } from './components/Inputs';
 
@@ -76,8 +76,6 @@ export default function Bot() {
 		forward,
 	} = details;
 	const { isAddingBot, isEditingBot } = ui;
-
-	const { canSendMessage } = useSelector((state: StoreState) => state[StoreNames.USER]);
 
 	useEffect(() => {
 		pushToNavbar({
@@ -237,7 +235,8 @@ export default function Bot() {
 			px={'2rem'}
 		>
 			<Flex direction={'column'} gap={'0.5rem'}>
-				<SubscriptionPopup isVisible={!canSendMessage} />
+				<AddDevicePopup />
+				<SubscriptionPopup />
 				<Flex direction={'column'} borderRadius={'20px'} mb={'1rem'} gap={2}>
 					{/*--------------------------------- TRIGGER SECTION--------------------------- */}
 					<FormControl

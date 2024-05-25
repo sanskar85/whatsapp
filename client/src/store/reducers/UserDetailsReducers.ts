@@ -4,11 +4,14 @@ import { UserDetailsState } from '../types/UserDetails';
 
 const initialState: UserDetailsState = {
 	name: '',
-	phoneNumber: '',
 	isSubscribed: false,
 	subscriptionExpiration: '',
 	userType: 'PERSONAL',
 	canSendMessage: false,
+
+	session_expires_at: '',
+	isWhatsappReady: false,
+	phone_number: '',
 
 	messageLoggerEnabled: false,
 
@@ -16,6 +19,7 @@ const initialState: UserDetailsState = {
 	labels: [],
 	contactsCount: null,
 	data_loaded: false,
+	settingsOpen: false,
 };
 
 const UserDetailsSlice = createSlice({
@@ -24,7 +28,6 @@ const UserDetailsSlice = createSlice({
 	reducers: {
 		reset: (state) => {
 			state.name = initialState.name;
-			state.phoneNumber = initialState.phoneNumber;
 			state.isSubscribed = initialState.isSubscribed;
 			state.canSendMessage = initialState.canSendMessage;
 			state.subscriptionExpiration = initialState.subscriptionExpiration;
@@ -36,9 +39,6 @@ const UserDetailsSlice = createSlice({
 		setUserDetails: (state, action: PayloadAction<Partial<typeof initialState>>) => {
 			if (action.payload.name) {
 				state.name = action.payload.name;
-			}
-			if (action.payload.phoneNumber) {
-				state.phoneNumber = action.payload.phoneNumber;
 			}
 			if (action.payload.isSubscribed) {
 				state.isSubscribed = action.payload.isSubscribed;
@@ -68,25 +68,18 @@ const UserDetailsSlice = createSlice({
 			if (action.payload.messageLoggerEnabled !== undefined) {
 				state.messageLoggerEnabled = action.payload.messageLoggerEnabled;
 			}
+
+			if (action.payload.session_expires_at) {
+				state.subscriptionExpiration = action.payload.session_expires_at;
+			}
+			if (action.payload.isWhatsappReady) {
+				state.isWhatsappReady = action.payload.isWhatsappReady;
+			}
+			if (action.payload.phone_number) {
+				state.phone_number = action.payload.phone_number;
+			}
 		},
-		setName: (state, action: PayloadAction<typeof initialState.name>) => {
-			state.name = action.payload;
-		},
-		setPhoneNumber: (state, action: PayloadAction<typeof initialState.phoneNumber>) => {
-			state.phoneNumber = action.payload;
-		},
-		setIsSubscribed: (state, action: PayloadAction<typeof initialState.isSubscribed>) => {
-			state.isSubscribed = action.payload;
-		},
-		setSubscriptionExpiration: (
-			state,
-			action: PayloadAction<typeof initialState.subscriptionExpiration>
-		) => {
-			state.subscriptionExpiration = action.payload;
-		},
-		setUserType: (state, action: PayloadAction<typeof initialState.userType>) => {
-			state.userType = action.payload;
-		},
+
 		setGroups: (state, action: PayloadAction<typeof initialState.groups>) => {
 			state.groups = action.payload;
 		},
@@ -99,21 +92,13 @@ const UserDetailsSlice = createSlice({
 		setDataLoaded: (state, action: PayloadAction<typeof initialState.data_loaded>) => {
 			state.data_loaded = action.payload;
 		},
+		setSettingsOpen: (state, action: PayloadAction<boolean>) => {
+			state.settingsOpen = action.payload;
+		},
 	},
 });
 
-export const {
-	reset,
-	setUserDetails,
-	setName,
-	setPhoneNumber,
-	setIsSubscribed,
-	setSubscriptionExpiration,
-	setUserType,
-	setGroups,
-	setLabels,
-	setContactsCount,
-	setDataLoaded,
-} = UserDetailsSlice.actions;
+export const { reset, setUserDetails, setGroups, setLabels, setContactsCount, setDataLoaded,setSettingsOpen } =
+	UserDetailsSlice.actions;
 
 export default UserDetailsSlice.reducer;

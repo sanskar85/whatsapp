@@ -2,11 +2,14 @@ import { EXPORTS_TYPE } from '../../config/const';
 
 export type UserDetailsState = {
 	name: string;
-	phoneNumber: string;
 	isSubscribed: boolean;
 	canSendMessage: boolean;
 	subscriptionExpiration: string;
 	userType: 'BUSINESS' | 'PERSONAL';
+
+	session_expires_at: string;
+	isWhatsappReady: boolean;
+	phone_number: string;
 
 	messageLoggerEnabled: boolean;
 
@@ -27,6 +30,7 @@ export type UserDetailsState = {
 	} | null;
 
 	data_loaded: boolean;
+	settingsOpen: boolean;
 };
 
 export type PaymentRecords = {
