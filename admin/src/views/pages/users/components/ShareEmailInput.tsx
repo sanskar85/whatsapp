@@ -77,11 +77,7 @@ const ShareEmailInputDialog = forwardRef<ShareEmailInputDialogHandle>((_, ref) =
 				<AlertDialogCloseButton />
 				<AlertDialogBody>
 					<InputGroup variant={'outline'} marginTop={'1rem'}>
-						<Input
-							placeholder='Refund Amount'
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
-						/>
+						<Input value={email} onChange={(e) => setEmail(e.target.value)} />
 						<InputRightAddon pointerEvents='none'>@gmail.com</InputRightAddon>
 					</InputGroup>
 				</AlertDialogBody>
