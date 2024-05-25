@@ -4,6 +4,7 @@ import { DeviceDB, UserDB } from '../../repository/user';
 import { IDevice, IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import UserService from './user';
+import UserPreferencesService from './userPreferences';
 
 export default class AdminService extends UserService {
 	public constructor(user: IUser) {
@@ -49,8 +50,10 @@ export default class AdminService extends UserService {
 			}
 		);
 
-		return Object.keys(userLinkMap).map((key) => {
+		const promises = Object.keys(userLinkMap).map(async (key) => {
 			const { user, device } = userLinkMap[key];
+
+			const userPrefService = await UserPreferencesService.getService(user._id);
 
 			const isOnline = !!(device?.client_id
 				? WhatsappProvider.clientByClientID(device.client_id)?.isReady()
@@ -74,7 +77,10 @@ export default class AdminService extends UserService {
 				longitude: device?.business_details.longitude ?? 0,
 				address: device?.business_details.address ?? '',
 				isOnline,
+				isGoogleSheetAvailable: userPrefService.getMessageLogSheetId() !== '',
 			};
 		});
+
+		return Promise.all(promises);
 	}
 }

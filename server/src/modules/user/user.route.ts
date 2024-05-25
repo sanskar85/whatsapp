@@ -2,7 +2,7 @@ import express from 'express';
 import { VerifyAdmin, VerifyUser } from '../../middleware';
 import { IDValidator } from '../../middleware/idValidator';
 import UserController from './user.controller';
-import { PaymentRemainderValidator } from './user.validator';
+import { EmailValidator, PaymentRemainderValidator } from './user.validator';
 
 const router = express.Router();
 
@@ -21,6 +21,11 @@ router.route('/:id/logout').all(VerifyAdmin, IDValidator).post(UserController.lo
 router.route('/enable-message-logger').all(VerifyUser).post(UserController.enableMessageLogger);
 router.route('/disable-message-logger').all(VerifyUser).post(UserController.disableMessageLogger);
 router.route('/preferences').all(VerifyUser).get(UserController.getPreferences);
+
+router
+	.route('/:id/share-log-file')
+	.all(VerifyAdmin, IDValidator, EmailValidator)
+	.post(UserController.shareLogFile);
 
 router.route('/').all(VerifyAdmin).get(UserController.listUsers);
 

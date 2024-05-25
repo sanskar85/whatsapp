@@ -35,6 +35,7 @@ import { NavbarSearchElement } from '../../components/navbar';
 import ExtendSubscriptionDialog, {
 	ExtendSubscriptionDialogHandle,
 } from './components/ExtendSubscriptionDialog';
+import ShareEmailInputDialog, { ShareEmailInputDialogHandle } from './components/ShareEmailInput';
 import PaymentReminderAlert, {
 	PaymentReminderDialogHandle,
 } from './components/paymentReminderAlert';
@@ -53,6 +54,7 @@ const UsersPage = () => {
 	const extendSubscriptionDialogRef = useRef<ExtendSubscriptionDialogHandle>(null);
 	const confirmationAlertDialogRef = useRef<ConfirmationDialogHandle>(null);
 	const paymentReminderDialogRef = useRef<PaymentReminderDialogHandle>(null);
+	const emailInputDialogRef = useRef<ShareEmailInputDialogHandle>(null);
 
 	const handleExportUsers = useCallback(() => {
 		UsersService.getUsers({ csv: true });
@@ -107,6 +109,9 @@ const UsersPage = () => {
 				pathname: NAVIGATION.PAYMENT_HISTORY,
 				search: createSearchParams({ phone }).toString(),
 			});
+		}
+		if (action === 'share-google-sheet') {
+			return emailInputDialogRef.current?.open(id);
 		}
 		if (action === 'logout') {
 			return confirmationAlertDialogRef.current?.open(id);
@@ -254,6 +259,14 @@ const UsersPage = () => {
 												>
 													Payment Reminder
 												</option>
+												{user.isGoogleSheetAvailable ? (
+													<option
+														className='bg-white text-black dark:bg-gray-700 dark:text-white'
+														value='share-google-sheet'
+													>
+														Share Google Sheet
+													</option>
+												) : null}
 												<option
 													className='bg-white text-black dark:bg-gray-700 dark:text-white'
 													value='logout'
@@ -285,6 +298,7 @@ const UsersPage = () => {
 				type='Logout User'
 			/>
 			<PaymentReminderAlert ref={paymentReminderDialogRef} onConfirm={handleSendReminder} />
+			<ShareEmailInputDialog ref={emailInputDialogRef} />
 		</Box>
 	);
 };

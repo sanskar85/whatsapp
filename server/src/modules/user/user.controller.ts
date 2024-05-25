@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
+import { shareToDrive } from '../../provider/google/sheets/SheetAuth';
 import { DeviceService, UserService } from '../../services/user';
 import UserPreferencesService from '../../services/user/userPreferences';
 import CSVParser from '../../utils/CSVParser';
@@ -101,6 +102,23 @@ async function disableMessageLogger(req: Request, res: Response, next: NextFunct
 	});
 }
 
+async function shareLogFile(req: Request, res: Response, next: NextFunction) {
+	const userPrefService = await UserPreferencesService.getService(req.locals.id);
+
+	const sheetID = userPrefService.getMessageLogSheetId();
+
+	if (!sheetID) {
+		return next(new APIError(API_ERRORS.COMMON_ERRORS.NOT_FOUND));
+	}
+
+	shareToDrive(sheetID, req.locals.data);
+
+	return Respond({
+		res,
+		status: 200,
+	});
+}
+
 async function paymentRemainder(req: Request, res: Response, next: NextFunction) {
 	// const adminService = new AdminService(req.locals.admin);
 
@@ -129,6 +147,7 @@ const Controller = {
 	paymentRemainder,
 	enableMessageLogger,
 	disableMessageLogger,
+	shareLogFile,
 	getPreferences,
 };
 

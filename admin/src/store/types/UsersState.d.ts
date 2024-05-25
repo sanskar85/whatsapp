@@ -21,4 +21,5 @@ type User = {
 	type: 'BUSINESS' | 'PERSONAL';
 	subscription_expiry: string;
 	isOnline: boolean;
+	isGoogleSheetAvailable: boolean;
 };

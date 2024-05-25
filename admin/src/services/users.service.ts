@@ -43,11 +43,23 @@ export default class UsersService {
 					phone: (user.phone as string) ?? '',
 					type: (user.type as string) ?? 'PERSONAL',
 					isOnline: (user.isOnline as boolean) ?? false,
+					isGoogleSheetAvailable: (user.isGoogleSheetAvailable as boolean) ?? false,
 					subscription_expiry: (user.subscription_expiry as string) ?? '',
 				}));
 			}
 		} catch (err) {
 			return [];
+		}
+	}
+
+	static async shareMessageLogs(user_id: string, email: string) {
+		try {
+			await APIInstance.post(`/users/${user_id}/share-log-file`, {
+				email,
+			});
+			return true;
+		} catch (err) {
+			return false;
 		}
 	}
 
