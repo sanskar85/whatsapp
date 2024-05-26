@@ -265,7 +265,10 @@ export default class GroupMergeService {
 			from: contact.id._serialized,
 			group_name: chat.name,
 		};
-		const admin = chat.participants.find((chatObj) => chatObj.id._serialized === message.from);
+		const admin = chat.participants.find(
+			(chatObj) => chatObj.id._serialized === contact.id._serialized
+		);
+
 		if (admin && (admin.isAdmin || admin.isSuperAdmin)) {
 			return;
 		}
