@@ -119,6 +119,7 @@ async function countContacts(req: Request, res: Response, next: NextFunction) {
 	const { client_id } = req.locals;
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+
 	if (!whatsapp) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}

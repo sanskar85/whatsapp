@@ -6,7 +6,10 @@ import { LoginValidator } from './auth.validator';
 const router = express.Router();
 
 router.route('/validate').all(VerifyUser).get(AuthController.validateLogin);
-router.route('/validate-client-id').all(VerifyUser).get(AuthController.validateClientID);
+router
+	.route('/validate-client-id')
+	.all(VerifyUser, VerifyClientID)
+	.get(AuthController.validateClientID);
 
 router.route('/login').all(LoginValidator).post(AuthController.login);
 router.route('/register').all(LoginValidator).post(AuthController.register);

@@ -1,12 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { saveRefreshTokens } from '../../config/cache';
-import {
-	CLIENT_ID_COOKIE,
-	IS_PRODUCTION,
-	JWT_COOKIE,
-	JWT_REFRESH_COOKIE,
-	SERVER_URL,
-} from '../../config/const';
+import { IS_PRODUCTION, JWT_COOKIE, JWT_REFRESH_COOKIE, SERVER_URL } from '../../config/const';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import { WhatsappProvider } from '../../provider/whatsapp_provider';
 import StorageDB from '../../repository/storage';
@@ -25,7 +19,7 @@ const JWT_EXPIRE_TIME = 3 * 60 * 1000;
 const REFRESH_EXPIRE_TIME = 30 * 24 * 60 * 60 * 1000;
 
 async function validateClientID(req: Request, res: Response, next: NextFunction) {
-	const client_id = req.cookies[CLIENT_ID_COOKIE];
+	const client_id = req.locals.client_id;
 	if (!client_id) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
@@ -72,12 +66,6 @@ async function initiateWhatsapp(req: Request, res: Response, next: NextFunction)
 	whatsapp.initialize();
 
 	try {
-		res.cookie(CLIENT_ID_COOKIE, client_id, {
-			sameSite: 'strict',
-			expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
-			httpOnly: IS_PRODUCTION,
-			secure: IS_PRODUCTION,
-		});
 		return Respond({
 			res,
 			status: 200,
@@ -97,7 +85,6 @@ async function logoutWhatsapp(req: Request, res: Response, next: NextFunction) {
 	if (whatsapp) {
 		whatsapp.logoutClient();
 	}
-	res.clearCookie(CLIENT_ID_COOKIE);
 	return Respond({
 		res,
 		status: 200,
@@ -145,12 +132,6 @@ async function login(req: Request, res: Response, next: NextFunction) {
 		if (client_id) {
 			const whatsapp = WhatsappProvider.clientByClientID(client_id);
 			if (whatsapp?.isReady()) {
-				res.cookie(CLIENT_ID_COOKIE, client_id, {
-					sameSite: 'strict',
-					expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
-					httpOnly: IS_PRODUCTION,
-					secure: IS_PRODUCTION,
-				});
 			}
 		}
 
@@ -186,20 +167,6 @@ async function register(req: Request, res: Response, next: NextFunction) {
 			httpOnly: IS_PRODUCTION,
 			secure: IS_PRODUCTION,
 		});
-
-		const client_id = WhatsappProvider.clientByUser(userService.getUserId());
-
-		if (client_id) {
-			const whatsapp = WhatsappProvider.clientByClientID(client_id);
-			if (whatsapp?.isReady()) {
-				res.cookie(CLIENT_ID_COOKIE, client_id, {
-					sameSite: 'strict',
-					expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
-					httpOnly: IS_PRODUCTION,
-					secure: IS_PRODUCTION,
-				});
-			}
-		}
 
 		return Respond({
 			res,
@@ -280,7 +247,6 @@ async function logout(req: Request, res: Response) {
 	const refreshTokens = req.cookies[JWT_REFRESH_COOKIE] as string;
 	res.clearCookie(JWT_COOKIE);
 	res.clearCookie(JWT_REFRESH_COOKIE);
-	res.clearCookie(CLIENT_ID_COOKIE);
 	await UserService.logout(refreshTokens);
 	return Respond({
 		res,
