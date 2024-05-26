@@ -269,7 +269,7 @@ export class WhatsappProvider {
 
 				const messageLogService = new MessageLogger(sheetId);
 				messageLogService.appendMessage({
-					timestamp: DateUtils.getMoment(message.timestamp).format('DD-MMM-YYYY HH:mm:ss'),
+					timestamp: DateUtils.getUnixMoment(message.timestamp).format('DD-MMM-YYYY HH:mm:ss'),
 					from: contact.id.user,
 					to: message.to.split('@')[0],
 					savedName: contact.name || '',

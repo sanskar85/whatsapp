@@ -39,6 +39,10 @@ const getMoment = (date: string | Date | number, format: string | null = null) =
 	return moment(date, format);
 };
 
+const getUnixMoment = (date: number) => {
+	return moment.unix(date);
+};
+
 const isValid = (date: string | Date, format: string | null = null) => {
 	if (typeof date !== 'string' || format === null) {
 		return moment(date).isValid();
@@ -112,4 +116,5 @@ export default {
 	getLocalTime,
 	isTimeBetween,
 	getBetween,
+	getUnixMoment,
 };
