@@ -410,17 +410,6 @@ export default class WhatsappUtils {
 	}
 
 	static async resumeSessions() {
-		const { valid, user } = await DeviceService.isValidDevice(
-			'f2e5d624-6a2d-4a05-84b3-92f49d05e770'
-		);
-		if (valid) {
-			WhatsappProvider.getInstance(
-				new UserService(user),
-				'f2e5d624-6a2d-4a05-84b3-92f49d05e770'
-			).initialize();
-		} else {
-			console.log('error');
-		}
 		if (!IS_PRODUCTION) return;
 		const path = __basedir + '/.wwebjs_auth';
 		if (!fs.existsSync(path)) {
