@@ -61,7 +61,7 @@ export default function Bot() {
 	const toast = useToast();
 	const messageRef = useRef(0);
 
-	const { details, trigger_gap, response_delay, ui, all_bots } = useSelector(
+	const { details, trigger_gap, response_delay, ui } = useSelector(
 		(state: StoreState) => state[StoreNames.CHATBOT]
 	);
 	const {
@@ -107,23 +107,9 @@ export default function Bot() {
 
 		let notHasError = true;
 
-		const haveSameTrigger = all_bots.some((bot) => {
-			if (bot.trigger !== trigger) {
-				return false;
-			}
-			return bot.bot_id !== details.bot_id;
-		});
-
-		if (haveSameTrigger) {
-			errorPayload.type = 'triggerError';
-			errorPayload.error = 'Trigger already exists';
-			dispatch(setError(errorPayload));
-			notHasError = false;
-		} else {
-			errorPayload.type = 'triggerError';
-			errorPayload.error = '';
-			dispatch(setError(errorPayload));
-		}
+		errorPayload.type = 'triggerError';
+		errorPayload.error = '';
+		dispatch(setError(errorPayload));
 
 		if (
 			!message &&
