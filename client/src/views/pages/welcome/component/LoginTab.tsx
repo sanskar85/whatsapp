@@ -48,7 +48,7 @@ export default function LoginTab() {
 		if (!token) {
 			return;
 		}
-		if (!username || !password) {
+		if (!username) {
 			return setUIDetails({
 				usernameError: !username,
 				passwordError: false,
