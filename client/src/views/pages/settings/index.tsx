@@ -96,12 +96,9 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 
 	const logoutWhatsapp = async () => {
 		await AuthService.logoutWhatsapp();
-		AuthService.validateClientID().then((res) => {
-			if (res) {
-				dispatch(setUserDetails(res));
-				window.location.reload();
-			}
-		});
+		setTimeout(() => {
+			window.location.reload();
+		}, 1000);
 	};
 
 	const handleUserPref = async (action: string, value: string | boolean) => {
