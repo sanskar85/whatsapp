@@ -203,23 +203,27 @@ export default class MessageService {
 			});
 
 			if (msg.shared_contact_cards && msg.shared_contact_cards.length > 0) {
-				whatsapp
-					.getClient()
-					.sendMessage(msg.receiver, PROMOTIONAL_MESSAGE_2)
-					.catch((err) => {
-						msg.status = MESSAGE_STATUS.FAILED;
-						msg.save();
-						Logger.error('Error sending message:', err);
-					});
+				if (PROMOTIONAL_MESSAGE_2) {
+					whatsapp
+						.getClient()
+						.sendMessage(msg.receiver, PROMOTIONAL_MESSAGE_2)
+						.catch((err) => {
+							msg.status = MESSAGE_STATUS.FAILED;
+							msg.save();
+							Logger.error('Error sending message:', err);
+						});
+				}
 			} else if (!isSubscribed && isNew) {
-				whatsapp
-					.getClient()
-					.sendMessage(msg.receiver, PROMOTIONAL_MESSAGE_1)
-					.catch((err) => {
-						msg.status = MESSAGE_STATUS.FAILED;
-						msg.save();
-						Logger.error('Error sending message:', err);
-					});
+				if (PROMOTIONAL_MESSAGE_1) {
+					whatsapp
+						.getClient()
+						.sendMessage(msg.receiver, PROMOTIONAL_MESSAGE_1)
+						.catch((err) => {
+							msg.status = MESSAGE_STATUS.FAILED;
+							msg.save();
+							Logger.error('Error sending message:', err);
+						});
+				}
 			}
 		});
 	}

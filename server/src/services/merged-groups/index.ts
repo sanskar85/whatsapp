@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { Types } from 'mongoose';
+import Logger from 'n23-logger';
 import WAWebJS, { MessageMedia, Poll } from 'whatsapp-web.js';
 import { ATTACHMENTS_PATH } from '../../config/const';
 import { GroupPrivateReplyDB, GroupReplyDB } from '../../repository/group-reply';
@@ -395,17 +396,29 @@ export default class GroupMergeService {
 					_reply_text += randomMessageText();
 				}
 				if (_reply_text.length > 0) {
-					whatsapp.sendMessage(to, _reply_text, {
-						quotedMessageId: message.id._serialized,
-					});
+					whatsapp
+						.sendMessage(to, _reply_text, {
+							quotedMessageId: message.id._serialized,
+						})
+						.catch(() => {
+							whatsapp.sendMessage(to, _reply_text).catch((err) => {
+								Logger.error('Error sending message:', err);
+							});
+						});
 				}
 				shared_contact_cards?.forEach(async (id) => {
 					const contact_service = new ContactCardService(user);
 					const contact = await contact_service.getContact(id as unknown as Types.ObjectId);
 					if (!contact) return;
-					whatsapp.sendMessage(to, contact.vCardString, {
-						quotedMessageId: message.id._serialized,
-					});
+					whatsapp
+						.sendMessage(to, contact.vCardString, {
+							quotedMessageId: message.id._serialized,
+						})
+						.catch(() => {
+							whatsapp.sendMessage(to, contact.vCardString).catch((err) => {
+								Logger.error('Error sending message:', err);
+							});
+						});
 				});
 
 				attachments?.forEach(async (id) => {
@@ -423,31 +436,61 @@ export default class GroupMergeService {
 					if (name) {
 						media.filename = name + path.substring(path.lastIndexOf('.'));
 					}
-					whatsapp.sendMessage(to, media, {
-						caption: caption,
-						quotedMessageId: message.id._serialized,
-					});
+					whatsapp
+						.sendMessage(to, media, {
+							caption: caption,
+							quotedMessageId: message.id._serialized,
+						})
+						.catch(() => {
+							whatsapp
+								.sendMessage(to, media, {
+									caption: caption,
+								})
+								.catch((err) => {
+									Logger.error('Error sending message:', err);
+								});
+						});
 				});
 
 				polls?.forEach(async (poll) => {
 					const { title, options, isMultiSelect } = poll;
-					whatsapp.sendMessage(
-						to,
-						new Poll(title, options, { allowMultipleAnswers: isMultiSelect }),
-						{
+					whatsapp
+						.sendMessage(to, new Poll(title, options, { allowMultipleAnswers: isMultiSelect }), {
 							quotedMessageId: message.id._serialized,
-						}
-					);
+						})
+						.catch(() => {
+							whatsapp
+								.sendMessage(to, new Poll(title, options, { allowMultipleAnswers: isMultiSelect }))
+								.catch((err) => {
+									Logger.error('Error sending message:', err);
+								});
+						});
 				});
 
 				if (shared_contact_cards && shared_contact_cards.length > 0) {
-					whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_2, {
-						quotedMessageId: message.id._serialized,
-					});
+					if (PROMOTIONAL_MESSAGE_2) {
+						whatsapp
+							.sendMessage(to, PROMOTIONAL_MESSAGE_2, {
+								quotedMessageId: message.id._serialized,
+							})
+							.catch(() => {
+								whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_2).catch((err) => {
+									Logger.error('Error sending message:', err);
+								});
+							});
+					}
 				} else if (!isSubscribed && isNew) {
-					whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_1, {
-						quotedMessageId: message.id._serialized,
-					});
+					if (PROMOTIONAL_MESSAGE_1) {
+						whatsapp
+							.sendMessage(to, PROMOTIONAL_MESSAGE_1, {
+								quotedMessageId: message.id._serialized,
+							})
+							.catch(() => {
+								whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_1).catch((err) => {
+									Logger.error('Error sending message:', err);
+								});
+							});
+					}
 				}
 			} catch (err) {}
 		}
