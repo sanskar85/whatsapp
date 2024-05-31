@@ -44,7 +44,7 @@ router
 	.all(MergeGroupValidator)
 	.post(GroupsController.mergeGroup);
 
-router.route('/refresh').post(VerifyClientID, GroupsController.refreshGroup);
+router.route('/refresh').post(VerifyUser, VerifyClientID, GroupsController.refreshGroup);
 
 router
 	.route('/')

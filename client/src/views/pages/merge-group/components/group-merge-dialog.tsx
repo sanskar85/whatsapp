@@ -1,4 +1,4 @@
-import { SearchIcon } from '@chakra-ui/icons';
+import { AddIcon, DeleteIcon, SearchIcon } from '@chakra-ui/icons';
 import {
 	Box,
 	Button,
@@ -23,7 +23,6 @@ import {
 	Tbody,
 	Td,
 	Text,
-	Textarea,
 	Th,
 	Thead,
 	Tr,
@@ -38,10 +37,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import GroupService from '../../../../services/group.service';
 import { StoreNames, StoreState } from '../../../../store';
 import {
+	addGroupReplySaved,
+	addGroupReplyUnsaved,
 	addMergedGroup,
 	addMultipleSelectedGroup,
+	addPrivateReplySaved,
+	addPrivateReplyUnsaved,
 	addSelectedGroup,
 	clearEditMergeGroup,
+	removeGroupReplySaved,
+	removeGroupReplyUnsaved,
+	removePrivateReplySaved,
+	removePrivateReplyUnsaved,
 	removeSelectedGroup,
 	setGroupReplySavedAttachments,
 	setGroupReplySavedPolls,
@@ -65,6 +72,7 @@ import {
 	setRestrictedNumbers,
 	toggleRandomString,
 	toggleReplyBusinessOnly,
+	toggleSendToAdmin,
 	updateMergeGroupsList,
 } from '../../../../store/reducers/MergeGroupReducer';
 import { setGroups } from '../../../../store/reducers/UserDetailsReducers';
@@ -207,6 +215,14 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 									>
 										Append Random Text
 									</Checkbox>
+									<Checkbox
+										colorScheme='green'
+										size='sm'
+										isChecked={editSelectedGroup.canSendAdmin}
+										onChange={() => dispatch(toggleSendToAdmin())}
+									>
+										Send to admin
+									</Checkbox>
 								</VStack>
 							</Flex>
 						</Box>
@@ -240,156 +256,258 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 							</Flex>
 						</Box>
 
-						<Flex gap={'1rem'}>
-							<VStack flexGrow={1} alignItems={'stretch'}>
-								<FormControl>
-									<FormLabel>Saved In-Chat Reply</FormLabel>
-									<Textarea
-										width={'full'}
-										minHeight={'130px'}
-										size={'sm'}
-										rounded={'md'}
-										marginTop={'-0.5rem'}
-										placeholder={'eg. Hello there!'}
-										border={'none'}
-										className='text-black !bg-[#ECECEC] '
-										_placeholder={{
-											opacity: 0.4,
-											color: 'inherit',
-										}}
-										_focus={{ border: 'none', outline: 'none' }}
-										value={editSelectedGroup.group_reply_saved.text ?? ''}
-										onChange={(e) => dispatch(setGroupReplySavedText(e.target.value))}
+						<Box width={'full'}>
+							<VStack width={'full'} alignItems={'stretch'}>
+								<Flex justifyContent={'space-between'}>
+									Saved In-Chat Reply{' '}
+									<IconButton
+										icon={<AddIcon />}
+										aria-label='add-icon'
+										onClick={() => dispatch(addGroupReplySaved())}
 									/>
-								</FormControl>
-								<Box>
-									<AddOns
-										attachments={editSelectedGroup.group_reply_saved.attachments}
-										shared_contact_cards={editSelectedGroup.group_reply_saved.shared_contact_cards}
-										polls={editSelectedGroup.group_reply_saved.polls}
-										onAttachmentsSelected={(ids) => dispatch(setGroupReplySavedAttachments(ids))}
-										onContactsSelected={(ids) =>
-											dispatch(setGroupReplySavedSharedContactCards(ids))
-										}
-										onPollsSelected={(ids) => dispatch(setGroupReplySavedPolls(ids))}
-									/>
-								</Box>
-							</VStack>
+								</Flex>
+								{editSelectedGroup.group_reply_saved.map((group, index) => (
+									<VStack key={index} alignItems={'stretch'} gap={'1rem'}>
+										<Flex justifyContent={'space-between'}>
+											<Text fontWeight={'semibold'} mb={'-1.0rem'}>
+												Message {index + 1}
+											</Text>
+											<IconButton
+												icon={<DeleteIcon />}
+												aria-label='minus-icon'
+												size={'sm'}
+												colorScheme='orange'
+												onClick={() => dispatch(removeGroupReplySaved(index))}
+											/>
+										</Flex>
+										<FormControl>
+											<FormLabel>Text</FormLabel>
+											<Input
+												width={'full'}
+												size={'sm'}
+												rounded={'md'}
+												placeholder={'eg. Hello there!'}
+												border={'none'}
+												className='text-black !bg-[#ECECEC] '
+												_placeholder={{
+													opacity: 0.4,
+													color: 'inherit',
+												}}
+												_focus={{ border: 'none', outline: 'none' }}
+												value={group.text ?? ''}
+												onChange={(e) =>
+													dispatch(setGroupReplySavedText({ index, text: e.target.value }))
+												}
+											/>
+										</FormControl>
+										<Box>
+											<AddOns
+												attachments={group.attachments}
+												shared_contact_cards={group.shared_contact_cards}
+												polls={group.polls}
+												onAttachmentsSelected={(ids) =>
+													dispatch(setGroupReplySavedAttachments({ text: ids, index }))
+												}
+												onContactsSelected={(ids) =>
+													dispatch(setGroupReplySavedSharedContactCards({ text: ids, index }))
+												}
+												onPollsSelected={(ids) =>
+													dispatch(setGroupReplySavedPolls({ polls: ids, index }))
+												}
+											/>
+										</Box>
+									</VStack>
+								))}
 
-							<VStack flexGrow={1} alignItems={'stretch'}>
-								<FormControl>
-									<FormLabel>Unsaved In-Chat Reply</FormLabel>
-									<Textarea
-										width={'full'}
-										minHeight={'130px'}
-										marginTop={'-0.5rem'}
-										size={'sm'}
-										rounded={'md'}
-										placeholder={'eg. Hello there!'}
-										border={'none'}
-										className='text-black !bg-[#ECECEC] '
-										_placeholder={{
-											opacity: 0.4,
-											color: 'inherit',
-										}}
-										_focus={{ border: 'none', outline: 'none' }}
-										value={editSelectedGroup.group_reply_unsaved.text ?? ''}
-										onChange={(e) => dispatch(setGroupReplyUnsavedText(e.target.value))}
+								<Flex justifyContent={'space-between'}>
+									Unsaved In-Chat Reply{' '}
+									<IconButton
+										icon={<AddIcon />}
+										aria-label='add-icon'
+										onClick={() => dispatch(addGroupReplyUnsaved())}
 									/>
-								</FormControl>
-								<Box>
-									<AddOns
-										attachments={editSelectedGroup.group_reply_unsaved.attachments}
-										shared_contact_cards={
-											editSelectedGroup.group_reply_unsaved.shared_contact_cards
-										}
-										polls={editSelectedGroup.group_reply_unsaved.polls}
-										onAttachmentsSelected={(ids) => dispatch(setGroupReplyUnsavedAttachments(ids))}
-										onContactsSelected={(ids) =>
-											dispatch(setGroupReplyUnsavedSharedContactCards(ids))
-										}
-										onPollsSelected={(ids) => dispatch(setGroupReplyUnsavedPolls(ids))}
-									/>
-								</Box>
-							</VStack>
-						</Flex>
-						<Flex gap={'1rem'}>
-							<VStack flexGrow={1} alignItems={'stretch'}>
-								<FormControl>
-									<FormLabel>Saved Private Reply</FormLabel>
-									<Textarea
-										width={'full'}
-										minHeight={'130px'}
-										size={'sm'}
-										marginTop={'-0.5rem'}
-										rounded={'md'}
-										placeholder={'eg. Hello there!'}
-										border={'none'}
-										className='text-black !bg-[#ECECEC] '
-										_placeholder={{
-											opacity: 0.4,
-											color: 'inherit',
-										}}
-										_focus={{ border: 'none', outline: 'none' }}
-										value={editSelectedGroup.private_reply_saved.text ?? ''}
-										onChange={(e) => dispatch(setPrivateReplySavedText(e.target.value))}
-									/>
-								</FormControl>
-								<Box>
-									<AddOns
-										attachments={editSelectedGroup.private_reply_saved.attachments}
-										shared_contact_cards={
-											editSelectedGroup.private_reply_saved.shared_contact_cards
-										}
-										polls={editSelectedGroup.private_reply_saved.polls}
-										onAttachmentsSelected={(ids) => dispatch(setPrivateReplySavedAttachments(ids))}
-										onContactsSelected={(ids) =>
-											dispatch(setPrivateReplySavedSharedContactCards(ids))
-										}
-										onPollsSelected={(ids) => dispatch(setPrivateReplySavedPolls(ids))}
-									/>
-								</Box>
-							</VStack>
+								</Flex>
 
-							<VStack flexGrow={1} alignItems={'stretch'}>
-								<FormControl>
-									<FormLabel>Unsaved Private Reply</FormLabel>
-									<Textarea
-										width={'full'}
-										minHeight={'130px'}
-										size={'sm'}
-										marginTop={'-0.5rem'}
-										rounded={'md'}
-										placeholder={'eg. Hello there!'}
-										border={'none'}
-										className='text-black !bg-[#ECECEC] '
-										_placeholder={{
-											opacity: 0.4,
-											color: 'inherit',
-										}}
-										_focus={{ border: 'none', outline: 'none' }}
-										value={editSelectedGroup.private_reply_unsaved.text ?? ''}
-										onChange={(e) => dispatch(setPrivateReplyUnsavedText(e.target.value))}
+								{editSelectedGroup.group_reply_unsaved.map((group, index) => (
+									<VStack key={index} alignItems={'stretch'} gap={'1rem'}>
+										<Flex justifyContent={'space-between'}>
+											<Text fontWeight={'semibold'} mb={'-1.0rem'}>
+												Message {index + 1}
+											</Text>
+											<IconButton
+												icon={<DeleteIcon />}
+												aria-label='minus-icon'
+												size={'sm'}
+												colorScheme='orange'
+												onClick={() => dispatch(removeGroupReplyUnsaved(index))}
+											/>
+										</Flex>
+										<FormControl>
+											<FormLabel>Text</FormLabel>
+											<Input
+												width={'full'}
+												size={'sm'}
+												rounded={'md'}
+												placeholder={'eg. Hello there!'}
+												border={'none'}
+												className='text-black !bg-[#ECECEC] '
+												_placeholder={{
+													opacity: 0.4,
+													color: 'inherit',
+												}}
+												_focus={{ border: 'none', outline: 'none' }}
+												value={group.text ?? ''}
+												onChange={(e) =>
+													dispatch(setGroupReplyUnsavedText({ index, text: e.target.value }))
+												}
+											/>
+										</FormControl>
+										<Box>
+											<AddOns
+												attachments={group.attachments}
+												shared_contact_cards={group.shared_contact_cards}
+												polls={group.polls}
+												onAttachmentsSelected={(ids) =>
+													dispatch(setGroupReplyUnsavedAttachments({ text: ids, index }))
+												}
+												onContactsSelected={(ids) =>
+													dispatch(setGroupReplyUnsavedSharedContactCards({ text: ids, index }))
+												}
+												onPollsSelected={(ids) =>
+													dispatch(setGroupReplyUnsavedPolls({ polls: ids, index }))
+												}
+											/>
+										</Box>
+									</VStack>
+								))}
+
+								<Flex justifyContent={'space-between'}>
+									Saved Private Reply{' '}
+									<IconButton
+										icon={<AddIcon />}
+										aria-label='add-icon'
+										onClick={() => dispatch(addPrivateReplySaved())}
 									/>
-								</FormControl>
-								<Box>
-									<AddOns
-										attachments={editSelectedGroup.private_reply_unsaved.attachments}
-										shared_contact_cards={
-											editSelectedGroup.private_reply_unsaved.shared_contact_cards
-										}
-										polls={editSelectedGroup.private_reply_unsaved.polls}
-										onAttachmentsSelected={(ids) =>
-											dispatch(setPrivateReplyUnsavedAttachments(ids))
-										}
-										onContactsSelected={(ids) =>
-											dispatch(setPrivateReplyUnsavedSharedContactCards(ids))
-										}
-										onPollsSelected={(ids) => dispatch(setPrivateReplyUnsavedPolls(ids))}
+								</Flex>
+
+								{editSelectedGroup.private_reply_saved.map((group, index) => (
+									<VStack key={index} alignItems={'stretch'} gap={'1rem'}>
+										<Flex justifyContent={'space-between'}>
+											<Text fontWeight={'semibold'} mb={'-1.0rem'}>
+												Message {index + 1}
+											</Text>
+											<IconButton
+												icon={<DeleteIcon />}
+												aria-label='minus-icon'
+												size={'sm'}
+												colorScheme='orange'
+												onClick={() => dispatch(removePrivateReplySaved(index))}
+											/>
+										</Flex>
+										<FormControl>
+											<FormLabel>Text</FormLabel>
+											<Input
+												width={'full'}
+												size={'sm'}
+												rounded={'md'}
+												placeholder={'eg. Hello there!'}
+												border={'none'}
+												className='text-black !bg-[#ECECEC] '
+												_placeholder={{
+													opacity: 0.4,
+													color: 'inherit',
+												}}
+												_focus={{ border: 'none', outline: 'none' }}
+												value={group.text ?? ''}
+												onChange={(e) =>
+													dispatch(setPrivateReplySavedText({ index, text: e.target.value }))
+												}
+											/>
+										</FormControl>
+										<Box>
+											<AddOns
+												attachments={group.attachments}
+												shared_contact_cards={group.shared_contact_cards}
+												polls={group.polls}
+												onAttachmentsSelected={(ids) =>
+													dispatch(setPrivateReplySavedAttachments({ text: ids, index }))
+												}
+												onContactsSelected={(ids) =>
+													dispatch(setPrivateReplySavedSharedContactCards({ text: ids, index }))
+												}
+												onPollsSelected={(ids) =>
+													dispatch(setPrivateReplySavedPolls({ polls: ids, index }))
+												}
+											/>
+										</Box>
+									</VStack>
+								))}
+
+								<Flex justifyContent={'space-between'}>
+									Unsaved Private Reply{' '}
+									<IconButton
+										icon={<AddIcon />}
+										aria-label='add-icon'
+										onClick={() => dispatch(addPrivateReplyUnsaved())}
 									/>
-								</Box>
+								</Flex>
+
+								{editSelectedGroup.private_reply_unsaved.map((group, index) => (
+									<VStack key={index} alignItems={'stretch'} gap={'1rem'}>
+										<Flex justifyContent={'space-between'}>
+											<Text fontWeight={'semibold'} mb={'-1.0rem'}>
+												Message {index + 1}
+											</Text>
+											<IconButton
+												icon={<DeleteIcon />}
+												aria-label='minus-icon'
+												size={'sm'}
+												colorScheme='orange'
+												onClick={() => dispatch(removePrivateReplyUnsaved(index))}
+											/>
+										</Flex>
+
+										<FormControl>
+											<FormLabel>Text</FormLabel>
+											<Input
+												width={'full'}
+												size={'sm'}
+												rounded={'md'}
+												placeholder={'eg. Hello there!'}
+												border={'none'}
+												className='text-black !bg-[#ECECEC] '
+												_placeholder={{
+													opacity: 0.4,
+													color: 'inherit',
+												}}
+												_focus={{ border: 'none', outline: 'none' }}
+												value={group.text ?? ''}
+												onChange={(e) =>
+													dispatch(setPrivateReplyUnsavedText({ index, text: e.target.value }))
+												}
+											/>
+										</FormControl>
+										<Box>
+											<AddOns
+												attachments={group.attachments}
+												shared_contact_cards={group.shared_contact_cards}
+												polls={group.polls}
+												onAttachmentsSelected={(ids) =>
+													dispatch(setPrivateReplyUnsavedAttachments({ text: ids, index }))
+												}
+												onContactsSelected={(ids) =>
+													dispatch(setPrivateReplyUnsavedSharedContactCards({ text: ids, index }))
+												}
+												onPollsSelected={(ids) =>
+													dispatch(setPrivateReplyUnsavedPolls({ polls: ids, index }))
+												}
+											/>
+										</Box>
+									</VStack>
+								))}
 							</VStack>
-						</Flex>
+						</Box>
+
 						<TableContainer>
 							<Table>
 								<Thead>

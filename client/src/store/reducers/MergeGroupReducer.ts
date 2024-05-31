@@ -9,36 +9,17 @@ const initialState: MergeGroupState = {
 		id: '',
 		name: '',
 		groups: [],
-		group_reply_saved: {
-			text: '',
-			shared_contact_cards: [],
-			attachments: [],
-			polls: [],
-		},
-		group_reply_unsaved: {
-			text: '',
-			shared_contact_cards: [],
-			attachments: [],
-			polls: [],
-		},
-		private_reply_saved: {
-			text: '',
-			shared_contact_cards: [],
-			attachments: [],
-			polls: [],
-		},
-		private_reply_unsaved: {
-			text: '',
-			shared_contact_cards: [],
-			attachments: [],
-			polls: [],
-		},
+		group_reply_saved: [],
+		group_reply_unsaved: [],
+		private_reply_saved: [],
+		private_reply_unsaved: [],
 		restricted_numbers: [],
 		min_delay: 2,
 		max_delay: 7,
 		random_string: false,
 		reply_business_only: false,
 		active: true,
+		canSendAdmin: false,
 	},
 	uiDetails: {
 		isSaving: false,
@@ -109,6 +90,7 @@ const MergeGroupSlice = createSlice({
 				state.editSelectedGroup.max_delay = group.max_delay;
 				state.editSelectedGroup.reply_business_only = group.reply_business_only;
 				state.editSelectedGroup.random_string = group.random_string;
+				state.editSelectedGroup.canSendAdmin = group.canSendAdmin;
 			}
 		},
 		setActive: (
@@ -136,65 +118,173 @@ const MergeGroupSlice = createSlice({
 		setGroups: (state, action: PayloadAction<string>) => {
 			state.editSelectedGroup.groups.push(action.payload);
 		},
-		setGroupReplySavedText: (state, action: PayloadAction<string>) => {
-			state.editSelectedGroup.group_reply_saved.text = action.payload;
+		addGroupReplySaved: (state) => {
+			state.editSelectedGroup.group_reply_saved.push({
+				text: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			});
 		},
-		setGroupReplyUnsavedText: (state, action: PayloadAction<string>) => {
-			state.editSelectedGroup.group_reply_unsaved.text = action.payload;
+		addGroupReplyUnsaved: (state) => {
+			state.editSelectedGroup.group_reply_unsaved.push({
+				text: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			});
 		},
-		setPrivateReplySavedText: (state, action: PayloadAction<string>) => {
-			state.editSelectedGroup.private_reply_saved.text = action.payload;
+		addPrivateReplySaved: (state) => {
+			state.editSelectedGroup.private_reply_saved.push({
+				text: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			});
 		},
-		setPrivateReplyUnsavedText: (state, action: PayloadAction<string>) => {
-			state.editSelectedGroup.private_reply_unsaved.text = action.payload;
+		addPrivateReplyUnsaved: (state) => {
+			state.editSelectedGroup.private_reply_unsaved.push({
+				text: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			});
 		},
-		setGroupReplySavedSharedContactCards: (state, action: PayloadAction<string[]>) => {
-			state.editSelectedGroup.group_reply_saved.shared_contact_cards = action.payload;
+		removeGroupReplySaved: (state, action: PayloadAction<number>) => {
+			state.editSelectedGroup.group_reply_saved.splice(action.payload, 1);
 		},
-		setGroupReplyUnsavedSharedContactCards: (state, action: PayloadAction<string[]>) => {
-			state.editSelectedGroup.group_reply_unsaved.shared_contact_cards = action.payload;
+		removeGroupReplyUnsaved: (state, action: PayloadAction<number>) => {
+			state.editSelectedGroup.group_reply_unsaved.splice(action.payload, 1);
 		},
-		setPrivateReplySavedSharedContactCards: (state, action: PayloadAction<string[]>) => {
-			state.editSelectedGroup.private_reply_saved.shared_contact_cards = action.payload;
+		removePrivateReplySaved: (state, action: PayloadAction<number>) => {
+			state.editSelectedGroup.private_reply_saved.splice(action.payload, 1);
 		},
-		setPrivateReplyUnsavedSharedContactCards: (state, action: PayloadAction<string[]>) => {
-			state.editSelectedGroup.private_reply_unsaved.shared_contact_cards = action.payload;
+		removePrivateReplyUnsaved: (state, action: PayloadAction<number>) => {
+			state.editSelectedGroup.private_reply_unsaved.splice(action.payload, 1);
 		},
-		setGroupReplySavedAttachments: (state, action: PayloadAction<string[]>) => {
-			state.editSelectedGroup.group_reply_saved.attachments = action.payload;
+		setGroupReplySavedText: (state, action: PayloadAction<{ index: number; text: string }>) => {
+			state.editSelectedGroup.group_reply_saved[action.payload.index].text = action.payload.text;
 		},
-		setGroupReplyUnsavedAttachments: (state, action: PayloadAction<string[]>) => {
-			state.editSelectedGroup.group_reply_unsaved.attachments = action.payload;
+		setGroupReplyUnsavedText: (state, action: PayloadAction<{ index: number; text: string }>) => {
+			state.editSelectedGroup.group_reply_unsaved[action.payload.index].text = action.payload.text;
 		},
-		setPrivateReplySavedAttachments: (state, action: PayloadAction<string[]>) => {
-			state.editSelectedGroup.private_reply_saved.attachments = action.payload;
+		setPrivateReplySavedText: (state, action: PayloadAction<{ index: number; text: string }>) => {
+			state.editSelectedGroup.private_reply_saved[action.payload.index].text = action.payload.text;
 		},
-		setPrivateReplyUnsavedAttachments: (state, action: PayloadAction<string[]>) => {
-			state.editSelectedGroup.private_reply_unsaved.attachments = action.payload;
+		setPrivateReplyUnsavedText: (state, action: PayloadAction<{ index: number; text: string }>) => {
+			state.editSelectedGroup.private_reply_unsaved[action.payload.index].text =
+				action.payload.text;
+		},
+		setGroupReplySavedSharedContactCards: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.group_reply_saved[action.payload.index].shared_contact_cards =
+				action.payload.text;
+		},
+		setGroupReplyUnsavedSharedContactCards: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.group_reply_unsaved[action.payload.index].shared_contact_cards =
+				action.payload.text;
+		},
+		setPrivateReplySavedSharedContactCards: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.private_reply_saved[action.payload.index].shared_contact_cards =
+				action.payload.text;
+		},
+		setPrivateReplyUnsavedSharedContactCards: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.private_reply_unsaved[action.payload.index].shared_contact_cards =
+				action.payload.text;
+		},
+		setGroupReplySavedAttachments: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.group_reply_saved[action.payload.index].attachments =
+				action.payload.text;
+		},
+		setGroupReplyUnsavedAttachments: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.group_reply_unsaved[action.payload.index].attachments =
+				action.payload.text;
+		},
+		setPrivateReplySavedAttachments: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.private_reply_saved[action.payload.index].attachments =
+				action.payload.text;
+		},
+		setPrivateReplyUnsavedAttachments: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.private_reply_unsaved[action.payload.index].attachments =
+				action.payload.text;
 		},
 		setGroupReplySavedPolls: (
 			state,
-			action: PayloadAction<typeof initialState.editSelectedGroup.group_reply_saved.polls>
+			action: PayloadAction<{
+				index: number;
+				polls: {
+					title: string;
+					options: string[];
+					isMultiSelect: boolean;
+				}[];
+			}>
 		) => {
-			state.editSelectedGroup.group_reply_saved.polls = action.payload;
+			state.editSelectedGroup.group_reply_saved[action.payload.index].polls = action.payload.polls;
 		},
 		setGroupReplyUnsavedPolls: (
 			state,
-			action: PayloadAction<typeof initialState.editSelectedGroup.group_reply_unsaved.polls>
+			action: PayloadAction<{
+				index: number;
+				polls: {
+					title: string;
+					options: string[];
+					isMultiSelect: boolean;
+				}[];
+			}>
 		) => {
-			state.editSelectedGroup.group_reply_unsaved.polls = action.payload;
+			state.editSelectedGroup.group_reply_unsaved[action.payload.index].polls =
+				action.payload.polls;
 		},
 		setPrivateReplySavedPolls: (
 			state,
-			action: PayloadAction<typeof initialState.editSelectedGroup.private_reply_saved.polls>
+			action: PayloadAction<{
+				index: number;
+				polls: {
+					title: string;
+					options: string[];
+					isMultiSelect: boolean;
+				}[];
+			}>
 		) => {
-			state.editSelectedGroup.private_reply_saved.polls = action.payload;
+			state.editSelectedGroup.private_reply_saved[action.payload.index].polls =
+				action.payload.polls;
 		},
 		setPrivateReplyUnsavedPolls: (
 			state,
-			action: PayloadAction<typeof initialState.editSelectedGroup.private_reply_unsaved.polls>
+			action: PayloadAction<{
+				index: number;
+				polls: {
+					title: string;
+					options: string[];
+					isMultiSelect: boolean;
+				}[];
+			}>
 		) => {
-			state.editSelectedGroup.private_reply_unsaved.polls = action.payload;
+			state.editSelectedGroup.private_reply_unsaved[action.payload.index].polls =
+				action.payload.polls;
 		},
 		clearEditMergeGroup: (state) => {
 			state.editSelectedGroup = initialState.editSelectedGroup;
@@ -235,6 +325,9 @@ const MergeGroupSlice = createSlice({
 		toggleRandomString: (state) => {
 			state.editSelectedGroup.random_string = !state.editSelectedGroup.random_string;
 		},
+		toggleSendToAdmin: (state) => {
+			state.editSelectedGroup.canSendAdmin = !state.editSelectedGroup.canSendAdmin;
+		},
 		toggleReplyBusinessOnly: (state) => {
 			state.editSelectedGroup.reply_business_only = !state.editSelectedGroup.reply_business_only;
 		},
@@ -259,6 +352,7 @@ export const {
 	addSelectedGroup,
 	removeSelectedGroup,
 	deleteMergedGroup,
+	toggleSendToAdmin,
 	editSelectedGroup,
 	clearEditMergeGroup,
 	updateMergeGroupsList,
@@ -293,6 +387,14 @@ export const {
 	toggleReplyBusinessOnly,
 	setRestrictedNumbers,
 	setActive,
+	addGroupReplySaved,
+	addGroupReplyUnsaved,
+	addPrivateReplySaved,
+	addPrivateReplyUnsaved,
+	removeGroupReplySaved,
+	removeGroupReplyUnsaved,
+	removePrivateReplySaved,
+	removePrivateReplyUnsaved,
 } = MergeGroupSlice.actions;
 
 export default MergeGroupSlice.reducer;

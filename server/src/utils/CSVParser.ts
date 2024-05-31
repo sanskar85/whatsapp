@@ -716,6 +716,7 @@ export default class CSVParser {
 			recipient: string;
 			group_name: string;
 			reply_type: string;
+			repliedAt: string;
 		}[]
 	) {
 		const keys = [
@@ -730,6 +731,10 @@ export default class CSVParser {
 			{
 				field: 'reply_type',
 				title: 'Replied As',
+			},
+			{
+				field: 'repliedAt',
+				title: 'Replied At',
 			},
 		];
 

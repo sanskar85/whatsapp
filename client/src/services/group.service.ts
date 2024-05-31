@@ -6,36 +6,17 @@ function processMergedGroup(group: any) {
 		id: group.id as string,
 		name: group.name as string,
 		groups: group.groups as string[],
-		group_reply_saved: {
-			text: group.group_reply_saved.text ?? '',
-			shared_contact_cards: group.group_reply_saved.shared_contact_cards ?? [],
-			attachments: group.group_reply_saved.attachments ?? [],
-			polls: group.group_reply_saved.polls ?? [],
-		},
-		group_reply_unsaved: {
-			text: group.group_reply_unsaved.text ?? '',
-			shared_contact_cards: group.group_reply_unsaved.shared_contact_cards ?? [],
-			attachments: group.group_reply_unsaved.attachments ?? [],
-			polls: group.group_reply_unsaved.polls ?? [],
-		},
-		private_reply_saved: {
-			text: group.private_reply_saved.text ?? '',
-			shared_contact_cards: group.private_reply_saved.shared_contact_cards ?? [],
-			attachments: group.private_reply_saved.attachments ?? [],
-			polls: group.private_reply_saved.polls ?? [],
-		},
-		private_reply_unsaved: {
-			text: group.private_reply_unsaved.text ?? '',
-			shared_contact_cards: group.private_reply_unsaved.shared_contact_cards ?? [],
-			attachments: group.private_reply_unsaved.attachments ?? [],
-			polls: group.private_reply_unsaved.polls ?? [],
-		},
+		group_reply_saved: group.group_reply_saved ?? [],
+		group_reply_unsaved: group.group_reply_unsaved ?? [],
+		private_reply_saved: group.private_reply_saved ?? [],
+		private_reply_unsaved: group.private_reply_unsaved ?? [],
 		restricted_numbers: group.restricted_numbers,
 		min_delay: group.min_delay,
 		max_delay: group.max_delay,
 		reply_business_only: group.reply_business_only,
 		random_string: group.random_string,
 		active: group.active,
+		canSendAdmin: group.canSendAdmin,
 	};
 }
 
@@ -113,7 +94,7 @@ export default class GroupService {
 				options: string[];
 				isMultiSelect: boolean;
 			}[];
-		};
+		}[];
 		group_reply_unsaved: {
 			text: string;
 			shared_contact_cards: string[];
@@ -123,7 +104,7 @@ export default class GroupService {
 				options: string[];
 				isMultiSelect: boolean;
 			}[];
-		};
+		}[];
 		private_reply_saved: {
 			text: string;
 			shared_contact_cards: string[];
@@ -133,7 +114,7 @@ export default class GroupService {
 				options: string[];
 				isMultiSelect: boolean;
 			}[];
-		};
+		}[];
 		private_reply_unsaved: {
 			text: string;
 			shared_contact_cards: string[];
@@ -143,12 +124,13 @@ export default class GroupService {
 				options: string[];
 				isMultiSelect: boolean;
 			}[];
-		};
+		}[];
 		min_delay: number;
 		max_delay: number;
 		reply_business_only: boolean;
 		random_string: boolean;
 		restricted_numbers: string[];
+		canSendAdmin: boolean;
 	}) {
 		try {
 			const { data } = await APIInstance.post(`/whatsapp/groups/merge`, {
@@ -158,11 +140,12 @@ export default class GroupService {
 				group_reply_unsaved: details.group_reply_unsaved,
 				private_reply_saved: details.private_reply_saved,
 				private_reply_unsaved: details.private_reply_unsaved,
-				restricted_numbers: details.restricted_numbers ,
+				restricted_numbers: details.restricted_numbers,
 				min_delay: details.min_delay,
 				max_delay: details.max_delay,
 				reply_business_only: details.reply_business_only,
 				random_string: details.random_string,
+				canSendAdmin: details.canSendAdmin,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {
@@ -194,7 +177,7 @@ export default class GroupService {
 					options: string[];
 					isMultiSelect: boolean;
 				}[];
-			};
+			}[];
 			group_reply_unsaved: {
 				text: string;
 				shared_contact_cards: string[];
@@ -204,7 +187,7 @@ export default class GroupService {
 					options: string[];
 					isMultiSelect: boolean;
 				}[];
-			};
+			}[];
 			private_reply_saved: {
 				text: string;
 				shared_contact_cards: string[];
@@ -214,7 +197,7 @@ export default class GroupService {
 					options: string[];
 					isMultiSelect: boolean;
 				}[];
-			};
+			}[];
 			private_reply_unsaved: {
 				text: string;
 				shared_contact_cards: string[];
@@ -224,12 +207,13 @@ export default class GroupService {
 					options: string[];
 					isMultiSelect: boolean;
 				}[];
-			};
+			}[];
 			restricted_numbers: string[];
 			min_delay: number;
 			max_delay: number;
 			reply_business_only: boolean;
 			random_string: boolean;
+			canSendAdmin: boolean;
 		}
 	) {
 		try {
@@ -245,6 +229,7 @@ export default class GroupService {
 				max_delay: details.max_delay,
 				reply_business_only: details.reply_business_only,
 				random_string: details.random_string,
+				canSendAdmin: details.canSendAdmin,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {

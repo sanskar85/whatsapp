@@ -25,7 +25,7 @@ type MergedGroup = {
 			options: string[];
 			isMultiSelect: boolean;
 		}[];
-	};
+	}[];
 	group_reply_unsaved: {
 		text: string;
 		shared_contact_cards: string[];
@@ -35,7 +35,7 @@ type MergedGroup = {
 			options: string[];
 			isMultiSelect: boolean;
 		}[];
-	};
+	}[];
 	private_reply_saved: {
 		text: string;
 		shared_contact_cards: string[];
@@ -45,7 +45,7 @@ type MergedGroup = {
 			options: string[];
 			isMultiSelect: boolean;
 		}[];
-	};
+	}[];
 	private_reply_unsaved: {
 		text: string;
 		shared_contact_cards: string[];
@@ -55,11 +55,12 @@ type MergedGroup = {
 			options: string[];
 			isMultiSelect: boolean;
 		}[];
-	};
+	}[];
 	restricted_numbers: string[];
 	min_delay: number;
 	max_delay: number;
 	reply_business_only: boolean;
 	random_string: boolean;
 	active: boolean;
+	canSendAdmin: boolean;
 };

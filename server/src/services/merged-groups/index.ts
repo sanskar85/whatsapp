@@ -10,6 +10,7 @@ import IMergedGroup from '../../types/merged-group';
 import IPolls from '../../types/polls';
 import IUpload from '../../types/uploads';
 import { IUser } from '../../types/users';
+import DateUtils from '../../utils/DateUtils';
 import { Delay, getRandomNumber, idValidator, randomMessageText } from '../../utils/ExpressUtils';
 import { FileUtils } from '../../utils/files';
 import ContactCardService from '../contact-card';
@@ -33,6 +34,7 @@ const processGroup = (group: IMergedGroup) => {
 		reply_business_only: group.reply_business_only ?? false,
 		random_string: group.random_string ?? false,
 		active: group.active ?? true,
+		canSendAdmin: group.canSendAdmin ?? false,
 	};
 };
 
@@ -60,30 +62,31 @@ export default class GroupMergeService {
 				shared_contact_cards: Types.ObjectId[];
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
-			};
+			}[];
 			group_reply_unsaved: {
 				text: string;
 				shared_contact_cards: Types.ObjectId[];
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
-			};
+			}[];
 			private_reply_saved: {
 				text: string;
 				shared_contact_cards: Types.ObjectId[];
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
-			};
+			}[];
 			private_reply_unsaved: {
 				text: string;
 				shared_contact_cards: Types.ObjectId[];
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
-			};
+			}[];
 			restricted_numbers?: Types.ObjectId[];
 			reply_business_only: boolean;
 			random_string: boolean;
 			min_delay: number;
 			max_delay: number;
+			canSendAdmin: boolean;
 		}
 	) {
 		const group = await MergedGroupDB.create({
@@ -105,30 +108,31 @@ export default class GroupMergeService {
 				shared_contact_cards: Types.ObjectId[];
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
-			};
+			}[];
 			group_reply_unsaved: {
 				text: string;
 				shared_contact_cards: Types.ObjectId[];
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
-			};
+			}[];
 			private_reply_saved: {
 				text: string;
 				shared_contact_cards: Types.ObjectId[];
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
-			};
+			}[];
 			private_reply_unsaved: {
 				text: string;
 				shared_contact_cards: Types.ObjectId[];
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
-			};
+			}[];
 			restricted_numbers?: Types.ObjectId[];
 			reply_business_only?: boolean;
 			random_string?: boolean;
 			min_delay: number;
 			max_delay: number;
+			canSendAdmin: boolean;
 		}
 	) {
 		let merged_group = await MergedGroupDB.findById(id);
@@ -154,6 +158,7 @@ export default class GroupMergeService {
 					...(details.random_string !== undefined && { random_string: details.random_string }),
 					...(details.min_delay && { min_delay: details.min_delay }),
 					...(details.max_delay && { max_delay: details.max_delay }),
+					...(details.canSendAdmin !== undefined && { canSendAdmin: details.canSendAdmin }),
 				},
 			}
 		);
@@ -186,11 +191,13 @@ export default class GroupMergeService {
 				recipient: doc.from.split('@')[0],
 				group_name: doc.group_name,
 				reply_type: 'Private Reply',
+				repliedAt: DateUtils.getMoment(doc.createdAt).format('DD/MM/YYYY HH:mm:ss'),
 			})),
 			...group_replies.map((doc) => ({
 				recipient: doc.from.split('@')[0],
 				group_name: doc.group_name,
 				reply_type: 'In Chat Reply',
+				repliedAt: DateUtils.getMoment(doc.createdAt).format('DD/MM/YYYY HH:mm:ss'),
 			})),
 		];
 	}
@@ -270,12 +277,11 @@ export default class GroupMergeService {
 			(chatObj) => chatObj.id._serialized === contact.id._serialized
 		);
 
-		if (admin && (admin.isAdmin || admin.isSuperAdmin)) {
-			return;
-		}
-
 		docs.forEach(async (doc) => {
 			if (doc.reply_business_only && !contact.isBusiness) {
+				return;
+			}
+			if (!doc.canSendAdmin && admin && (admin.isAdmin || admin.isSuperAdmin)) {
 				return;
 			}
 			for (const restricted_numbers of doc.restricted_numbers) {
@@ -296,207 +302,222 @@ export default class GroupMergeService {
 
 		async function sendGroupReply(
 			doc: IMergedGroup,
-			reply: {
+			allReplies: {
 				text: string;
 				attachments?: IUpload[] | undefined;
 				shared_contact_cards?: IContactCard[] | undefined;
 				polls?: IPolls[] | undefined;
-			}
+			}[]
 		) {
 			if (!doc) return;
 			try {
-				const { text, attachments, shared_contact_cards, polls } = reply;
-				if (
-					text.length === 0 &&
-					attachments?.length === 0 &&
-					shared_contact_cards?.length === 0 &&
-					polls?.length === 0
-				) {
-					return;
-				}
-				await Delay(getRandomNumber(doc.min_delay, doc.max_delay));
-
 				await GroupReplyDB.create({ ...createDocData, mergedGroup: doc._id });
-				let _reply_text = text.replace(new RegExp('{{public_name}}', 'g'), contact.pushname);
-
-				if (_reply_text.length > 0 && doc.random_string) {
-					_reply_text += randomMessageText();
-				}
-				if (_reply_text.length > 0) {
-					message.reply(_reply_text);
-				}
-
-				shared_contact_cards?.forEach(async (id) => {
-					const contact_service = new ContactCardService(user);
-					const contact = await contact_service.getContact(id as unknown as Types.ObjectId);
-					if (!contact) return;
-					message.reply(contact.vCardString);
-				});
-
-				attachments?.forEach(async (id) => {
-					const attachment_service = new UploadService(user);
-					const attachment = await attachment_service.getAttachment(
-						id as unknown as Types.ObjectId
-					);
-					if (!attachment) return;
-					const { filename, caption, name } = attachment;
-					const path = __basedir + ATTACHMENTS_PATH + filename;
-					if (!fs.existsSync(path)) {
-						return null;
+			} catch (err) {
+				return;
+			}
+			for (const reply of allReplies) {
+				try {
+					const { text, attachments, shared_contact_cards, polls } = reply;
+					if (
+						text.length === 0 &&
+						attachments?.length === 0 &&
+						shared_contact_cards?.length === 0 &&
+						polls?.length === 0
+					) {
+						return;
 					}
-					const media = MessageMedia.fromFilePath(path);
-					if (name) {
-						media.filename = name + path.substring(path.lastIndexOf('.'));
-					}
-					message.reply(media, undefined, { caption: caption });
-				});
+					await Delay(getRandomNumber(doc.min_delay, doc.max_delay));
 
-				polls?.forEach(async (poll) => {
-					const { title, options, isMultiSelect } = poll;
-					message.reply(new Poll(title, options, { allowMultipleAnswers: isMultiSelect }));
-				});
+					let _reply_text = text.replace(new RegExp('{{public_name}}', 'g'), contact.pushname);
 
-				if (shared_contact_cards && shared_contact_cards.length > 0) {
-					if (PROMOTIONAL_MESSAGE_2) {
-						message.reply(PROMOTIONAL_MESSAGE_2);
+					if (_reply_text.length > 0 && doc.random_string) {
+						_reply_text += randomMessageText();
 					}
-				} else if (!isSubscribed && isNew) {
-					if (PROMOTIONAL_MESSAGE_1) {
-						message.reply(PROMOTIONAL_MESSAGE_1);
+					if (_reply_text.length > 0) {
+						message.reply(_reply_text);
 					}
-				}
-			} catch (err) {}
+
+					shared_contact_cards?.forEach(async (id) => {
+						const contact_service = new ContactCardService(user);
+						const contact = await contact_service.getContact(id as unknown as Types.ObjectId);
+						if (!contact) return;
+						message.reply(contact.vCardString);
+					});
+
+					attachments?.forEach(async (id) => {
+						const attachment_service = new UploadService(user);
+						const attachment = await attachment_service.getAttachment(
+							id as unknown as Types.ObjectId
+						);
+						if (!attachment) return;
+						const { filename, caption, name } = attachment;
+						const path = __basedir + ATTACHMENTS_PATH + filename;
+						if (!fs.existsSync(path)) {
+							return null;
+						}
+						const media = MessageMedia.fromFilePath(path);
+						if (name) {
+							media.filename = name + path.substring(path.lastIndexOf('.'));
+						}
+						message.reply(media, undefined, { caption: caption });
+					});
+
+					polls?.forEach(async (poll) => {
+						const { title, options, isMultiSelect } = poll;
+						message.reply(new Poll(title, options, { allowMultipleAnswers: isMultiSelect }));
+					});
+
+					if (shared_contact_cards && shared_contact_cards.length > 0) {
+						if (PROMOTIONAL_MESSAGE_2) {
+							message.reply(PROMOTIONAL_MESSAGE_2);
+						}
+					} else if (!isSubscribed && isNew) {
+						if (PROMOTIONAL_MESSAGE_1) {
+							message.reply(PROMOTIONAL_MESSAGE_1);
+						}
+					}
+				} catch (err) {}
+			}
 		}
 
 		async function sendPrivateReply(
 			doc: IMergedGroup,
-			reply: {
+			allReplies: {
 				text: string;
 				attachments?: IUpload[] | undefined;
 				shared_contact_cards?: IContactCard[] | undefined;
 				polls?: IPolls[] | undefined;
-			}
+			}[]
 		) {
 			if (!doc) return;
 			try {
-				const { text, attachments, shared_contact_cards, polls } = reply;
-
-				if (
-					text.length === 0 &&
-					attachments?.length === 0 &&
-					shared_contact_cards?.length === 0 &&
-					polls?.length === 0
-				) {
-					return;
-				}
-				await Delay(getRandomNumber(doc.min_delay, doc.max_delay));
-
 				await GroupPrivateReplyDB.create({ ...createDocData, mergedGroup: doc._id });
+			} catch (err) {
+				return;
+			}
 
-				let _reply_text = text.replace(new RegExp('{{public_name}}', 'g'), contact.pushname);
+			for (const reply of allReplies) {
+				try {
+					const { text, attachments, shared_contact_cards, polls } = reply;
 
-				const to = contact.id._serialized;
-				if (_reply_text.length > 0 && doc.random_string) {
-					_reply_text += randomMessageText();
-				}
-				if (_reply_text.length > 0) {
-					whatsapp
-						.sendMessage(to, _reply_text, {
-							quotedMessageId: message.id._serialized,
-						})
-						.catch(() => {
-							whatsapp.sendMessage(to, _reply_text).catch((err) => {
-								Logger.error('Error sending message:', err);
-							});
-						});
-				}
-				shared_contact_cards?.forEach(async (id) => {
-					const contact_service = new ContactCardService(user);
-					const contact = await contact_service.getContact(id as unknown as Types.ObjectId);
-					if (!contact) return;
-					whatsapp
-						.sendMessage(to, contact.vCardString, {
-							quotedMessageId: message.id._serialized,
-						})
-						.catch(() => {
-							whatsapp.sendMessage(to, contact.vCardString).catch((err) => {
-								Logger.error('Error sending message:', err);
-							});
-						});
-				});
-
-				attachments?.forEach(async (id) => {
-					const attachment_service = new UploadService(user);
-					const attachment = await attachment_service.getAttachment(
-						id as unknown as Types.ObjectId
-					);
-					if (!attachment) return;
-					const { filename, caption, name } = attachment;
-					const path = __basedir + ATTACHMENTS_PATH + filename;
-					if (!fs.existsSync(path)) {
-						return null;
+					if (
+						text.length === 0 &&
+						attachments?.length === 0 &&
+						shared_contact_cards?.length === 0 &&
+						polls?.length === 0
+					) {
+						return;
 					}
-					const media = MessageMedia.fromFilePath(path);
-					if (name) {
-						media.filename = name + path.substring(path.lastIndexOf('.'));
+					await Delay(getRandomNumber(doc.min_delay, doc.max_delay));
+
+					let _reply_text = text.replace(new RegExp('{{public_name}}', 'g'), contact.pushname);
+
+					const to = contact.id._serialized;
+					if (_reply_text.length > 0 && doc.random_string) {
+						_reply_text += randomMessageText();
 					}
-					whatsapp
-						.sendMessage(to, media, {
-							caption: caption,
-							quotedMessageId: message.id._serialized,
-						})
-						.catch(() => {
+					if (_reply_text.length > 0) {
+						whatsapp
+							.sendMessage(to, _reply_text, {
+								quotedMessageId: message.id._serialized,
+							})
+							.catch(() => {
+								whatsapp.sendMessage(to, _reply_text).catch((err) => {
+									Logger.error('Error sending message:', err);
+								});
+							});
+					}
+					shared_contact_cards?.forEach(async (id) => {
+						const contact_service = new ContactCardService(user);
+						const contact = await contact_service.getContact(id as unknown as Types.ObjectId);
+						if (!contact) return;
+						whatsapp
+							.sendMessage(to, contact.vCardString, {
+								quotedMessageId: message.id._serialized,
+							})
+							.catch(() => {
+								whatsapp.sendMessage(to, contact.vCardString).catch((err) => {
+									Logger.error('Error sending message:', err);
+								});
+							});
+					});
+
+					attachments?.forEach(async (id) => {
+						const attachment_service = new UploadService(user);
+						const attachment = await attachment_service.getAttachment(
+							id as unknown as Types.ObjectId
+						);
+						if (!attachment) return;
+						const { filename, caption, name } = attachment;
+						const path = __basedir + ATTACHMENTS_PATH + filename;
+						if (!fs.existsSync(path)) {
+							return null;
+						}
+						const media = MessageMedia.fromFilePath(path);
+						if (name) {
+							media.filename = name + path.substring(path.lastIndexOf('.'));
+						}
+						whatsapp
+							.sendMessage(to, media, {
+								caption: caption,
+								quotedMessageId: message.id._serialized,
+							})
+							.catch(() => {
+								whatsapp
+									.sendMessage(to, media, {
+										caption: caption,
+									})
+									.catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
+							});
+					});
+
+					polls?.forEach(async (poll) => {
+						const { title, options, isMultiSelect } = poll;
+						whatsapp
+							.sendMessage(to, new Poll(title, options, { allowMultipleAnswers: isMultiSelect }), {
+								quotedMessageId: message.id._serialized,
+							})
+							.catch(() => {
+								whatsapp
+									.sendMessage(
+										to,
+										new Poll(title, options, { allowMultipleAnswers: isMultiSelect })
+									)
+									.catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
+							});
+					});
+
+					if (shared_contact_cards && shared_contact_cards.length > 0) {
+						if (PROMOTIONAL_MESSAGE_2) {
 							whatsapp
-								.sendMessage(to, media, {
-									caption: caption,
+								.sendMessage(to, PROMOTIONAL_MESSAGE_2, {
+									quotedMessageId: message.id._serialized,
 								})
-								.catch((err) => {
-									Logger.error('Error sending message:', err);
+								.catch(() => {
+									whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_2).catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
 								});
-						});
-				});
-
-				polls?.forEach(async (poll) => {
-					const { title, options, isMultiSelect } = poll;
-					whatsapp
-						.sendMessage(to, new Poll(title, options, { allowMultipleAnswers: isMultiSelect }), {
-							quotedMessageId: message.id._serialized,
-						})
-						.catch(() => {
+						}
+					} else if (!isSubscribed && isNew) {
+						if (PROMOTIONAL_MESSAGE_1) {
 							whatsapp
-								.sendMessage(to, new Poll(title, options, { allowMultipleAnswers: isMultiSelect }))
-								.catch((err) => {
-									Logger.error('Error sending message:', err);
+								.sendMessage(to, PROMOTIONAL_MESSAGE_1, {
+									quotedMessageId: message.id._serialized,
+								})
+								.catch(() => {
+									whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_1).catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
 								});
-						});
-				});
-
-				if (shared_contact_cards && shared_contact_cards.length > 0) {
-					if (PROMOTIONAL_MESSAGE_2) {
-						whatsapp
-							.sendMessage(to, PROMOTIONAL_MESSAGE_2, {
-								quotedMessageId: message.id._serialized,
-							})
-							.catch(() => {
-								whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_2).catch((err) => {
-									Logger.error('Error sending message:', err);
-								});
-							});
+						}
 					}
-				} else if (!isSubscribed && isNew) {
-					if (PROMOTIONAL_MESSAGE_1) {
-						whatsapp
-							.sendMessage(to, PROMOTIONAL_MESSAGE_1, {
-								quotedMessageId: message.id._serialized,
-							})
-							.catch(() => {
-								whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_1).catch((err) => {
-									Logger.error('Error sending message:', err);
-								});
-							});
-					}
-				}
-			} catch (err) {}
+				} catch (err) {}
+			}
 		}
 	}
 }

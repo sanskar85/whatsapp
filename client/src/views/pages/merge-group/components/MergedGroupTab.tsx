@@ -27,14 +27,10 @@ import {
 	editSelectedGroup,
 	removeSelectedGroups,
 	setActive,
-	setGroupReplySavedText,
-	setGroupReplyUnsavedText,
-	setPrivateReplySavedText,
-	setPrivateReplyUnsavedText,
 } from '../../../../store/reducers/MergeGroupReducer';
+import ConfirmationAlert, { ConfirmationAlertHandle } from '../../../components/confirmation-alert';
 import DeleteAlert, { DeleteAlertHandle } from '../../../components/delete-alert';
 import GroupMerge from './group-merge-dialog';
-import ConfirmationAlert, { ConfirmationAlertHandle } from '../../../components/confirmation-alert';
 
 export default function MergedGroupTab() {
 	const deleteAlertRef = useRef<DeleteAlertHandle>(null);
@@ -133,7 +129,7 @@ export default function MergedGroupTab() {
 													aria-label='toggle'
 													icon={group.active ? <PiPause /> : <PiPlay />}
 													color={group.active ? 'blue.400' : 'green.400'}
-													onClick={() => 
+													onClick={() =>
 														confirmationRef.current?.open({
 															id: group.id,
 															type: 'Group',
@@ -149,10 +145,6 @@ export default function MergedGroupTab() {
 													colorScheme='gray'
 													onClick={() => {
 														dispatch(editSelectedGroup(group.id));
-														dispatch(setGroupReplySavedText(group.group_reply_saved.text));
-														dispatch(setGroupReplyUnsavedText(group.group_reply_unsaved.text));
-														dispatch(setPrivateReplySavedText(group.private_reply_saved.text));
-														dispatch(setPrivateReplyUnsavedText(group.private_reply_unsaved.text));
 														onOpen();
 													}}
 												/>
