@@ -16,6 +16,7 @@ import { Colors } from '../../../config/const';
 import { startAuth, useAuth } from '../../../hooks/useAuth';
 import AddDeviceDialog, { AddDeviceDialogHandle } from '../../components/AddDeviceDialog';
 import LoginTab from './component/LoginTab';
+import SignupTab from './component/SignupTab';
 
 export default function Welcome() {
 	const {
@@ -130,10 +131,14 @@ export default function Welcome() {
 				>
 					<TabList width={'200px'} margin={'auto'} bgColor={Colors.ACCENT_LIGHT} rounded={'full'}>
 						<Tab>Login</Tab>
+						<Tab>Signup</Tab>
 					</TabList>
 					<TabPanels>
 						<TabPanel>
 							<LoginTab onSignIn={onSignIn} />
+						</TabPanel>
+						<TabPanel>
+							<SignupTab />
 						</TabPanel>
 					</TabPanels>
 				</Tabs>

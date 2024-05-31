@@ -1,4 +1,6 @@
+export const LOCAL_SERVER_URL = import.meta.env.VITE_LOCAL_SERVER_URL;
 export const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+export const CAPTCHA_KEY = import.meta.env.VITE_CAPTCHA_KEY;
 
 export enum SOCKET_EVENT {
 	INITIALIZE = 'initialize',

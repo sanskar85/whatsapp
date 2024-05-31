@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { singletonHook } from 'react-singleton-hook';
 import { io } from 'socket.io-client';
-import { SERVER_URL, SOCKET_EVENT } from '../config/const';
+import { LOCAL_SERVER_URL, SOCKET_EVENT } from '../config/const';
 
 const initStatus = {
 	isAuthenticated: false,
@@ -26,7 +26,7 @@ let globalSet: React.Dispatch<
 	throw new Error('you must useAuth before setting its state');
 };
 
-const socket = io(SERVER_URL + 'auth');
+const socket = io(LOCAL_SERVER_URL + 'auth');
 
 export const useAuth = singletonHook(initStatus, () => {
 	const [auth, setAuth] = useState(initStatus);

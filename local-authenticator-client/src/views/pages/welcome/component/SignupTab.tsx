@@ -13,21 +13,18 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { CAPTCHA_KEY, Colors } from '../../../../config/const';
 import { useAuth } from '../../../../hooks/useAuth';
 import AuthService from '../../../../services/auth.service';
-import { PasswordInput } from './PasswordInput';
 
-export default function LoginTab({ onSignIn }: { onSignIn: (text: string) => void }) {
-	const { isAuthenticating } = useAuth();
+export default function SignupTab() {
 	const recaptchaRef = useRef<ReCAPTCHA>(null);
+	const { isAuthenticating } = useAuth();
 	const toast = useToast();
-
-	const [{ username, password }, setCredentials] = useState({
+	const [{ username, name }, setCredentials] = useState({
 		username: '',
-		password: '',
+		name: '',
 	});
 
-	const [{ usernameError, passwordError, loginError }, setUIDetails] = useState({
+	const [{ usernameError, loginError }, setUIDetails] = useState({
 		usernameError: false,
-		passwordError: false,
 		loginError: false,
 	});
 
@@ -38,42 +35,12 @@ export default function LoginTab({ onSignIn }: { onSignIn: (text: string) => voi
 		}));
 		setUIDetails((prev) => ({
 			...prev,
+			loginError: false,
 			[e.target.name + 'Error']: false,
 		}));
 	};
 
-	const handleLogin = async () => {
-		if (!username || !password) {
-			return setUIDetails({
-				usernameError: !username,
-				passwordError: !password,
-				loginError: false,
-			});
-		}
-		const token = await recaptchaRef.current?.executeAsync();
-		if (!token) {
-			return;
-		}
-		const valid = await AuthService.login(username, password);
-		if (valid) {
-			onSignIn(username);
-			return;
-		}
-		setUIDetails({
-			passwordError: true,
-			usernameError: true,
-			loginError: true,
-		});
-		setTimeout(() => {
-			setUIDetails({
-				passwordError: false,
-				usernameError: false,
-				loginError: false,
-			});
-		}, 2000);
-	};
-
-	const forgotPassword = async () => {
+	const handleSignup = async () => {
 		const token = await recaptchaRef.current?.executeAsync();
 		if (!token) {
 			return;
@@ -81,40 +48,67 @@ export default function LoginTab({ onSignIn }: { onSignIn: (text: string) => voi
 		if (!username) {
 			return setUIDetails({
 				usernameError: !username,
-				passwordError: false,
 				loginError: false,
 			});
 		}
-		const valid = await AuthService.forgotPassword(username);
-		if (valid) {
-			toast({
-				title: 'Password reset link sent to your email',
-				status: 'success',
-				duration: 4000,
-				isClosable: true,
-			});
-		}
-		setUIDetails({
-			passwordError: false,
-			usernameError: true,
-			loginError: false,
-		});
-		setTimeout(() => {
-			setUIDetails({
-				passwordError: false,
-				usernameError: false,
-				loginError: false,
-			});
-		}, 5000);
-	};
 
+		const success = await AuthService.register(username);
+
+		setUIDetails((prev) => ({
+			...prev,
+			usernameError: !success,
+			loginError: !success,
+		}));
+		if (!success) {
+			toast({
+				title: 'Account creation failed.',
+				description: "Email already exists or couldn't send email.",
+				status: 'error',
+				duration: 5000,
+			});
+			return;
+		}
+
+		setCredentials({
+			username: '',
+			name: '',
+		});
+
+		toast({
+			title: 'Account created.',
+			description: 'Login credentials sent to your email.',
+			status: 'success',
+			duration: 5000,
+		});
+	};
 	return (
 		<>
 			<Stack width={'full'} spacing='6'>
-				<Stack spacing='3'>
+				<Stack spacing='2'>
 					<FormControl isInvalid={usernameError}>
 						<FormLabel htmlFor='email' color={Colors.PRIMARY_DARK}>
-							Username
+							Full Name
+						</FormLabel>
+						<Input
+							type='text'
+							variant='unstyled'
+							bgColor={Colors.ACCENT_LIGHT}
+							placeholder='full name'
+							_placeholder={{
+								color: Colors.ACCENT_DARK,
+								opacity: 0.7,
+							}}
+							borderColor={Colors.ACCENT_DARK}
+							borderWidth={'1px'}
+							padding={'0.5rem'}
+							name='name'
+							value={name}
+							onChange={handleChange}
+						/>
+					</FormControl>
+					<FormControl isInvalid={usernameError}>
+						<FormLabel htmlFor='email' color={Colors.PRIMARY_DARK}>
+							Email
 						</FormLabel>
 						<Input
 							type='email'
@@ -123,7 +117,7 @@ export default function LoginTab({ onSignIn }: { onSignIn: (text: string) => voi
 							variant='unstyled'
 							bgColor={Colors.ACCENT_LIGHT}
 							onChange={handleChange}
-							placeholder='username'
+							placeholder='email'
 							_placeholder={{
 								color: usernameError ? 'red.400' : Colors.ACCENT_DARK,
 								opacity: 0.7,
@@ -131,29 +125,21 @@ export default function LoginTab({ onSignIn }: { onSignIn: (text: string) => voi
 							borderColor={usernameError ? 'red' : Colors.ACCENT_DARK}
 							borderWidth={'1px'}
 							padding={'0.5rem'}
-							marginTop={'-0.5rem'}
 						/>
 					</FormControl>
-					<PasswordInput
-						isInvalid={passwordError}
-						name='password'
-						value={password}
-						onChange={handleChange}
-						placeholder='********'
-					/>
 				</Stack>
 
-				<Stack>
+				<Stack spacing='0'>
+					<Text color={'red'} textAlign={'center'}>
+						{loginError}
+					</Text>
 					<Button
-						onClick={handleLogin}
+						onClick={handleSignup}
 						colorScheme={loginError ? 'red' : 'green'}
 						isLoading={isAuthenticating}
 					>
-						Sign in
+						Sign Up
 					</Button>
-					<Text textAlign={'center'} cursor={'pointer'} onClick={forgotPassword}>
-						forgot password?
-					</Text>
 				</Stack>
 				<Center>
 					<ReCAPTCHA ref={recaptchaRef} size='invisible' sitekey={CAPTCHA_KEY} badge='inline' />

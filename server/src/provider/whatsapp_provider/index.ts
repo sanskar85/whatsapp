@@ -213,26 +213,28 @@ export class WhatsappProvider {
 				voted_at: DateUtils.getMoment(vote.interractedAtTs).toDate(),
 			};
 
-			const chat = await this.client.getChatById(pollDetails.chat_id);
-			if (chat.isGroup) {
-				details.group_name = chat.name;
-			}
+			try {
+				const chat = await this.client.getChatById(pollDetails.chat_id);
+				if (chat.isGroup) {
+					details.group_name = chat.name;
+				}
 
-			details.voter_number = contact.number;
-			details.voter_name = (contact.name || contact.pushname) ?? '';
+				details.voter_number = contact.number;
+				details.voter_name = (contact.name || contact.pushname) ?? '';
 
-			await vote_response_service.saveVote(details);
-			details.selected_option.map((opt) => {
-				this.deviceService!.handleMessage({
-					triggered_from: chat.id._serialized,
-					body: opt,
-					contact,
-					isGroup: chat.isGroup,
-					fromPoll: true,
-					client_id: this.client_id,
-					message_id: 'VOTE UPDATE',
+				await vote_response_service.saveVote(details);
+				details.selected_option.map((opt) => {
+					this.deviceService!.handleMessage({
+						triggered_from: chat.id._serialized,
+						body: opt,
+						contact,
+						isGroup: chat.isGroup,
+						fromPoll: true,
+						client_id: this.client_id,
+						message_id: 'VOTE UPDATE',
+					});
 				});
-			});
+			} catch (err) {}
 		});
 
 		this.client.on('disconnected', async () => {

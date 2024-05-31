@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { SERVER_URL } from './const';
+import { LOCAL_SERVER_URL } from './const';
 
-const socket = io(SERVER_URL);
+const socket = io(LOCAL_SERVER_URL);
 export default socket;

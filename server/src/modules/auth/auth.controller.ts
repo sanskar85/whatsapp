@@ -174,7 +174,7 @@ async function register(req: Request, res: Response, next: NextFunction) {
 			data: {},
 		});
 	} catch (err) {
-		return next(new APIError(API_ERRORS.USER_ERRORS.USER_NOT_FOUND_ERROR));
+		return next(new APIError(API_ERRORS.COMMON_ERRORS.ALREADY_EXISTS));
 	}
 }
 
