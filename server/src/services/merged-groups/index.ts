@@ -357,9 +357,13 @@ export default class GroupMergeService {
 				});
 
 				if (shared_contact_cards && shared_contact_cards.length > 0) {
-					message.reply(PROMOTIONAL_MESSAGE_2);
+					if (PROMOTIONAL_MESSAGE_2) {
+						message.reply(PROMOTIONAL_MESSAGE_2);
+					}
 				} else if (!isSubscribed && isNew) {
-					message.reply(PROMOTIONAL_MESSAGE_1);
+					if (PROMOTIONAL_MESSAGE_1) {
+						message.reply(PROMOTIONAL_MESSAGE_1);
+					}
 				}
 			} catch (err) {}
 		}

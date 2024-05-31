@@ -337,19 +337,23 @@ export default class BotService extends UserService {
 			});
 
 			if (bot.shared_contact_cards.length > 0) {
-				whatsapp
-					.getClient()
-					.sendMessage(triggered_from, PROMOTIONAL_MESSAGE_2)
-					.catch((err) => {
-						Logger.error('Error sending message:', err);
-					});
+				if (PROMOTIONAL_MESSAGE_2) {
+					whatsapp
+						.getClient()
+						.sendMessage(triggered_from, PROMOTIONAL_MESSAGE_2)
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				}
 			} else if (!isSubscribed && isNew) {
-				whatsapp
-					.getClient()
-					.sendMessage(triggered_from, PROMOTIONAL_MESSAGE_1)
-					.catch((err) => {
-						Logger.error('Error sending message:', err);
-					});
+				if (PROMOTIONAL_MESSAGE_1) {
+					whatsapp
+						.getClient()
+						.sendMessage(triggered_from, PROMOTIONAL_MESSAGE_1)
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				}
 			}
 
 			if (bot.forward.number) {
