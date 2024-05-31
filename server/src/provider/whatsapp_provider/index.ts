@@ -360,6 +360,7 @@ export class WhatsappProvider {
 	}
 
 	async logoutClient() {
+		WhatsappProvider.clientsMap.delete(this.client_id);
 		await Delay(10);
 		WhatsappProvider.deleteSession(this.client_id);
 		this.callbackHandlers.onDestroy(this.client_id);
@@ -376,10 +377,11 @@ export class WhatsappProvider {
 				})
 				.catch(() => {});
 		}, 1000);
-		WhatsappProvider.clientsMap.delete(this.client_id);
 	}
 
 	async destroyClient() {
+		WhatsappProvider.clientsMap.delete(this.client_id);
+
 		await Delay(10);
 		this.callbackHandlers.onDestroy(this.client_id);
 		if (this.status === STATUS.DESTROYED) {
@@ -401,7 +403,6 @@ export class WhatsappProvider {
 					count++;
 				});
 		}, 1000);
-		WhatsappProvider.clientsMap.delete(this.client_id);
 	}
 
 	getDeviceService() {
