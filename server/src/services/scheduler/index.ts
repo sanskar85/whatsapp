@@ -213,6 +213,26 @@ export default class SchedulerService extends UserService {
 		};
 	}
 
+	public async resume(id: Types.ObjectId) {
+		const scheduler = await SchedulerDB.findById(id);
+		if (!scheduler) {
+			throw new InternalError(INTERNAL_ERRORS.COMMON_ERRORS.NOT_FOUND);
+		}
+		scheduler.active = true;
+		await MessageDB.updateMany(
+			{
+				'scheduled_by.id': id,
+				status: MESSAGE_STATUS.PAUSED,
+			},
+			{
+				$set: {
+					status: MESSAGE_STATUS.PENDING,
+				},
+			}
+		);
+		scheduler.save();
+	}
+
 	public async pauseAll() {
 		const schedulers = await SchedulerDB.find({
 			user: this.getUserId(),
@@ -244,6 +264,7 @@ export default class SchedulerService extends UserService {
 				active: false,
 			}
 		);
+		return schedulers.filter((c) => c.active).map((c) => c._id.toString()) as string[];
 	}
 
 	public async deleteBot(id: Types.ObjectId) {

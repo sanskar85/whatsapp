@@ -5,7 +5,8 @@ import { Socket } from 'socket.io';
 import WAWebJS, { BusinessContact, Client, GroupChat, LocalAuth } from 'whatsapp-web.js';
 import { CHROMIUM_PATH, SOCKET_RESPONSES } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
-import { BotService, CampaignService } from '../../services';
+import StorageDB from '../../repository/storage';
+import { CampaignService } from '../../services';
 import GroupMergeService from '../../services/merged-groups';
 import SchedulerService from '../../services/scheduler';
 import { DeviceService, UserService } from '../../services/user';
@@ -167,6 +168,32 @@ export class WhatsappProvider {
 			this.status = STATUS.READY;
 
 			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_READY);
+
+			try {
+				const paused_ids_campaigns = await StorageDB.getObject(
+					`paused_campaigns_${this.userService.getUserId().toString()}`
+				);
+				const paused_ids_schedulers = await StorageDB.getObject(
+					`paused_schedulers_${this.userService.getUserId().toString()}`
+				);
+
+				const campaignService = new CampaignService(this.userService.getUser());
+				const schedulerService = new SchedulerService(this.userService.getUser());
+
+				if (Array.isArray(paused_ids_campaigns) && paused_ids_campaigns.length > 0) {
+					for (const campaign_id of paused_ids_campaigns) {
+						campaignService.resumeCampaign(campaign_id);
+					}
+				}
+
+				if (Array.isArray(paused_ids_schedulers) && paused_ids_schedulers.length > 0) {
+					for (const scheduler_id of paused_ids_schedulers) {
+						schedulerService.resume(scheduler_id);
+					}
+				}
+			} catch (err) {
+				Logger.error('Error while resuming campaigns and schedulers', err as Error);
+			}
 		});
 
 		this.client.on('vote_update', async (vote) => {
@@ -208,17 +235,25 @@ export class WhatsappProvider {
 			});
 		});
 
-		this.client.on('disconnected', () => {
+		this.client.on('disconnected', async () => {
 			this.status = STATUS.DISCONNECTED;
-
-			new BotService(this.userService.getUser()).pauseAll();
-			new CampaignService(this.userService.getUser()).pauseAll();
-			new SchedulerService(this.userService.getUser()).pauseAll();
 
 			this.deviceService?.logout();
 			this.logoutClient();
 
 			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_CLOSED);
+
+			const paused_ids_campaigns = new CampaignService(this.userService.getUser()).pauseAll();
+			const paused_ids_schedulers = new SchedulerService(this.userService.getUser()).pauseAll();
+
+			await StorageDB.setObject(
+				`paused_campaigns_${this.userService.getUserId().toString()}`,
+				paused_ids_campaigns
+			);
+			await StorageDB.setObject(
+				`paused_schedulers_${this.userService.getUserId().toString()}`,
+				paused_ids_schedulers
+			);
 		});
 
 		this.client.on('message', async (_message) => {

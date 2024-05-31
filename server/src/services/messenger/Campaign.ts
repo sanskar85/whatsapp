@@ -174,7 +174,7 @@ export default class CampaignService extends UserService {
 		try {
 			const campaigns = await CampaignDB.find({ user: this.getUserId() });
 			if (campaigns.length === 0) {
-				return;
+				return [];
 			}
 			const messages = campaigns.map((campaign) => campaign.messages).flat();
 			await MessageDB.updateMany(
@@ -194,7 +194,13 @@ export default class CampaignService extends UserService {
 					},
 				}
 			);
-		} catch (err) {}
+
+			return campaigns
+				.filter((c) => c.status === CAMPAIGN_STATUS.ACTIVE)
+				.map((c) => c._id.toString()) as string[];
+		} catch (err) {
+			return [];
+		}
 	}
 
 	async pauseCampaign(campaign_id: Types.ObjectId) {
