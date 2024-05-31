@@ -39,9 +39,9 @@ router
 
 router
 	.route('/merge')
-	.all(VerifyUser, VerifyClientID)
+	.all(VerifyUser)
 	.get(GroupsController.mergedGroups)
-	.all(MergeGroupValidator)
+	.all(VerifyClientID, MergeGroupValidator)
 	.post(GroupsController.mergeGroup);
 
 router.route('/refresh').post(VerifyUser, VerifyClientID, GroupsController.refreshGroup);

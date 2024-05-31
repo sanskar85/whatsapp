@@ -388,16 +388,6 @@ async function generateReport(req: Request, res: Response, next: NextFunction) {
 }
 
 async function mergedGroups(req: Request, res: Response, next: NextFunction) {
-	const { client_id } = req.locals;
-
-	const whatsapp = WhatsappProvider.clientByClientID(client_id);
-	if (!whatsapp) {
-		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
-	}
-	if (!whatsapp.isReady()) {
-		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
-	}
-
 	try {
 		const merged_groups = await new GroupMergeService(req.locals.user.getUser()).listGroups();
 
