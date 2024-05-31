@@ -79,7 +79,7 @@ async function initiateWhatsapp(req: Request, res: Response, next: NextFunction)
 }
 
 async function logoutWhatsapp(req: Request, res: Response, next: NextFunction) {
-	const { client_id } = req.cookies;
+	const { client_id } = req.locals;
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (whatsapp) {
