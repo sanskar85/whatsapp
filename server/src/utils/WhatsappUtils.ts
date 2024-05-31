@@ -410,17 +410,17 @@ export default class WhatsappUtils {
 	}
 
 	static async resumeSessions() {
-		const { valid, user } = await DeviceService.isValidDevice(
-			'41ae7725-cf53-4e93-b537-a86065ef3a45'
-		);
-		if (valid) {
-			WhatsappProvider.getInstance(
-				new UserService(user),
-				'41ae7725-cf53-4e93-b537-a86065ef3a45'
-			).initialize();
-		} else {
-			console.log('error');
-		}
+		// const { valid, user } = await DeviceService.isValidDevice(
+		// 	'41ae7725-cf53-4e93-b537-a86065ef3a45'
+		// );
+		// if (valid) {
+		// 	WhatsappProvider.getInstance(
+		// 		new UserService(user),
+		// 		'41ae7725-cf53-4e93-b537-a86065ef3a45'
+		// 	).initialize();
+		// } else {
+		// 	console.log('error');
+		// }
 		if (!IS_PRODUCTION) return;
 		const path = __basedir + '/.wwebjs_auth';
 		if (!fs.existsSync(path)) {
