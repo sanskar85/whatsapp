@@ -28,6 +28,7 @@ import WhatsappUtils from './utils/WhatsappUtils';
 const allowlist = [
 	'http://localhost:5173',
 	'https://app.whatsleads.in',
+	'https://auth.whatsleads.in',
 	'https://admin.whatsleads.in',
 ];
 
