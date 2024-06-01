@@ -20,9 +20,12 @@ import {
 	Select,
 	Table,
 	TableContainer,
+	Tag,
+	TagLabel,
 	Tbody,
 	Td,
 	Text,
+	Textarea,
 	Th,
 	Thead,
 	Tr,
@@ -31,7 +34,7 @@ import {
 	useToast,
 } from '@chakra-ui/react';
 import Multiselect from 'multiselect-react-dropdown';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { BiRefresh } from 'react-icons/bi';
 import { useDispatch, useSelector } from 'react-redux';
 import GroupService from '../../../../services/group.service';
@@ -87,6 +90,9 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 	const dispatch = useDispatch();
 	const toast = useToast();
 	const [dataRefreshing, groupsLoading] = useBoolean();
+	const messageRef = useRef<{
+		[key: string]: HTMLTextAreaElement | null;
+	}>({});
 
 	const [searchText, setSearchText] = useState<string>('');
 
@@ -164,6 +170,13 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 		} else {
 			dispatch(addMultipleSelectedGroup([]));
 		}
+	};
+
+	const insertVariablesToMessage = (key: string, variable: string, targetText: string) => {
+		const startIndex = messageRef.current?.[key]?.selectionStart ?? 0;
+		const msg = targetText;
+		const text = msg.substring(0, startIndex) + ' ' + variable + ' ' + msg.substring(startIndex);
+		return text;
 	};
 
 	const filtered = groups.filter((group) =>
@@ -282,7 +295,8 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 										</Flex>
 										<FormControl>
 											<FormLabel>Text</FormLabel>
-											<Input
+											<Textarea
+												ref={(el) => (messageRef.current['group-saved'] = el)}
 												width={'full'}
 												size={'sm'}
 												rounded={'md'}
@@ -300,6 +314,17 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 												}
 											/>
 										</FormControl>
+
+										<PublicNameTag
+											onClick={() => {
+												const text = insertVariablesToMessage(
+													'group-saved',
+													'{{public_name}}',
+													group.text ?? ''
+												);
+												dispatch(setGroupReplySavedText({ index, text }));
+											}}
+										/>
 										<Box>
 											<AddOns
 												attachments={group.attachments}
@@ -344,7 +369,8 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 										</Flex>
 										<FormControl>
 											<FormLabel>Text</FormLabel>
-											<Input
+											<Textarea
+												ref={(el) => (messageRef.current['group-unsaved'] = el)}
 												width={'full'}
 												size={'sm'}
 												rounded={'md'}
@@ -362,6 +388,16 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 												}
 											/>
 										</FormControl>
+										<PublicNameTag
+											onClick={() => {
+												const text = insertVariablesToMessage(
+													'group-unsaved',
+													'{{public_name}}',
+													group.text ?? ''
+												);
+												dispatch(setGroupReplyUnsavedText({ index, text }));
+											}}
+										/>
 										<Box>
 											<AddOns
 												attachments={group.attachments}
@@ -406,7 +442,8 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 										</Flex>
 										<FormControl>
 											<FormLabel>Text</FormLabel>
-											<Input
+											<Textarea
+												ref={(el) => (messageRef.current['private-saved'] = el)}
 												width={'full'}
 												size={'sm'}
 												rounded={'md'}
@@ -424,6 +461,16 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 												}
 											/>
 										</FormControl>
+										<PublicNameTag
+											onClick={() => {
+												const text = insertVariablesToMessage(
+													'private-saved',
+													'{{public_name}}',
+													group.text ?? ''
+												);
+												dispatch(setPrivateReplySavedText({ index, text }));
+											}}
+										/>
 										<Box>
 											<AddOns
 												attachments={group.attachments}
@@ -469,7 +516,8 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 
 										<FormControl>
 											<FormLabel>Text</FormLabel>
-											<Input
+											<Textarea
+												ref={(el) => (messageRef.current['private-unsaved'] = el)}
 												width={'full'}
 												size={'sm'}
 												rounded={'md'}
@@ -487,6 +535,16 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 												}
 											/>
 										</FormControl>
+										<PublicNameTag
+											onClick={() => {
+												const text = insertVariablesToMessage(
+													'private-unsaved',
+													'{{public_name}}',
+													group.text ?? ''
+												);
+												dispatch(setPrivateReplyUnsavedText({ index, text }));
+											}}
+										/>
 										<Box>
 											<AddOns
 												attachments={group.attachments}
@@ -680,6 +738,24 @@ function DelayInput({
 				onChange={(e) => onChange(Number(e.target.value))}
 			/>
 		</FormControl>
+	);
+}
+
+function PublicNameTag({ onClick }: { onClick: () => void }) {
+	return (
+		<Tag
+			size={'sm'}
+			m={'0.25rem'}
+			p={'0.5rem'}
+			width={'fit-content'}
+			borderRadius='md'
+			variant='solid'
+			colorScheme='gray'
+			_hover={{ cursor: 'pointer' }}
+			onClick={onClick}
+		>
+			<TagLabel>{'{{public_name}}'}</TagLabel>
+		</Tag>
 	);
 }
 
