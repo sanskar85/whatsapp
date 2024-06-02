@@ -268,7 +268,7 @@ export class WhatsappProvider {
 
 			const message = await this.client.getMessageById(_message.id._serialized);
 
-			if (!message) {
+			if (!message || !message.body) {
 				return;
 			}
 
