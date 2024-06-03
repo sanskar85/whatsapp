@@ -11,6 +11,7 @@ import {
 	Td,
 	Th,
 	Thead,
+	Tooltip,
 	Tr,
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
@@ -169,11 +170,17 @@ const CSVUpload = () => {
 									<Td className='whitespace-break-spaces'>{csv.name}</Td>
 									<Td className='whitespace-break-spaces'>{csv.headers.join(', ')}</Td>
 									<Td>
-										<IconButton
-											aria-label='Edit'
-											icon={<Icon as={IoIosCloudDownload} height={5} width={5} />}
-											onClick={() => downloadCSV(csv.id)}
-										/>
+										<Tooltip label='Download CSV File' aria-label='Download CSV File'>
+											<IconButton
+												aria-label='Edit'
+												icon={
+													<Box as='span' title='Download CSV File'>
+														<Icon as={IoIosCloudDownload} height={5} width={5} />
+													</Box>
+												}
+												onClick={() => downloadCSV(csv.id)}
+											/>
+										</Tooltip>
 									</Td>
 								</Tr>
 							);

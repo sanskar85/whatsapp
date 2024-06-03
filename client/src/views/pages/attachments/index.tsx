@@ -12,6 +12,7 @@ import {
 	Td,
 	Th,
 	Thead,
+	Tooltip,
 	Tr,
 } from '@chakra-ui/react';
 import React, { useEffect } from 'react';
@@ -153,18 +154,30 @@ const AttachmentPage = () => {
 								<Td textAlign={'center'}>{attachment.custom_caption ? 'Yes' : 'No'}</Td>
 								<Td>
 									<HStack>
-										<IconButton
-											aria-label='Edit'
-											icon={<Icon as={EditIcon} height={5} width={5} />}
-											onClick={() => handleAttachmentDetailsEdit(attachment.id)}
-										/>
-										<Box as='span'>
+										<Tooltip label='Edit Attachment Details' aria-label='Edit Attachment Details'>
 											<IconButton
-												aria-label='change file'
-												icon={<Icon as={IoIosCloudDownload} height={5} width={5} />}
+												// title='Edit Attachment Details'
+												aria-label='Edit'
+												icon={
+													// <Box as='span' title='Edit Attachment Details'>
+													<Icon as={EditIcon} height={5} width={5} />
+													// </Box>
+												}
+												onClick={() => handleAttachmentDetailsEdit(attachment.id)}
+											/>
+										</Tooltip>
+										<Tooltip label='Download Attachment' aria-label='Download Attachment'>
+											<IconButton
+												title='Download Attachment'
+												aria-label='Download Attachment'
+												icon={
+													<Box as='span' title='Download Attachment'>
+														<Icon as={IoIosCloudDownload} height={5} width={5} />
+													</Box>
+												}
 												onClick={() => downloadFile(attachment.id)}
 											/>
-										</Box>
+										</Tooltip>
 									</HStack>
 								</Td>
 							</Tr>

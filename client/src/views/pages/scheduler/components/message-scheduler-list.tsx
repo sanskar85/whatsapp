@@ -9,6 +9,7 @@ import {
 	Td,
 	Th,
 	Thead,
+	Tooltip,
 	Tr,
 	useToast,
 } from '@chakra-ui/react';
@@ -108,52 +109,61 @@ const MessageSchedulerList = () => {
 							</Td>
 							<Td>
 								<HStack>
-									<IconButton
-										aria-label='download-scheduled-messages'
-										icon={<DownloadIcon />}
-										onClick={() => {
-											downloadSchedulerReport(scheduler.id);
-										}}
-									/>
-									<IconButton
-										aria-label='toggle-scheduler'
-										icon={scheduler.isActive ? <FiPause /> : <FiPlay />}
-										onClick={() => {
-											confirmationAlertRef.current?.open({
-												id: scheduler.id,
-												disclaimer: 'Are you change you want to change running status?',
-												type: 'TOGGLE_SCHEDULER',
-											});
-										}}
-										colorScheme={scheduler.isActive ? 'yellow' : 'blue'}
-									/>
-									<IconButton
-										aria-label='edit-scheduler'
-										icon={<FiEdit />}
-										onClick={() => {
-											dispatch(setSelectedScheduler(scheduler));
-										}}
-										colorScheme='gray'
-									/>
-									<IconButton
-										aria-label='re-schedule'
-										icon={<MdScheduleSend />}
-										onClick={() => {
-											confirmationAlertRef.current?.open({
-												id: scheduler.id,
-												disclaimer: 'Are you sure you want to forcefully schedule the messages?',
-												type: 'RESCHEDULE',
-											});
-										}}
-										colorScheme='gray'
-									/>
-
-									<IconButton
-										aria-label='delete-scheduler'
-										icon={<MdDelete />}
-										onClick={() => deleteAlertRef.current?.open(scheduler.id)}
-										colorScheme='red'
-									/>
+									<Tooltip label='Download Report' aria-label='Download Report'>
+										<IconButton
+											aria-label='download-scheduled-messages'
+											icon={<DownloadIcon />}
+											onClick={() => {
+												downloadSchedulerReport(scheduler.id);
+											}}
+										/>
+									</Tooltip>
+									<Tooltip label='Toggle Scheduler' aria-label='Toggle Scheduler'>
+										<IconButton
+											aria-label='toggle-scheduler'
+											icon={scheduler.isActive ? <FiPause /> : <FiPlay />}
+											onClick={() => {
+												confirmationAlertRef.current?.open({
+													id: scheduler.id,
+													disclaimer: 'Are you change you want to change running status?',
+													type: 'TOGGLE_SCHEDULER',
+												});
+											}}
+											colorScheme={scheduler.isActive ? 'yellow' : 'blue'}
+										/>
+									</Tooltip>
+									<Tooltip label='Edit Scheduler' aria-label='Edit Scheduler'>
+										<IconButton
+											aria-label='edit-scheduler'
+											icon={<FiEdit />}
+											onClick={() => {
+												dispatch(setSelectedScheduler(scheduler));
+											}}
+											colorScheme='gray'
+										/>
+									</Tooltip>
+									<Tooltip label='Re-schedule' aria-label='Re-schedule'>
+										<IconButton
+											aria-label='re-schedule'
+											icon={<MdScheduleSend />}
+											onClick={() => {
+												confirmationAlertRef.current?.open({
+													id: scheduler.id,
+													disclaimer: 'Are you sure you want to forcefully schedule the messages?',
+													type: 'RESCHEDULE',
+												});
+											}}
+											colorScheme='gray'
+										/>
+									</Tooltip>
+									<Tooltip label='Delete Scheduler' aria-label='Delete Scheduler'>
+										<IconButton
+											aria-label='delete-scheduler'
+											icon={<MdDelete />}
+											onClick={() => deleteAlertRef.current?.open(scheduler.id)}
+											colorScheme='red'
+										/>
+									</Tooltip>
 								</HStack>
 							</Td>
 						</Tr>

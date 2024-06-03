@@ -12,6 +12,7 @@ import {
 	Td,
 	Th,
 	Thead,
+	Tooltip,
 	Tr,
 } from '@chakra-ui/react';
 import { useEffect, useRef } from 'react';
@@ -152,11 +153,13 @@ const ContactsPage = () => {
 								<Td>{contact.contact_details_work?.number}</Td>
 								<Td>{contact.email_personal}</Td>
 								<Td>
-									<IconButton
-										aria-label='Edit'
-										icon={<Icon as={EditIcon} />}
-										onClick={() => handleContactEdit(contact.id)}
-									/>
+									<Tooltip label='Edit Contact Details' aria-label='Edit Contact Details'>
+										<IconButton
+											aria-label='Edit'
+											icon={<Icon as={EditIcon} />}
+											onClick={() => handleContactEdit(contact.id)}
+										/>
+									</Tooltip>
 								</Td>
 							</Tr>
 						))}
