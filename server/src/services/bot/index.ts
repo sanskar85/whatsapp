@@ -26,6 +26,7 @@ import UserService from '../user/user';
 
 export default class BotService extends UserService {
 	private messageSchedulerService: MessageService;
+	private handledBotPerUser: Set<string> = new Set();
 
 	public constructor(user: IUser) {
 		super(user);
@@ -264,6 +265,9 @@ export default class BotService extends UserService {
 			if (!bot.group_respond && (opts.isGroup || message_from.length > 12)) {
 				return;
 			}
+			else if (this.handledBotPerUser.has(`${message_from}_${bot.bot_id.toString()}`)) {
+				return;
+			}
 			await Delay(bot.response_delay_seconds);
 			this.responseSent(bot.bot_id, message_from);
 			Logger.info(
@@ -439,6 +443,12 @@ export default class BotService extends UserService {
 			fromPoll: false,
 		}
 	) {
+		this.handledBotPerUser.add(`${message_from}_${bot_id.toString()}`);
+
+		setTimeout(() => {
+			this.handledBotPerUser.delete(`${message_from}_${bot_id.toString()}`);
+		}, 1000 * 60 * 5);
+
 		const bot_response = await BotResponseDB.findOne({
 			user: this.getUser(),
 			recipient: message_from,
