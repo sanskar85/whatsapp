@@ -356,6 +356,7 @@ export default function Bot() {
 							size='md'
 							isChecked={details.random_string}
 							onChange={() => dispatch(toggleRandomString())}
+							className='dark:text-white'
 						>
 							Append Random Text
 						</Checkbox>

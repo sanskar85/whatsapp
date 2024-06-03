@@ -1,5 +1,6 @@
 import { EditIcon } from '@chakra-ui/icons';
 import {
+	Box,
 	Checkbox,
 	HStack,
 	IconButton,
@@ -10,6 +11,7 @@ import {
 	Td,
 	Th,
 	Thead,
+	Tooltip,
 	Tr,
 	useDisclosure,
 } from '@chakra-ui/react';
@@ -125,41 +127,64 @@ export default function MergedGroupTab() {
 										<Td isNumeric>{group.groups.length}</Td>
 										<Td>
 											<HStack>
-												<IconButton
-													aria-label='toggle'
-													icon={group.active ? <PiPause /> : <PiPlay />}
-													color={group.active ? 'blue.400' : 'green.400'}
-													onClick={() =>
-														confirmationRef.current?.open({
-															id: group.id,
-															type: 'Group',
-															disclaimer: 'Are you sure you want to toggle this group?',
-														})
-													}
-													outline='none'
-													border='none'
-												/>
-												<IconButton
-													aria-label='edit merge group'
-													icon={<EditIcon />}
-													colorScheme='gray'
-													onClick={() => {
-														dispatch(editSelectedGroup(group.id));
-														onOpen();
-													}}
-												/>
-												<IconButton
-													aria-label='clear'
-													icon={<AiOutlineClear />}
-													colorScheme='gray'
-													onClick={() => deleteAlertRef.current?.open(group.id)}
-												/>
-												<IconButton
-													aria-label='download'
-													icon={<IoIosCloudDownload />}
-													colorScheme='gray'
-													onClick={() => download(group.id)}
-												/>
+												<Tooltip label='Toggle group' aria-label='Toggle group' placement='top'>
+													<IconButton
+														title='Toggle group'
+														aria-label='toggle'
+														icon={group.active ? <PiPause /> : <PiPlay />}
+														color={group.active ? 'blue.400' : 'green.400'}
+														onClick={() =>
+															confirmationRef.current?.open({
+																id: group.id,
+																type: 'Group',
+																disclaimer: 'Are you sure you want to toggle this group?',
+															})
+														}
+														outline='none'
+														border='none'
+													/>
+												</Tooltip>
+												<Tooltip
+													label='Edit merge group'
+													aria-label='Edit merge group'
+													placement='top'
+												>
+													<IconButton
+														aria-label='edit merge group'
+														icon={<EditIcon />}
+														colorScheme='gray'
+														onClick={() => {
+															dispatch(editSelectedGroup(group.id));
+															onOpen();
+														}}
+													/>
+												</Tooltip>
+												<Tooltip label='Clear history' aria-label='Clear history' placement='top'>
+													<IconButton
+														title='Clear history'
+														aria-label='clear'
+														icon={<AiOutlineClear />}
+														colorScheme='gray'
+														onClick={() => deleteAlertRef.current?.open(group.id)}
+													/>
+												</Tooltip>
+												<Tooltip
+													label='Download responses'
+													aria-label='Download responses'
+													placement='top'
+												>
+													<IconButton
+														title='Download responses'
+														aria-label='download'
+														icon={
+															<Box as='span' title='Download responses'>
+																<IoIosCloudDownload />
+															</Box>
+														}
+														colorScheme='gray'
+														onClick={() => download(group.id)}
+													/>
+												</Tooltip>
 											</HStack>
 										</Td>
 									</Tr>

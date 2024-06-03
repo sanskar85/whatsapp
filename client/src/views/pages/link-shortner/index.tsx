@@ -17,6 +17,7 @@ import {
 	Td,
 	Th,
 	Thead,
+	Tooltip,
 	Tr,
 	useDisclosure,
 	useToast,
@@ -200,12 +201,14 @@ const LinkShortner = () => {
 									</Td>
 									<Td>
 										<ActionButton
+											label='Copy Link'
 											activeBackgroundColor='gray.100'
 											icon={CopyIcon}
 											onClick={() => navigator.clipboard.writeText(item.shorten_link)}
 											color={theme === 'dark' ? 'white' : 'black'}
 										/>
 										<ActionButton
+											label='Edit Link'
 											activeBackgroundColor='yellow.100'
 											icon={EditIcon}
 											onClick={() => {
@@ -219,6 +222,7 @@ const LinkShortner = () => {
 											color={theme === 'dark' ? 'yellow.200' : 'yellow.500'}
 										/>
 										<ActionButton
+											label='Delete Link'
 											isHidden
 											activeBackgroundColor='red.100'
 											icon={DeleteIcon}
@@ -252,6 +256,7 @@ type ActionButtonProps = {
 	activeBackgroundColor: string;
 	color: string;
 	isHidden?: boolean;
+	label: string;
 };
 function ActionButton({
 	icon,
@@ -259,28 +264,32 @@ function ActionButton({
 	color,
 	activeBackgroundColor,
 	isHidden = false,
+	label,
 }: ActionButtonProps) {
 	return (
-		<IconButton
-			backgroundColor={'transparent'}
-			border={'none'}
-			outline={'none'}
-			_hover={{
-				backgroundColor: 'transparent',
-				border: 'none',
-				outline: 'none',
-			}}
-			_active={{
-				backgroundColor: activeBackgroundColor,
-				border: 'none',
-				outline: 'none',
-			}}
-			aria-label='action-button'
-			icon={<Icon as={icon} />}
-			onClick={onClick}
-			color={color}
-			hidden={isHidden}
-		/>
+		<Tooltip label={label} aria-label={label}>
+			<IconButton
+				backgroundColor={'transparent'}
+				border={'none'}
+				outline={'none'}
+				_hover={{
+					backgroundColor: 'transparent',
+					border: 'none',
+					outline: 'none',
+				}}
+				_active={{
+					backgroundColor: activeBackgroundColor,
+					border: 'none',
+					outline: 'none',
+				}}
+				aria-label='action-button'
+				icon={<Icon as={icon} />}
+				onClick={onClick}
+				color={color}
+				hidden={isHidden}
+				zIndex={1}
+			/>
+		</Tooltip>
 	);
 }
 

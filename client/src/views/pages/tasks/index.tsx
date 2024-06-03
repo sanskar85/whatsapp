@@ -11,6 +11,7 @@ import {
 	Td,
 	Th,
 	Thead,
+	Tooltip,
 	Tr,
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
@@ -119,13 +120,15 @@ const Tasks = () => {
 									<Td>{task.status}</Td>
 									<Td>{task.createdAt}</Td>
 									<Td>
-										<IconButton
-											hidden={task.data_result_type === TASK_RESULT_TYPE.NONE}
-											isDisabled={task.status !== TASK_STATUS.COMPLETED}
-											aria-label='download file'
-											icon={<Icon as={IoIosCloudDownload} height={5} width={5} />}
-											onClick={() => downloadTask(task.id)}
-										/>
+										<Tooltip label='Download File' aria-label='Download File'>
+											<IconButton
+												hidden={task.data_result_type === TASK_RESULT_TYPE.NONE}
+												isDisabled={task.status !== TASK_STATUS.COMPLETED}
+												aria-label='download file'
+												icon={<Icon as={IoIosCloudDownload} height={5} width={5} />}
+												onClick={() => downloadTask(task.id)}
+											/>
+										</Tooltip>
 									</Td>
 								</Tr>
 							);

@@ -9,10 +9,12 @@ import {
 	Text,
 	Th,
 	Thead,
+	Tooltip,
 	Tr,
 } from '@chakra-ui/react';
 import { useRef } from 'react';
-import { MdDelete, MdHistory } from 'react-icons/md';
+import { IoIosCloudDownload } from 'react-icons/io';
+import { MdDelete } from 'react-icons/md';
 import { PiPause, PiPlay } from 'react-icons/pi';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from '../../../../hooks/useTheme';
@@ -109,64 +111,72 @@ export default function AllResponders() {
 										: `${Math.floor(bot.trigger_gap_seconds / 86400)} day`}
 								</Td>
 								<Td>
-									<IconButton
-										aria-label='Delete'
-										icon={<MdDelete />}
-										color={'red.400'}
-										onClick={() => {
-											deleteAlertRef.current?.open(bot.bot_id);
-										}}
-										bgColor={'transparent'}
-										_hover={{
-											bgColor: 'transparent',
-										}}
-										outline='none'
-										border='none'
-									/>
-									<IconButton
-										aria-label='Edit'
-										icon={<EditIcon />}
-										color={'yellow.400'}
-										onClick={() => dispatch(setSelectedBot(bot.bot_id))}
-										bgColor={'transparent'}
-										_hover={{
-											bgColor: 'transparent',
-										}}
-										outline='none'
-										border='none'
-									/>
-									<IconButton
-										aria-label='toggle'
-										icon={bot.isActive ? <PiPause /> : <PiPlay />}
-										color={bot.isActive ? 'blue.400' : 'green.400'}
-										onClick={() => {
-											confirmationAlertRef.current?.open({
-												id: bot.bot_id,
-												disclaimer: 'Are you sure you want to change running status?',
-												type: 'TOGGLE_BOT',
-											});
-										}}
-										bgColor={'transparent'}
-										_hover={{
-											bgColor: 'transparent',
-										}}
-										outline='none'
-										border='none'
-									/>
-									<IconButton
-										aria-label='History'
-										icon={<MdHistory />}
-										color={'red.400'}
-										onClick={() => {
-											BotService.downloadResponses(bot.bot_id);
-										}}
-										bgColor={'transparent'}
-										_hover={{
-											bgColor: 'transparent',
-										}}
-										outline='none'
-										border='none'
-									/>
+									<Tooltip label='Delete Responder' aria-label='Delete Responder'>
+										<IconButton
+											aria-label='Delete'
+											icon={<MdDelete />}
+											color={'red.400'}
+											onClick={() => {
+												deleteAlertRef.current?.open(bot.bot_id);
+											}}
+											bgColor={'transparent'}
+											_hover={{
+												bgColor: 'transparent',
+											}}
+											outline='none'
+											border='none'
+										/>
+									</Tooltip>
+									<Tooltip label='Edit Responder' aria-label='Edit Responder'>
+										<IconButton
+											aria-label='Edit'
+											icon={<EditIcon />}
+											color={'yellow.400'}
+											onClick={() => dispatch(setSelectedBot(bot.bot_id))}
+											bgColor={'transparent'}
+											_hover={{
+												bgColor: 'transparent',
+											}}
+											outline='none'
+											border='none'
+										/>
+									</Tooltip>
+									<Tooltip label='Toggle Responder' aria-label='Toggle Responder'>
+										<IconButton
+											aria-label='toggle'
+											icon={bot.isActive ? <PiPause /> : <PiPlay />}
+											color={bot.isActive ? 'blue.400' : 'green.400'}
+											onClick={() => {
+												confirmationAlertRef.current?.open({
+													id: bot.bot_id,
+													disclaimer: 'Are you sure you want to change running status?',
+													type: 'TOGGLE_BOT',
+												});
+											}}
+											bgColor={'transparent'}
+											_hover={{
+												bgColor: 'transparent',
+											}}
+											outline='none'
+											border='none'
+										/>
+									</Tooltip>
+									<Tooltip label='Download History' aria-label='Download History'>
+										<IconButton
+											aria-label='History'
+											icon={<IoIosCloudDownload />}
+											color={'red.400'}
+											onClick={() => {
+												BotService.downloadResponses(bot.bot_id);
+											}}
+											bgColor={'transparent'}
+											_hover={{
+												bgColor: 'transparent',
+											}}
+											outline='none'
+											border='none'
+										/>
+									</Tooltip>
 								</Td>
 							</Tr>
 						))}
