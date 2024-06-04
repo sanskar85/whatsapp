@@ -126,6 +126,7 @@ export class WhatsappProvider {
 
 	private async attachListeners() {
 		this.client.on('qr', async (qrCode) => {
+			Logger.info(`QR Update`, `${this.userService.getUser().username} - ${this.client_id}`);
 			try {
 				this.qrCode = await QRCode.toDataURL(qrCode);
 				this.status = STATUS.QR_READY;
@@ -135,11 +136,16 @@ export class WhatsappProvider {
 		});
 
 		this.client.on('authenticated', async () => {
+			Logger.info(
+				`Client Authenticated`,
+				`${this.userService.getUser().username} - ${this.client_id}`
+			);
 			this.status = STATUS.AUTHENTICATED;
 			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_AUTHENTICATED);
 		});
 
 		this.client.on('ready', async () => {
+			Logger.info(`Client Ready`, `${this.userService.getUser().username} - ${this.client_id}`);
 			this.number = this.client.info.wid.user;
 			this.contact = await this.client.getContactById(this.client.info.wid._serialized);
 
@@ -238,6 +244,10 @@ export class WhatsappProvider {
 		});
 
 		this.client.on('disconnected', async () => {
+			Logger.info(
+				`Client Disconnected`,
+				`${this.userService.getUser().username} - ${this.client_id}`
+			);
 			this.status = STATUS.DISCONNECTED;
 
 			this.deviceService?.logout();
