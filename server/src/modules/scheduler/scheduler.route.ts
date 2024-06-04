@@ -11,7 +11,7 @@ router
 	.route('/:id/report')
 	.all(VerifyUser, IDValidator)
 	.get(SchedulerController.downloadSchedulerReport);
-router.route('/:id/reschedule').all(VerifyUser, IDValidator).get(SchedulerController.reschedule);
+router.route('/:id/reschedule').all(VerifyUser, IDValidator).put(SchedulerController.reschedule);
 
 router
 	.route('/:id')
