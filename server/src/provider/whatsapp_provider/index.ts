@@ -145,37 +145,39 @@ export class WhatsappProvider {
 		});
 
 		this.client.on('ready', async () => {
-			Logger.info(`Client Ready`, `${this.userService.getUser().username} - ${this.client_id}`);
-			this.number = this.client.info.wid.user;
-			this.contact = await this.client.getContactById(this.client.info.wid._serialized);
-
-			const business_details = this.contact.isBusiness
-				? WhatsappUtils.getBusinessDetails(this.contact as BusinessContact)
-				: {
-						description: '',
-						email: '',
-						websites: [] as string[],
-						latitude: 0,
-						longitude: 0,
-						address: '',
-				  };
-
-			this.userPrefService = await UserPreferencesService.getService(this.userService.getUserId());
-
-			this.deviceService = await DeviceService.createDevice({
-				user: this.userService,
-				name: this.client.info.pushname,
-				phone: this.number,
-				isBusiness: this.contact.isBusiness,
-				business_details,
-			});
-
-			this.deviceService.setClientID(this.client_id);
-			this.status = STATUS.READY;
-
-			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_READY);
-
 			try {
+				Logger.info(`Client Ready`, `${this.userService.getUser().username} - ${this.client_id}`);
+				this.number = this.client.info.wid.user;
+				this.contact = await this.client.getContactById(this.client.info.wid._serialized);
+
+				const business_details = this.contact.isBusiness
+					? WhatsappUtils.getBusinessDetails(this.contact as BusinessContact)
+					: {
+							description: '',
+							email: '',
+							websites: [] as string[],
+							latitude: 0,
+							longitude: 0,
+							address: '',
+					  };
+
+				this.userPrefService = await UserPreferencesService.getService(
+					this.userService.getUserId()
+				);
+
+				this.deviceService = await DeviceService.createDevice({
+					user: this.userService,
+					name: this.client.info.pushname,
+					phone: this.number,
+					isBusiness: this.contact.isBusiness,
+					business_details,
+				});
+
+				this.deviceService.setClientID(this.client_id);
+				this.status = STATUS.READY;
+
+				this.sendToClient(SOCKET_RESPONSES.WHATSAPP_READY);
+
 				const paused_ids_campaigns = await StorageDB.getObject(
 					`paused_campaigns_${this.userService.getUserId().toString()}`
 				);
@@ -206,20 +208,20 @@ export class WhatsappProvider {
 			if (!vote.parentMessage.id?.fromMe) return;
 			const vote_response_service = new VoteResponseService(this.userService.getUser());
 			const pollDetails = vote_response_service.getPollDetails(vote.parentMessage);
-			const contact = await this.client.getContactById(vote.voter);
-			if (!this.contact || contact.id._serialized === this.contact.id._serialized) {
-				return;
-			}
-			const details = {
-				...pollDetails,
-				voter_number: '',
-				voter_name: '',
-				group_name: '',
-				selected_option: vote.selectedOptions.map((opt) => opt.name),
-				voted_at: DateUtils.getMoment(vote.interractedAtTs).toDate(),
-			};
-
 			try {
+				const contact = await this.client.getContactById(vote.voter);
+				if (!this.contact || contact.id._serialized === this.contact.id._serialized) {
+					return;
+				}
+				const details = {
+					...pollDetails,
+					voter_number: '',
+					voter_name: '',
+					group_name: '',
+					selected_option: vote.selectedOptions.map((opt) => opt.name),
+					voted_at: DateUtils.getMoment(vote.interractedAtTs).toDate(),
+				};
+
 				const chat = await this.client.getChatById(pollDetails.chat_id);
 				if (chat.isGroup) {
 					details.group_name = chat.name;

@@ -135,13 +135,15 @@ export default class WhatsappUtils {
 					} as GroupDetails);
 					return acc;
 				}
-				const contact = await this.whatsapp.getClient().getContactById(chat.id._serialized);
-				if (!contact.isMyContact && !contact.isMe) {
-					acc.non_saved_contacts.push(contact);
-				}
-				if (contact.isMyContact && !contact.isMe) {
-					acc.chat_contacts.push(contact);
-				}
+				try {
+					const contact = await this.whatsapp.getClient().getContactById(chat.id._serialized);
+					if (!contact.isMyContact && !contact.isMe) {
+						acc.non_saved_contacts.push(contact);
+					}
+					if (contact.isMyContact && !contact.isMe) {
+						acc.chat_contacts.push(contact);
+					}
+				} catch (err) {}
 				return acc;
 			},
 			Promise.resolve({
@@ -249,9 +251,13 @@ export default class WhatsappUtils {
 				let fetchedContact: WAWebJS.Contact | null = null;
 
 				if (!contact) {
-					fetchedContact = await this.whatsapp
-						.getClient()
-						.getContactById(participant.id._serialized);
+					try {
+						fetchedContact = await this.whatsapp
+							.getClient()
+							.getContactById(participant.id._serialized);
+					} catch (err) {
+						return null;
+					}
 					contact_details.name = fetchedContact.name ?? '';
 					const country_code = await fetchedContact.getCountryCode();
 					contact_details.country = COUNTRIES[country_code as string];
@@ -277,9 +283,13 @@ export default class WhatsappUtils {
 				}
 
 				if (!fetchedContact) {
-					fetchedContact = await this.whatsapp
-						.getClient()
-						.getContactById(participant.id._serialized);
+					try {
+						fetchedContact = await this.whatsapp
+							.getClient()
+							.getContactById(participant.id._serialized);
+					} catch (err) {
+						return null;
+					}
 				}
 
 				const business_details = WhatsappUtils.getBusinessDetails(
@@ -320,38 +330,43 @@ export default class WhatsappUtils {
 							label: label_name,
 						})) as (TLabelContact | TLabelBusinessContact)[];
 					} else {
-						const contact = await this.whatsapp.getClient().getContactById(chat.id._serialized);
-						const contact_details = await this.getContactDetails(contact);
+						try {
+							const contact = await this.whatsapp.getClient().getContactById(chat.id._serialized);
 
-						if (
-							!(options.saved && options.unsaved) &&
-							((options.saved && !contact_details.isSaved) ||
-								(options.unsaved && contact_details.isSaved))
-						) {
-							return [];
-						}
+							const contact_details = await this.getContactDetails(contact);
 
-						if (!options.business_details) {
+							if (
+								!(options.saved && options.unsaved) &&
+								((options.saved && !contact_details.isSaved) ||
+									(options.unsaved && contact_details.isSaved))
+							) {
+								return [];
+							}
+
+							if (!options.business_details) {
+								return [
+									{
+										...contact_details,
+										group_name: chat.name,
+										label: label_name,
+									} as TLabelContact,
+								];
+							}
+							if (!contact.isBusiness) {
+								return [];
+							}
+							const business_details = WhatsappUtils.getBusinessDetails(contact as BusinessContact);
 							return [
 								{
 									...contact_details,
+									...business_details,
 									group_name: chat.name,
 									label: label_name,
-								} as TLabelContact,
+								} as TLabelBusinessContact,
 							];
-						}
-						if (!contact.isBusiness) {
+						} catch (err) {
 							return [];
 						}
-						const business_details = WhatsappUtils.getBusinessDetails(contact as BusinessContact);
-						return [
-							{
-								...contact_details,
-								...business_details,
-								group_name: chat.name,
-								label: label_name,
-							} as TLabelBusinessContact,
-						];
 					}
 				})
 				.flat();
