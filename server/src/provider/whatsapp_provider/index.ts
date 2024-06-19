@@ -324,11 +324,13 @@ export class WhatsappProvider {
 				if (message.hasMedia) {
 					try {
 						const media = await message.downloadMedia();
-						const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
-						const dest = __basedir + MISC_PATH + filename;
-						await FileUtils.createImageFile(media.data, dest);
+						if (media.mimetype.includes('image')) {
+							const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
+							const dest = __basedir + MISC_PATH + filename;
+							await FileUtils.createImageFile(media.data, dest);
 
-						link = await uploadSingleFile(filename, this.number!, dest);
+							link = await uploadSingleFile(filename, this.number!, dest);
+						}
 					} catch (err) {
 						Logger.error('Error while saving image message', err as Error);
 					}
