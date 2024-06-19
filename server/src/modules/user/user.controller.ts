@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
-import { shareToDrive } from '../../provider/google/sheets/SheetAuth';
+import { shareToDrive } from '../../provider/google/SheetAuth';
 import { DeviceService, UserService } from '../../services/user';
 import UserPreferencesService from '../../services/user/userPreferences';
 import CSVParser from '../../utils/CSVParser';

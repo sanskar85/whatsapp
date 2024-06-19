@@ -1,5 +1,6 @@
 import csv from 'csvtojson/v2';
 import fs from 'fs';
+import mime from 'mime';
 import { CSV_PATH } from '../../config/const';
 
 const moveFile = (from: string, to: string) => {
@@ -79,6 +80,25 @@ async function writeFile(path: string, data: string) {
 	});
 }
 
+function getMimeType(path: string) {
+	return mime.getType(path);
+}
+function getExt(mime_type: string) {
+	return mime.getExtension(mime_type);
+}
+
+async function createImageFile(base64WithoutHeader: string, path: string) {
+	return new Promise<void>((resolve, reject) => {
+		fs.writeFile(path, base64WithoutHeader, 'base64', function (err) {
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		});
+	});
+}
+
 export default {
 	moveFile,
 	deleteFile,
@@ -88,4 +108,7 @@ export default {
 	readCSV,
 	readFile,
 	writeFile,
+	getExt,
+	getMimeType,
+	createImageFile,
 };

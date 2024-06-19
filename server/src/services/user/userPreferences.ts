@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { DRIVE_SHARE_LINK } from '../../config/const';
-import { addHeader, createSpreadSheet, shareToDrive } from '../../provider/google/sheets/SheetAuth';
+import { addHeader, createSpreadSheet, shareToDrive } from '../../provider/google/SheetAuth';
 import UserPreferencesDB from '../../repository/user/UserPreferences';
 import { IUserPreferences } from '../../types/users';
 

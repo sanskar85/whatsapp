@@ -3,7 +3,7 @@ import Logger from 'n23-logger';
 import QRCode from 'qrcode';
 import { Socket } from 'socket.io';
 import WAWebJS, { BusinessContact, Client, GroupChat, LocalAuth } from 'whatsapp-web.js';
-import { CHROMIUM_PATH, SOCKET_RESPONSES } from '../../config/const';
+import { CHROMIUM_PATH, MISC_PATH, SOCKET_RESPONSES } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import StorageDB from '../../repository/storage';
 import { CampaignService } from '../../services';
@@ -13,9 +13,10 @@ import { DeviceService, UserService } from '../../services/user';
 import UserPreferencesService from '../../services/user/userPreferences';
 import VoteResponseService from '../../services/vote-response';
 import DateUtils from '../../utils/DateUtils';
-import { Delay } from '../../utils/ExpressUtils';
+import { Delay, generateClientID } from '../../utils/ExpressUtils';
 import WhatsappUtils from '../../utils/WhatsappUtils';
-import { MessageLogger } from '../google/sheets';
+import { FileUtils } from '../../utils/files';
+import { MessageLogger, uploadSingleFile } from '../google';
 
 type ClientID = string;
 
@@ -280,40 +281,57 @@ export class WhatsappProvider {
 
 			const message = await this.client.getMessageById(_message.id._serialized);
 
-			if (!message || !message.body) {
+			if (!message) {
 				return;
 			}
-
-			this.handledMessage.set(message.id._serialized, null);
+			const contact = await message.getContact();
 			const chat = await message.getChat();
 			const isGroup = chat.isGroup;
-			const contact = await message.getContact();
-			if (!this.contact || contact.id._serialized === this.contact.id._serialized) {
-				return;
-			}
 
-			this.deviceService!.handleMessage({
-				triggered_from: message.from,
-				body: message.body,
-				contact,
-				isGroup,
-				fromPoll: false,
-				client_id: this.client_id,
-				message_id: message.id._serialized,
-			});
-			if (isGroup) {
-				const groupService = new GroupMergeService(this.userService.getUser());
-				groupService.sendGroupReply(this.client, {
-					chat: chat as GroupChat,
-					message,
+			if (message.body) {
+				this.handledMessage.set(message.id._serialized, null);
+				if (!this.contact || contact.id._serialized === this.contact.id._serialized) {
+					return;
+				}
+
+				this.deviceService!.handleMessage({
+					triggered_from: message.from,
+					body: message.body,
 					contact,
-					deviceService: this.deviceService!,
+					isGroup,
+					fromPoll: false,
+					client_id: this.client_id,
+					message_id: message.id._serialized,
 				});
+				if (isGroup) {
+					const groupService = new GroupMergeService(this.userService.getUser());
+					groupService.sendGroupReply(this.client, {
+						chat: chat as GroupChat,
+						message,
+						contact,
+						deviceService: this.deviceService!,
+					});
+				}
 			}
 			if (this.userPrefService!.isMessagesLogEnabled()) {
 				const sheetId = this.userPrefService!.getMessageLogSheetId();
 				if (!sheetId) {
 					return;
+				}
+
+				let link: string | undefined = '';
+
+				if (message.hasMedia) {
+					try {
+						const media = await message.downloadMedia();
+						const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
+						const dest = __basedir + MISC_PATH + filename;
+						await FileUtils.createImageFile(media.data, dest);
+
+						link = await uploadSingleFile(filename, this.number!, dest);
+					} catch (err) {
+						Logger.error('Error while saving image message', err as Error);
+					}
 				}
 
 				const messageLogService = new MessageLogger(sheetId);
@@ -326,6 +344,7 @@ export class WhatsappProvider {
 					groupName: isGroup ? chat.name : '',
 					message: message.body,
 					isCaption: message.hasMedia && message.body ? 'Yes' : 'No',
+					link: link || '',
 				});
 			}
 		});

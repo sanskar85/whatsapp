@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { getAuthToken } from './SheetAuth';
+import { getAuthToken } from './Auth';
 const sheets = google.sheets('v4');
 
 export type LogMessage = {
@@ -11,6 +11,7 @@ export type LogMessage = {
 	groupName: string;
 	message: string;
 	isCaption: string;
+	link: string;
 };
 
 export default class MessageLogger {

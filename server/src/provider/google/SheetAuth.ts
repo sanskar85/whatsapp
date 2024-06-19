@@ -1,8 +1,7 @@
 import { google } from 'googleapis';
+import { getAuthToken } from './Auth';
 const sheets = google.sheets('v4');
 const drive = google.drive('v3');
-
-const SERVICE_FILE_PATH = '/static/google-sheet-service-file.json';
 
 const HEADERS = [
 	'Timestamp',
@@ -13,21 +12,10 @@ const HEADERS = [
 	'Group Name',
 	'Message',
 	'Is Caption',
+	'Link',
 ];
 
 export type HeaderType = typeof HEADERS;
-
-export async function getAuthToken() {
-	const oauth2Client = new google.auth.GoogleAuth({
-		keyFilename: __basedir + SERVICE_FILE_PATH,
-		scopes: [
-			'https://www.googleapis.com/auth/spreadsheets',
-			'https://www.googleapis.com/auth/drive',
-		],
-	});
-
-	return await oauth2Client.getClient();
-}
 
 export async function createSpreadSheet(title: string) {
 	const res = await sheets.spreadsheets.create({
