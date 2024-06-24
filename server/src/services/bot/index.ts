@@ -160,6 +160,7 @@ export default class BotService extends UserService {
 		message_body: string;
 		contact: WAWebJS.Contact;
 	}) {
+
 		const bots = await this.activeBots();
 		const last_messages = await this.lastMessages(
 			bots.map((bot) => bot.bot_id),
@@ -268,8 +269,8 @@ export default class BotService extends UserService {
 			else if (this.handledBotPerUser.has(`${message_from}_${bot.bot_id.toString()}`)) {
 				return;
 			}
-			await Delay(bot.response_delay_seconds);
 			this.responseSent(bot.bot_id, message_from);
+			await Delay(bot.response_delay_seconds);
 			Logger.info(
 				'BOT TRIGGERED',
 				JSON.stringify({
