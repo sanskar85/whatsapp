@@ -138,6 +138,7 @@ export default class MessageService {
 			}
 			let message = msg.message;
 			msg.status = MESSAGE_STATUS.SENT;
+			msg.sendAt = DateUtils.getMomentNow().toDate();
 			await msg.save();
 
 			if (message) {
