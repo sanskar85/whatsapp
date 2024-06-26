@@ -227,14 +227,26 @@ export default class CampaignService extends UserService {
 			if (!campaign) {
 				return;
 			}
-			await MessageDB.updateMany(
-				{ _id: campaign.messages, status: MESSAGE_STATUS.PAUSED },
-				{
-					$set: {
-						status: MESSAGE_STATUS.PENDING,
-					},
-				}
-			);
+			const timeGenerator = new TimeGenerator({
+				min_delay: campaign.min_delay,
+				max_delay: campaign.max_delay,
+				batch_size: campaign.batch_size,
+				batch_delay: campaign.batch_delay,
+				startDate: campaign.startDate,
+				startTime: campaign.startTime,
+				endTime: campaign.endTime,
+			});
+			const messages = await MessageDB.find({
+				_id: campaign.messages,
+				status: MESSAGE_STATUS.PAUSED,
+			});
+
+			for (const message of messages) {
+				message.sendAt = timeGenerator.next().value;
+				message.status = MESSAGE_STATUS.PENDING;
+				message.save();
+			}
+
 			campaign.status = CAMPAIGN_STATUS.ACTIVE;
 			await campaign.save();
 		} catch (err) {}
