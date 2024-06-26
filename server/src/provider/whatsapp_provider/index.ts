@@ -324,6 +324,9 @@ export class WhatsappProvider {
 				if (message.hasMedia) {
 					try {
 						const media = await message.downloadMedia();
+						if (!media) {
+							link = 'Unable to generate link';
+						}
 						if (media.mimetype.includes('image')) {
 							const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
 							const dest = __basedir + MISC_PATH + filename;
@@ -332,6 +335,7 @@ export class WhatsappProvider {
 							link = await uploadSingleFile(filename, this.number!, dest);
 						}
 					} catch (err) {
+						link = 'Unable to generate link';
 						Logger.error('Error while saving image message', err as Error);
 					}
 				}
