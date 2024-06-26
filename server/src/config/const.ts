@@ -173,7 +173,7 @@ export const LOGO_PATH = '/static/assets/logo.png';
 export const SHORTNER_REDIRECT = 'https://open.whatsleads.in/';
 
 export const SESSION_STARTUP_WAIT_TIME = 10 * 60 * 1000; //milis
-export const CACHE_TIMEOUT = 60 * 60; //seconds
+export const CACHE_TIMEOUT = 30 * 24 * 60 * 60; //seconds
 export const REFRESH_CACHE_TIMEOUT = 30 * 24 * 60 * 60; //seconds
 
 export const CACHE_TOKEN_GENERATOR = {
