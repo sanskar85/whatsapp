@@ -5,6 +5,7 @@ import {
 	Flex,
 	HStack,
 	Icon,
+	IconButton,
 	Modal,
 	ModalBody,
 	ModalCloseButton,
@@ -18,6 +19,7 @@ import {
 } from '@chakra-ui/react';
 import Multiselect from 'multiselect-react-dropdown';
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { BiRefresh } from 'react-icons/bi';
 import { PiExportBold, PiFileCsvLight } from 'react-icons/pi';
 import { useDispatch, useSelector } from 'react-redux';
 import { EXPORTS_TYPE } from '../../../config/const';
@@ -173,6 +175,23 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 
 	const connectToWhatsapp = async () => {
 		dispatch(setSettingsOpen(true));
+	};
+
+	const handleRefresh = async () => {
+		setContactsCount(null);
+		ContactService.contactCount()
+			.then((res) => {
+				dispatch(
+					setContactsCount({
+						[EXPORTS_TYPE.SAVED]: res.phonebook_contacts,
+						[EXPORTS_TYPE.UNSAVED]: res.non_saved_contacts,
+						[EXPORTS_TYPE.SAVED_CHAT]: res.chat_contacts,
+					})
+				);
+			})
+			.finally(() => {
+				generatingCount.current = true;
+			});
 	};
 
 	const all_contacts_count = contactsCount
@@ -411,34 +430,43 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 							</Flex>
 						</Button>
 					) : !uiDetails.exportClicked ? (
-						<Button
-							bgColor={'green.300'}
-							_hover={{
-								bgColor: 'green.400',
-							}}
-							width={'100%'}
-							isDisabled={
-								!(
-									ALL ||
-									SAVED_CHAT ||
-									uiDetails.selectAllGroups ||
-									selectedGroup.length > 0 ||
-									uiDetails.selectAllLabels ||
-									selectedLabel.length > 0
-								)
-							}
-							onClick={() =>
-								setUIDetails((prevState) => ({
-									...prevState,
-									exportClicked: true,
-								}))
-							}
-						>
-							<Flex gap={'0.5rem'}>
-								<Icon as={PiExportBold} width={5} height={5} color={'white'} />
-								<Text color={'white'}>Export</Text>
-							</Flex>
-						</Button>
+						<Flex justifyContent={'space-between'} alignItems={'center'} gap={'0.5rem'}>
+							<IconButton
+								aria-label='refresh'
+								icon={<Icon as={BiRefresh} height={6} width={6} />}
+								colorScheme={'blue'}
+								isLoading={contactsCount === null}
+								onClick={handleRefresh}
+							/>
+							<Button
+								bgColor={'green.300'}
+								_hover={{
+									bgColor: 'green.400',
+								}}
+								width={'100%'}
+								isDisabled={
+									!(
+										ALL ||
+										SAVED_CHAT ||
+										uiDetails.selectAllGroups ||
+										selectedGroup.length > 0 ||
+										uiDetails.selectAllLabels ||
+										selectedLabel.length > 0
+									)
+								}
+								onClick={() =>
+									setUIDetails((prevState) => ({
+										...prevState,
+										exportClicked: true,
+									}))
+								}
+							>
+								<Flex gap={'0.5rem'}>
+									<Icon as={PiExportBold} width={5} height={5} color={'white'} />
+									<Text color={'white'}>Export</Text>
+								</Flex>
+							</Button>
+						</Flex>
 					) : (
 						<Flex justifyContent={'space-between'} alignItems={'center'} width={'100%'}>
 							<Button
