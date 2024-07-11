@@ -179,7 +179,7 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 
 	const handleRefresh = async () => {
 		try {
-			setContactsCount(null);
+			dispatch(setContactsCount(null));
 			await GroupService.refreshGroups();
 			const res = await ContactService.contactCount();
 			dispatch(
