@@ -430,7 +430,12 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 							</Flex>
 						</Button>
 					) : !uiDetails.exportClicked ? (
-						<Flex justifyContent={'space-between'} alignItems={'center'} gap={'0.5rem'}>
+						<Flex
+							justifyContent={'space-between'}
+							alignItems={'center'}
+							gap={'0.5rem'}
+							width={'full'}
+						>
 							<IconButton
 								aria-label='refresh'
 								icon={<Icon as={BiRefresh} height={6} width={6} />}
