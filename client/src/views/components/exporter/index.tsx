@@ -178,20 +178,20 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 	};
 
 	const handleRefresh = async () => {
-		setContactsCount(null);
-		ContactService.contactCount()
-			.then((res) => {
-				dispatch(
-					setContactsCount({
-						[EXPORTS_TYPE.SAVED]: res.phonebook_contacts,
-						[EXPORTS_TYPE.UNSAVED]: res.non_saved_contacts,
-						[EXPORTS_TYPE.SAVED_CHAT]: res.chat_contacts,
-					})
-				);
-			})
-			.finally(() => {
-				generatingCount.current = true;
-			});
+		try {
+			setContactsCount(null);
+			await GroupService.refreshGroups();
+			const res = await ContactService.contactCount();
+			dispatch(
+				setContactsCount({
+					[EXPORTS_TYPE.SAVED]: res.phonebook_contacts,
+					[EXPORTS_TYPE.UNSAVED]: res.non_saved_contacts,
+					[EXPORTS_TYPE.SAVED_CHAT]: res.chat_contacts,
+				})
+			);
+		} catch (err) {
+			//ignored
+		}
 	};
 
 	const all_contacts_count = contactsCount
