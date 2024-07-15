@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Types } from 'mongoose';
 import { z } from 'zod';
+import { BOT_TRIGGER_OPTIONS } from '../../config/const';
 import APIError from '../../errors/api-errors';
 import IPolls from '../../types/polls';
 
@@ -51,6 +52,8 @@ export type MergeGroupValidationResult = {
 	max_delay: number;
 	canSendAdmin: boolean;
 	multiple_responses: boolean;
+	triggers: string[];
+	options: BOT_TRIGGER_OPTIONS;
 };
 
 export async function CreateGroupValidator(req: Request, res: Response, next: NextFunction) {
@@ -204,6 +207,13 @@ export async function MergeGroupValidator(req: Request, res: Response, next: Nex
 			min_delay: z.number().positive().default(2),
 			max_delay: z.number().positive().default(5),
 			canSendAdmin: z.boolean().default(false),
+			triggers: z.string().array().default([]),
+			options: z.enum([
+				BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE,
+				BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE,
+				BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE,
+				BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE,
+			]),
 		})
 		.refine((obj) => obj.group_ids.length !== 0);
 	const validationResult = reqValidator.safeParse(req.body);

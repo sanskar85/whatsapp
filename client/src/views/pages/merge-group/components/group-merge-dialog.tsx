@@ -1,4 +1,4 @@
-import { AddIcon, DeleteIcon, SearchIcon } from '@chakra-ui/icons';
+import { AddIcon, CheckIcon, DeleteIcon, SearchIcon } from '@chakra-ui/icons';
 import {
 	Box,
 	Button,
@@ -49,7 +49,9 @@ import {
 	addPrivateReplySaved,
 	addPrivateReplyUnsaved,
 	addSelectedGroup,
+	addTrigger,
 	clearEditMergeGroup,
+	removeAllTriggers,
 	removeGroupReplySaved,
 	removeGroupReplyUnsaved,
 	removePrivateReplySaved,
@@ -75,6 +77,7 @@ import {
 	setPrivateReplyUnsavedSharedContactCards,
 	setPrivateReplyUnsavedText,
 	setRestrictedNumbers,
+	setTriggerAtIndex,
 	toggleMultipleResponses,
 	toggleRandomString,
 	toggleReplyBusinessOnly,
@@ -202,6 +205,62 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 							/>
 						</FormControl>
 						<Text fontSize={'large'}>Reply Settings</Text>
+						<Box flex={1}>
+							<FormControl display={'flex'} flexDirection={'column'} gap={2}>
+								<Flex justifyContent={'space-between'} alignItems={'center'}>
+									<Text className='text-gray-700 dark:text-gray-400'>Triggers</Text>
+									<Flex justifyContent={'flex-end'} alignItems={'center'} gap={'1rem'}>
+										<IconButton
+											isRound={true}
+											variant='solid'
+											aria-label='Done'
+											size='xs'
+											icon={
+												editSelectedGroup.triggers.length === 0 ? (
+													<CheckIcon color='white' />
+												) : (
+													<></>
+												)
+											}
+											onClick={() => dispatch(removeAllTriggers())}
+											className={`${
+												editSelectedGroup.triggers.length === 0 ? '!bg-[#4CB072]' : '!bg-[#A6A6A6] '
+											} hover:!bg-green-700 `}
+										/>
+										<Text fontSize='sm' ml={'-0.5rem'}>
+											Default Message
+										</Text>
+										<Button
+											variant='solid'
+											colorScheme='green'
+											leftIcon={<AddIcon color='white' />}
+											onClick={() => dispatch(addTrigger())}
+										>
+											<Text fontSize='sm'>Add Trigger</Text>
+										</Button>
+									</Flex>
+								</Flex>
+								{editSelectedGroup.triggers.map((t, index) => (
+									<Textarea
+										width={'full'}
+										key={index}
+										minHeight={'70px'}
+										placeholder={`ex. Trigger ${index + 1}`}
+										border={'none'}
+										className='text-black  !bg-[#ECECEC]'
+										_placeholder={{ opacity: 0.4, color: 'inherit' }}
+										_focus={{ border: 'none', outline: 'none' }}
+										value={t ?? ''}
+										onChange={(e) => dispatch(setTriggerAtIndex({ index, value: e.target.value }))}
+									/>
+								))}
+								{editSelectedGroup.triggers.length === 0 && (
+									<Text textAlign={'center'}>
+										No Triggers Added. This bot will run for every message.
+									</Text>
+								)}
+							</FormControl>
+						</Box>
 						<Box flex={1}>
 							<Flex gap={4}>
 								<DelayInput

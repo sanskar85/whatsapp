@@ -1,4 +1,5 @@
 import { Document } from 'mongoose';
+import { BOT_TRIGGER_OPTIONS } from '../../config/const';
 import IContactCard from '../contact-cards';
 import IPolls from '../polls';
 import IUpload from '../uploads';
@@ -39,4 +40,6 @@ export default interface IMergedGroup extends Document {
 	max_delay: number;
 	canSendAdmin: boolean;
 	multiple_responses: boolean;
+	triggers: string[];
+	options: BOT_TRIGGER_OPTIONS;
 }

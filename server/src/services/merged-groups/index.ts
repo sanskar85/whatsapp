@@ -2,7 +2,7 @@ import fs from 'fs';
 import { Types } from 'mongoose';
 import Logger from 'n23-logger';
 import WAWebJS, { MessageMedia, Poll } from 'whatsapp-web.js';
-import { ATTACHMENTS_PATH } from '../../config/const';
+import { ATTACHMENTS_PATH, BOT_TRIGGER_OPTIONS } from '../../config/const';
 import { GroupPrivateReplyDB, GroupReplyDB } from '../../repository/group-reply';
 import MergedGroupDB from '../../repository/merged-groups';
 import IContactCard from '../../types/contact-cards';
@@ -36,6 +36,8 @@ const processGroup = (group: IMergedGroup) => {
 		active: group.active ?? true,
 		canSendAdmin: group.canSendAdmin ?? false,
 		multiple_responses: group.multiple_responses ?? false,
+		triggers: group.triggers ?? [],
+		options: group.options ?? BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE,
 	};
 };
 
@@ -89,6 +91,8 @@ export default class GroupMergeService {
 			max_delay: number;
 			canSendAdmin: boolean;
 			multiple_responses: boolean;
+			triggers: string[];
+			options: BOT_TRIGGER_OPTIONS;
 		}
 	) {
 		const group = await MergedGroupDB.create({
@@ -136,6 +140,8 @@ export default class GroupMergeService {
 			max_delay: number;
 			canSendAdmin: boolean;
 			multiple_responses: boolean;
+			triggers: string[];
+			options: BOT_TRIGGER_OPTIONS;
 		}
 	) {
 		let merged_group = await MergedGroupDB.findById(id);
@@ -165,6 +171,8 @@ export default class GroupMergeService {
 					...(details.multiple_responses !== undefined && {
 						multiple_responses: details.multiple_responses,
 					}),
+					...(details.triggers && { triggers: details.triggers }),
+					...(details.options && { options: details.options }),
 				},
 			}
 		);

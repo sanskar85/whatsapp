@@ -64,4 +64,6 @@ type MergedGroup = {
 	active: boolean;
 	canSendAdmin: boolean;
 	multiple_responses: boolean;
+	triggers: string[];
+	options: BOT_TRIGGER_OPTIONS;
 };

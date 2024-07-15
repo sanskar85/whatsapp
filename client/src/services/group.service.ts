@@ -18,6 +18,8 @@ function processMergedGroup(group: any) {
 		active: group.active,
 		canSendAdmin: group.canSendAdmin,
 		multiple_responses: group.multiple_responses,
+		options: group.options,
+		triggers: group.triggers,
 	};
 }
 
@@ -133,6 +135,8 @@ export default class GroupService {
 		restricted_numbers: string[];
 		canSendAdmin: boolean;
 		multiple_responses: boolean;
+		triggers: string[];
+		options: string;
 	}) {
 		try {
 			const { data } = await APIInstance.post(`/whatsapp/groups/merge`, {
@@ -149,6 +153,8 @@ export default class GroupService {
 				random_string: details.random_string,
 				canSendAdmin: details.canSendAdmin,
 				multiple_responses: details.multiple_responses,
+				triggers: details.triggers,
+				options: details.options,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {
@@ -218,6 +224,8 @@ export default class GroupService {
 			random_string: boolean;
 			canSendAdmin: boolean;
 			multiple_responses: boolean;
+			triggers: string[];
+			options: string;
 		}
 	) {
 		try {
@@ -235,6 +243,8 @@ export default class GroupService {
 				random_string: details.random_string,
 				canSendAdmin: details.canSendAdmin,
 				multiple_responses: details.multiple_responses,
+				triggers: details.triggers,
+				options: details.options,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {

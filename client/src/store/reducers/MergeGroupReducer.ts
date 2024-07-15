@@ -21,6 +21,8 @@ const initialState: MergeGroupState = {
 		active: true,
 		canSendAdmin: false,
 		multiple_responses: false,
+		triggers: [],
+		options: 'EXACT_MATCH_CASE',
 	},
 	uiDetails: {
 		isSaving: false,
@@ -93,6 +95,8 @@ const MergeGroupSlice = createSlice({
 				state.editSelectedGroup.random_string = group.random_string;
 				state.editSelectedGroup.canSendAdmin = group.canSendAdmin;
 				state.editSelectedGroup.multiple_responses = group.multiple_responses;
+				state.editSelectedGroup.triggers = group.triggers;
+				state.editSelectedGroup.options = group.options;
 			}
 		},
 		setActive: (
@@ -116,6 +120,21 @@ const MergeGroupSlice = createSlice({
 		},
 		setName: (state, action: PayloadAction<string>) => {
 			state.editSelectedGroup.name = action.payload;
+		},
+		setTriggerAtIndex: (state, action: PayloadAction<{ index: number; value: string }>) => {
+			state.editSelectedGroup.triggers[action.payload.index] = action.payload.value;
+		},
+		addTrigger: (state) => {
+			state.editSelectedGroup.triggers.push('');
+		},
+		removeTrigger: (state, action: PayloadAction<number>) => {
+			state.editSelectedGroup.triggers.splice(action.payload, 1);
+		},
+		removeAllTriggers: (state) => {
+			state.editSelectedGroup.triggers = [];
+		},
+		setOptions: (state, action: PayloadAction<typeof initialState.editSelectedGroup.options>) => {
+			state.editSelectedGroup.options = action.payload;
 		},
 		setGroups: (state, action: PayloadAction<string>) => {
 			state.editSelectedGroup.groups.push(action.payload);
@@ -401,6 +420,11 @@ export const {
 	removePrivateReplySaved,
 	removePrivateReplyUnsaved,
 	toggleMultipleResponses,
+	addTrigger,
+	removeAllTriggers,
+	removeTrigger,
+	setOptions,
+	setTriggerAtIndex,
 } = MergeGroupSlice.actions;
 
 export default MergeGroupSlice.reducer;
