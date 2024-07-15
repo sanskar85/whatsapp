@@ -6,6 +6,7 @@ export default interface IGroupReply extends Document {
 	from: string;
 	mergedGroup: IMergedGroup;
 	group_name: string;
+	unique_id: string;
 	createdAt: Date;
 	updatedAt: Date;
 }

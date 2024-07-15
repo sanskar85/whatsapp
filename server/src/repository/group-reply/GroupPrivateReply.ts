@@ -15,11 +15,12 @@ const schema = new mongoose.Schema<IGroupPrivateReply>(
 			ref: 'MergedGroup',
 		},
 		group_name: String,
+		unique_id: String,
 	},
 	{ timestamps: true }
 );
 
-schema.index({ user: 1, from: 1, mergedGroup: 1 }, { unique: true });
+schema.index({ user: 1, from: 1, mergedGroup: 1, unique_id: 1 }, { unique: true });
 
 const GroupPrivateReplyDB = mongoose.model<IGroupPrivateReply>('GroupPrivateReply', schema);
 

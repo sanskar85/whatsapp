@@ -376,13 +376,16 @@ export default class GroupMergeService {
 			}[]
 		) {
 			if (!doc) return;
-			if (!doc.multiple_responses) {
-				try {
-					await GroupReplyDB.create({ ...createDocData, mergedGroup: doc._id });
-				} catch (err) {
-					return;
-				}
+			try {
+				await GroupReplyDB.create({
+					...createDocData,
+					mergedGroup: doc._id,
+					unique_id: doc.multiple_responses ? message.id._serialized : 'only-once-key',
+				});
+			} catch (err) {
+				return;
 			}
+
 			for (const reply of allReplies) {
 				try {
 					const { text, attachments, shared_contact_cards, polls } = reply;
@@ -460,7 +463,11 @@ export default class GroupMergeService {
 			if (!doc) return;
 			if (!doc.multiple_responses) {
 				try {
-					await GroupPrivateReplyDB.create({ ...createDocData, mergedGroup: doc._id });
+					await GroupPrivateReplyDB.create({
+						...createDocData,
+						mergedGroup: doc._id,
+						unique_id: doc.multiple_responses ? message.id._serialized : 'only-once-key',
+					});
 				} catch (err) {
 					return;
 				}
