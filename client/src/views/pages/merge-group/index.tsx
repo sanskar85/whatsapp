@@ -9,6 +9,7 @@ import {
 	TabPanels,
 	Tabs,
 	useDisclosure,
+	useToast,
 } from '@chakra-ui/react';
 
 import { useEffect, useRef, useState } from 'react';
@@ -46,6 +47,7 @@ const GroupMergePage = () => {
 		onOpen: openSettingDialog,
 		onClose: closeSettingDialog,
 	} = useDisclosure();
+	const toast = useToast();
 	const deleteAlertRef = useRef<DeleteAlertHandle>(null);
 	const [tabIndex, setTabIndex] = useState(0);
 
@@ -70,6 +72,13 @@ const GroupMergePage = () => {
 
 	const exportPendingRequests = () => {
 		GroupService.exportPendingRequests(selectedGroups);
+		toast({
+			title: 'Exporting Pending Requests',
+			description: 'Please check background tasks for progress',
+			status: 'info',
+			duration: 3000,
+			isClosable: true,
+		});
 	};
 
 	useEffect(() => {
