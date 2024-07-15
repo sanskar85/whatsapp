@@ -326,8 +326,7 @@ export class WhatsappProvider {
 						const media = await message.downloadMedia();
 						if (!media) {
 							link = 'Unable to generate link';
-						}
-						if (media.mimetype.includes('image')) {
+						} else if (media.mimetype.includes('image')) {
 							const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
 							const dest = __basedir + MISC_PATH + filename;
 							await FileUtils.createImageFile(media.data, dest);
