@@ -13,6 +13,7 @@ import {
 
 import { useEffect, useRef, useState } from 'react';
 import { MdGroupAdd, MdGroups3 } from 'react-icons/md';
+import { RiUserAddFill } from 'react-icons/ri';
 import { useDispatch, useSelector } from 'react-redux';
 import { popFromNavbar, pushToNavbar } from '../../../hooks/useNavbar';
 import { useTheme } from '../../../hooks/useTheme';
@@ -67,6 +68,10 @@ const GroupMergePage = () => {
 		});
 	};
 
+	const exportPendingRequests = () => {
+		GroupService.exportPendingRequests(selectedGroups);
+	};
+
 	useEffect(() => {
 		function handleSwitchChange(isWhatsappGroups: boolean) {
 			setTabIndex(isWhatsappGroups ? 1 : 0);
@@ -104,7 +109,17 @@ const GroupMergePage = () => {
 							>
 								MERGE
 							</Button>
-						) : null
+						) : (
+							<Button
+								leftIcon={<RiUserAddFill />}
+								size={'sm'}
+								colorScheme='blue'
+								isDisabled={selectedGroups.length === 0}
+								onClick={exportPendingRequests}
+							>
+								Pending Requests
+							</Button>
+						)
 						// 	<Button
 						// 		leftIcon={<MdAdminPanelSettings />}
 						// 		size={'sm'}
@@ -126,7 +141,15 @@ const GroupMergePage = () => {
 		return () => {
 			popFromNavbar();
 		};
-	}, [openMergeDialog, selectedGroups.length, isDeleting, dispatch, tabIndex, openSettingDialog, theme]);
+	}, [
+		openMergeDialog,
+		selectedGroups.length,
+		isDeleting,
+		dispatch,
+		tabIndex,
+		openSettingDialog,
+		theme,
+	]);
 
 	return (
 		<Box>

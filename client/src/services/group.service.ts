@@ -349,4 +349,11 @@ export default class GroupService {
 		});
 		return true;
 	}
+
+	static async exportPendingRequests(selectedGroups: string[]) {
+		await APIInstance.post(`/whatsapp/groups/pending-requests`, {
+			groups: selectedGroups,
+		});
+		return true;
+	}
 }

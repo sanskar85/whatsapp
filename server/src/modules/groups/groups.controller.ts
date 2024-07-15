@@ -537,7 +537,7 @@ async function updateGroupsDetails(req: Request, res: Response, next: NextFuncti
 
 async function pendingRequests(req: Request, res: Response, next: NextFunction) {
 	const { client_id } = req.locals;
-	const ids_to_export = Array.isArray(req.query.groups ?? '') ? (req.query.groups as string[]) : [];
+	const ids_to_export = Array.isArray(req.body.groups ?? '') ? (req.body.groups as string[]) : [];
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp) {
