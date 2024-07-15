@@ -290,6 +290,7 @@ export default class GroupMergeService {
 		const admin = chat.participants.find(
 			(chatObj) => chatObj.id._serialized === contact.id._serialized
 		);
+		const message_body = message.body;
 
 		docs.forEach(async (doc) => {
 			if (doc.reply_business_only && !contact.isBusiness) {
@@ -298,6 +299,57 @@ export default class GroupMergeService {
 			if (!doc.canSendAdmin && admin && (admin.isAdmin || admin.isSuperAdmin)) {
 				return;
 			}
+
+			let cond = true;
+			if (doc.triggers.length > 0) {
+				cond = false;
+				for (const trigger of doc.triggers) {
+					if (doc.options === BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE) {
+						cond = cond || message_body.toLowerCase() === trigger.toLowerCase();
+					}
+					if (doc.options === BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE) {
+						cond = cond || message_body === trigger;
+					}
+
+					if (doc.options === BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE) {
+						const lowerCaseSentence = trigger.toLowerCase();
+						const lowerCaseParagraph = message_body.toLowerCase();
+
+						// Split the paragraph into words
+						const words_paragraph = lowerCaseParagraph.split(/\s+/);
+						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+						cond =
+							cond ||
+							words_paragraph.some(
+								(_, index, arr) =>
+									arr.slice(index, index + sentence_paragraph.length).join() ===
+									sentence_paragraph.join()
+							);
+					}
+					if (doc.options === BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE) {
+						const lowerCaseSentence = trigger;
+						const lowerCaseParagraph = message_body;
+
+						// Split the paragraph into words
+						const words_paragraph = lowerCaseParagraph.split(/\s+/);
+						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+						cond =
+							cond ||
+							words_paragraph.some(
+								(_, index, arr) =>
+									arr.slice(index, index + sentence_paragraph.length).join() ===
+									sentence_paragraph.join()
+							);
+					}
+				}
+			}
+
+			if (!cond) {
+				return;
+			}
+
 			for (const restricted_numbers of doc.restricted_numbers) {
 				const parsed_csv = await FileUtils.readCSV(restricted_numbers.filename);
 				if (parsed_csv && parsed_csv.findIndex((el) => el.number === contact.id.user) !== -1) {
