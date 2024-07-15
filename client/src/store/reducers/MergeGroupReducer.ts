@@ -20,6 +20,7 @@ const initialState: MergeGroupState = {
 		reply_business_only: false,
 		active: true,
 		canSendAdmin: false,
+		multiple_responses: false,
 	},
 	uiDetails: {
 		isSaving: false,
