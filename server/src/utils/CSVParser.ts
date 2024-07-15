@@ -743,4 +743,39 @@ export default class CSVParser {
 			emptyFieldValue: '',
 		});
 	}
+
+	static exportPendingGroupParticipants(contacts: (TContact & { group_name: string })[]) {
+		const keys = [
+			{
+				field: 'group_name',
+				title: 'Group Name',
+			},
+			{
+				field: 'public_name',
+				title: 'Whatsapp Public Name',
+			},
+			{
+				field: 'name',
+				title: 'Name',
+			},
+			{
+				field: 'number',
+				title: 'Number',
+			},
+			{
+				field: 'isBusiness',
+				title: 'Is Business',
+			},
+			{
+				field: 'country',
+				title: 'Country',
+			},
+		];
+
+		const csv = json2csv(contacts, {
+			keys: keys,
+			emptyFieldValue: '',
+		});
+		return csv;
+	}
 }

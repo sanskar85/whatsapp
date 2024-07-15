@@ -1,6 +1,6 @@
 import fs from 'fs';
 import Logger from 'n23-logger';
-import WAWebJS, { BusinessContact, Contact, GroupChat } from 'whatsapp-web.js';
+import WAWebJS, { BusinessContact, Contact, ContactId, GroupChat } from 'whatsapp-web.js';
 import { COUNTRIES, IS_PRODUCTION, SESSION_STARTUP_WAIT_TIME } from '../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../errors/internal-errors';
 import { WhatsappProvider } from '../provider/whatsapp_provider';
@@ -170,7 +170,7 @@ export default class WhatsappUtils {
 		}
 		const country = COUNTRIES[country_code as string];
 		return {
-			name: contact.name,
+			name: contact.name ?? '',
 			number: contact.number,
 			isBusiness: (contact.isBusiness ? 'Business' : 'Personal') as 'Business' | 'Personal',
 			country,
@@ -305,6 +305,22 @@ export default class WhatsappUtils {
 		return group_participants.filter((participant) => participant !== null) as T extends true
 			? TGroupBusinessContact[]
 			: TGroupContact[];
+	}
+
+	async getPendingGroupMembershipRequests(chat: GroupChat) {
+		const requests = await chat.getGroupMembershipRequests();
+		return await Promise.all(
+			requests.map(async (request) => {
+				const contact = await this.whatsapp
+					.getClient()
+					.getContactById((request.id as ContactId)._serialized);
+				const contact_details = await this.getContactDetails(contact);
+				return {
+					...contact_details,
+					group_name: chat.name,
+				};
+			})
+		);
 	}
 
 	async getContactsByLabel(

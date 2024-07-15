@@ -45,6 +45,9 @@ router
 	.post(GroupsController.mergeGroup);
 
 router.route('/refresh').post(VerifyUser, VerifyClientID, GroupsController.refreshGroup);
+router
+	.route('/pending-requests')
+	.post(VerifyUser, VerifyClientID, GroupsController.pendingRequests);
 
 router
 	.route('/')

@@ -535,6 +535,72 @@ async function updateGroupsDetails(req: Request, res: Response, next: NextFuncti
 	});
 }
 
+async function pendingRequests(req: Request, res: Response, next: NextFunction) {
+	const { client_id } = req.locals;
+	const ids_to_export = Array.isArray(req.query.groups ?? '') ? (req.query.groups as string[]) : [];
+
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
+	}
+	if (!whatsapp.isReady()) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
+	}
+	const whatsappUtils = new WhatsappUtils(whatsapp);
+	const taskService = new TaskService(req.locals.user.getUser());
+
+	const task_id = await taskService.createTask(
+		TASK_TYPE.EXPORT_GROUP_CONTACTS,
+		TASK_RESULT_TYPE.CSV,
+		{
+			description: `Export Groups Pending Participants.`,
+		}
+	);
+
+	Respond({
+		res,
+		status: 201,
+	});
+
+	try {
+		const groups = (
+			await Promise.all(
+				ids_to_export.map(async (group_id) => {
+					try {
+						const chat = await whatsapp.getClient().getChatById(group_id);
+						if (!chat.isGroup) {
+							throw new Error('Group not found');
+						}
+						return chat as GroupChat;
+					} catch (err) {
+						return null;
+					}
+				})
+			)
+		).filter((chat) => chat !== null) as GroupChat[];
+
+		const participants = (
+			await Promise.all(
+				groups.map((groupChat) => whatsappUtils.getPendingGroupMembershipRequests(groupChat))
+			)
+		).flat();
+
+		const data = CSVParser.exportPendingGroupParticipants(participants);
+
+		const file_name = `Exported Pending Participants.csv`;
+
+		const file_path = __basedir + TASK_PATH + task_id.toString() + '.csv';
+
+		await FileUtils.writeFile(file_path, data);
+
+		taskService.markCompleted(task_id, file_name);
+		whatsapp.sendToClient(SOCKET_RESPONSES.TASK_COMPLETED, task_id.toString());
+	} catch (err) {
+		taskService.markFailed(task_id);
+		whatsapp.sendToClient(SOCKET_RESPONSES.TASK_FAILED, task_id.toString());
+	}
+}
+
 const GroupsController = {
 	groups,
 	exportGroups,
@@ -549,6 +615,7 @@ const GroupsController = {
 	updateMergedGroup,
 	updateGroupsPicture,
 	updateGroupsDetails,
+	pendingRequests,
 };
 
 export default GroupsController;
