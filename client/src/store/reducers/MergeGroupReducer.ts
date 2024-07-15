@@ -92,6 +92,7 @@ const MergeGroupSlice = createSlice({
 				state.editSelectedGroup.reply_business_only = group.reply_business_only;
 				state.editSelectedGroup.random_string = group.random_string;
 				state.editSelectedGroup.canSendAdmin = group.canSendAdmin;
+				state.editSelectedGroup.multiple_responses = group.multiple_responses;
 			}
 		},
 		setActive: (
