@@ -12,7 +12,7 @@ const botSchema = new mongoose.Schema<IBot>({
 		enum: Object.values(BOT_TRIGGER_TO),
 		default: BOT_TRIGGER_TO.ALL,
 	},
-	trigger: String,
+	trigger: [String],
 	trigger_gap_seconds: Number,
 	response_delay_seconds: Number,
 	startAt: String,

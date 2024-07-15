@@ -89,7 +89,7 @@ export default function AllResponders() {
 						{all_bots.map((bot, index) => (
 							<Tr key={index} color={theme === 'dark' ? 'white' : 'black'}>
 								<Td>
-									{bot.trigger.split('\n').map((trigger, index) => (
+									{bot.trigger.map((trigger, index) => (
 										<Box key={index}>
 											{trigger.length > 20 ? trigger.substring(0, 18) + '...' : trigger}
 										</Box>

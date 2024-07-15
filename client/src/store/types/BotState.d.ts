@@ -28,14 +28,14 @@ export type BotState = {
 export type Bot = {
 	bot_id: string;
 	respond_to: string;
-	trigger: string;
+	trigger: string[];
 	trigger_gap_seconds: number;
 	response_delay_seconds: number;
 	options: string;
 	startAt: string;
 	endAt: string;
 	message: string;
-	random_string:boolean;
+	random_string: boolean;
 	attachments: string[];
 	shared_contact_cards: string[];
 	isActive: boolean;

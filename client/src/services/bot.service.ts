@@ -3,7 +3,7 @@ import { Bot } from '../store/types/BotState';
 
 export default class BotService {
 	static async createBot(data: {
-		trigger: string;
+		trigger: string[];
 		message: string;
 		random_string: boolean;
 		respond_to: string;
@@ -41,7 +41,7 @@ export default class BotService {
 			const res = response.bot;
 			return {
 				bot_id: res.bot_id ?? '',
-				trigger: res.trigger ?? '',
+				trigger: res.trigger ?? [],
 				options: res.options ?? '',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
@@ -69,7 +69,7 @@ export default class BotService {
 
 			return {
 				bot_id: res.bot_id ?? '',
-				trigger: res.trigger ?? '',
+				trigger: res.trigger ?? [],
 				options: res.options ?? '',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
@@ -95,7 +95,7 @@ export default class BotService {
 			const { data: response } = await APIInstance.get(`/whatsapp/bot`);
 			return response.bots.map((res: Bot) => ({
 				bot_id: res.bot_id ?? '',
-				trigger: res.trigger ?? '',
+				trigger: res.trigger ?? [],
 				options: res.options ?? '',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
@@ -128,7 +128,7 @@ export default class BotService {
 	static async updateBot(
 		id: string,
 		data: {
-			trigger: string;
+			trigger: string[];
 			message: string;
 			random_string: boolean;
 			respond_to: string;
@@ -165,7 +165,7 @@ export default class BotService {
 			const { data: response } = await APIInstance.patch(`/whatsapp/bot/${id}`, data);
 			const res = response.bot as {
 				bot_id: string;
-				trigger: string;
+				trigger: string[];
 				options: string;
 				startAt: string;
 				endAt: string;
@@ -198,7 +198,7 @@ export default class BotService {
 
 			return {
 				bot_id: res.bot_id ?? '',
-				trigger: res.trigger ?? '',
+				trigger: res.trigger ?? [],
 				options: res.options ?? '',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',

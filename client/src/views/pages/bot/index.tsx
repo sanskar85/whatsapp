@@ -1,4 +1,4 @@
-import { CheckIcon } from '@chakra-ui/icons';
+import { AddIcon, CheckIcon } from '@chakra-ui/icons';
 import {
 	AbsoluteCenter,
 	Box,
@@ -27,6 +27,8 @@ import BotService from '../../../services/bot.service';
 import { StoreNames, StoreState } from '../../../store';
 import {
 	addBot,
+	addTrigger,
+	removeAllTriggers,
 	reset,
 	setAddingBot,
 	setAttachments,
@@ -43,7 +45,7 @@ import {
 	setResponseDelayTime,
 	setResponseDelayType,
 	setStartAt,
-	setTrigger,
+	setTriggerAtIndex,
 	setTriggerGapTime,
 	setTriggerGapType,
 	toggleRandomString,
@@ -232,30 +234,48 @@ export default function Bot() {
 						gap={2}
 					>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Text className='text-gray-700 dark:text-gray-400'>Trigger</Text>
-							<Flex gap={2} alignItems={'center'}>
+							<Text className='text-gray-700 dark:text-gray-400'>Triggers</Text>
+							<Flex justifyContent={'flex-end'} alignItems={'center'} gap={'1rem'}>
 								<IconButton
 									isRound={true}
 									variant='solid'
 									aria-label='Done'
 									size='xs'
-									icon={!trigger ? <CheckIcon color='white' /> : <></>}
-									onClick={() => dispatch(setTrigger(''))}
+									icon={trigger.length === 0 ? <CheckIcon color='white' /> : <></>}
+									onClick={() => dispatch(removeAllTriggers())}
 									className={`${
-										!trigger ? '!bg-[#4CB072]' : '!bg-[#A6A6A6] '
+										trigger.length === 0 ? '!bg-[#4CB072]' : '!bg-[#A6A6A6] '
 									} hover:!bg-green-700 `}
 								/>
-								<Text fontSize='sm' color={theme === 'dark' ? 'white' : 'black'}>
+								<Text fontSize='sm' ml={'-0.5rem'} color={theme === 'dark' ? 'white' : 'black'}>
 									Default Message
 								</Text>
+								<Button
+									variant='solid'
+									colorScheme='green'
+									leftIcon={<AddIcon color='white' />}
+									onClick={() => dispatch(addTrigger())}
+								>
+									<Text fontSize='sm' color={theme === 'dark' ? 'white' : 'black'}>
+										Add Trigger
+									</Text>
+								</Button>
 							</Flex>
 						</Flex>
-						<TextAreaElement
-							value={trigger ?? ''}
-							onChange={(e) => dispatch(setTrigger(e.target.value))}
-							isInvalid={!!ui.triggerError}
-							placeholder={'ex. hello'}
-						/>
+						{trigger.map((t, index) => (
+							<TextAreaElement
+								key={index}
+								value={t ?? ''}
+								onChange={(e) => dispatch(setTriggerAtIndex({ index, value: e.target.value }))}
+								isInvalid={!!ui.triggerError}
+								placeholder={`ex. Trigger ${index + 1}`}
+							/>
+						))}
+						{trigger.length === 0 && (
+							<Text textAlign={'center'} color={theme === 'dark' ? 'gray.200' : 'gray.800'}>
+								No Triggers Added. This bot will run for every message.
+							</Text>
+						)}
 						{ui.triggerError && <FormErrorMessage>{ui.triggerError}</FormErrorMessage>}
 					</FormControl>
 

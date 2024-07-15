@@ -160,7 +160,6 @@ export default class BotService extends UserService {
 		message_body: string;
 		contact: WAWebJS.Contact;
 	}) {
-
 		const bots = await this.activeBots();
 		const last_messages = await this.lastMessages(
 			bots.map((bot) => bot.bot_id),
@@ -187,44 +186,55 @@ export default class BotService extends UserService {
 					return false;
 				}
 			}
-			if (bot.trigger === '') {
+			if (bot.trigger.length === 0) {
 				return true;
 			}
-			if (bot.options === BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE) {
-				return message_body.toLowerCase() === bot.trigger.toLowerCase();
+
+			let cond = false;
+
+			for (const trigger of bot.trigger) {
+				if (bot.options === BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE) {
+					cond = cond || message_body.toLowerCase() === trigger.toLowerCase();
+				}
+				if (bot.options === BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE) {
+					cond = cond || message_body === trigger;
+				}
+
+				if (bot.options === BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE) {
+					const lowerCaseSentence = trigger.toLowerCase();
+					const lowerCaseParagraph = message_body.toLowerCase();
+
+					// Split the paragraph into words
+					const words_paragraph = lowerCaseParagraph.split(/\s+/);
+					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+					cond =
+						cond ||
+						words_paragraph.some(
+							(_, index, arr) =>
+								arr.slice(index, index + sentence_paragraph.length).join() ===
+								sentence_paragraph.join()
+						);
+				}
+				if (bot.options === BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE) {
+					const lowerCaseSentence = trigger;
+					const lowerCaseParagraph = message_body;
+
+					// Split the paragraph into words
+					const words_paragraph = lowerCaseParagraph.split(/\s+/);
+					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+					cond =
+						cond ||
+						words_paragraph.some(
+							(_, index, arr) =>
+								arr.slice(index, index + sentence_paragraph.length).join() ===
+								sentence_paragraph.join()
+						);
+				}
 			}
-			if (bot.options === BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE) {
-				return message_body === bot.trigger;
-			}
 
-			if (bot.options === BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE) {
-				const lowerCaseSentence = bot.trigger.toLowerCase();
-				const lowerCaseParagraph = message_body.toLowerCase();
-
-				// Split the paragraph into words
-				const words_paragraph = lowerCaseParagraph.split(/\s+/);
-				const sentence_paragraph = lowerCaseSentence.split(/\s+/);
-
-				return words_paragraph.some(
-					(_, index, arr) =>
-						arr.slice(index, index + sentence_paragraph.length).join() === sentence_paragraph.join()
-				);
-			}
-			if (bot.options === BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE) {
-				const lowerCaseSentence = bot.trigger;
-				const lowerCaseParagraph = message_body;
-
-				// Split the paragraph into words
-				const words_paragraph = lowerCaseParagraph.split(/\s+/);
-				const sentence_paragraph = lowerCaseSentence.split(/\s+/);
-
-				return words_paragraph.some(
-					(_, index, arr) =>
-						arr.slice(index, index + sentence_paragraph.length).join() === sentence_paragraph.join()
-				);
-			}
-
-			return false;
+			return cond;
 		});
 	}
 
@@ -265,8 +275,7 @@ export default class BotService extends UserService {
 		botsEngaged.forEach(async (bot) => {
 			if (!bot.group_respond && (opts.isGroup || message_from.length > 12)) {
 				return;
-			}
-			else if (this.handledBotPerUser.has(`${message_from}_${bot.bot_id.toString()}`)) {
+			} else if (this.handledBotPerUser.has(`${message_from}_${bot.bot_id.toString()}`)) {
 				return;
 			}
 			this.responseSent(bot.bot_id, message_from);
@@ -479,7 +488,7 @@ export default class BotService extends UserService {
 		trigger_gap_seconds: number;
 		response_delay_seconds: number;
 		options: BOT_TRIGGER_OPTIONS;
-		trigger: string;
+		trigger: string[];
 		random_string: boolean;
 		message: string;
 		startAt: string;
@@ -548,7 +557,7 @@ export default class BotService extends UserService {
 			trigger_gap_seconds?: number;
 			response_delay_seconds?: number;
 			options?: BOT_TRIGGER_OPTIONS;
-			trigger?: string;
+			trigger?: string[];
 			startAt?: string;
 			endAt?: string;
 			random_string: boolean;
@@ -725,7 +734,7 @@ export default class BotService extends UserService {
 		responses.forEach((response) => {
 			response.triggered_at.BOT.forEach((triggered_at) => {
 				result.push({
-					trigger: bot.trigger,
+					trigger: bot.trigger.join(', '),
 					recipient: response.recipient,
 					triggered_at: DateUtils.getMoment(triggered_at).format('DD-MM-YYYY HH:mm:ss'),
 					triggered_by: 'BOT',
@@ -733,7 +742,7 @@ export default class BotService extends UserService {
 			});
 			response.triggered_at.POLL.forEach((triggered_at) => {
 				result.push({
-					trigger: bot.trigger,
+					trigger: bot.trigger.join(', '),
 					recipient: response.recipient,
 					triggered_at: DateUtils.getMoment(triggered_at).format('DD-MM-YYYY HH:mm:ss'),
 					triggered_by: 'POLL',

@@ -6,7 +6,7 @@ const initialState: BotState = {
 	all_bots: [],
 	details: {
 		bot_id: '',
-		trigger: '',
+		trigger: [],
 		message: '',
 		random_string: false,
 		respond_to: 'ALL',
@@ -123,9 +123,17 @@ const BotSlice = createSlice({
 				return bot;
 			});
 		},
-		setTrigger: (state, action: PayloadAction<typeof initialState.details.trigger>) => {
-			state.details.trigger = action.payload;
-			state.ui.triggerError = '';
+		setTriggerAtIndex: (state, action: PayloadAction<{ index: number; value: string }>) => {
+			state.details.trigger[action.payload.index] = action.payload.value;
+		},
+		addTrigger: (state) => {
+			state.details.trigger.push('');
+		},
+		removeTrigger: (state, action: PayloadAction<number>) => {
+			state.details.trigger.splice(action.payload, 1);
+		},
+		removeAllTriggers: (state) => {
+			state.details.trigger = [];
 		},
 		setMessage: (state, action: PayloadAction<typeof initialState.details.message>) => {
 			state.details.message = action.payload;
@@ -242,7 +250,10 @@ export const {
 	updateBot,
 	removeBot,
 	setSelectedBot,
-	setTrigger,
+	addTrigger,
+	removeAllTriggers,
+	removeTrigger,
+	setTriggerAtIndex,
 	setMessage,
 	toggleRandomString,
 	setRespondTo,

@@ -9,7 +9,7 @@ export type CreateBotValidationResult = {
 	trigger_gap_seconds: number;
 	response_delay_seconds: number;
 	options: BOT_TRIGGER_OPTIONS;
-	trigger: string;
+	trigger: string[];
 	random_string: boolean;
 	message: string;
 	startAt: string;
@@ -44,7 +44,7 @@ export type CreateBotValidationResult = {
 
 export async function CreateBotValidator(req: Request, res: Response, next: NextFunction) {
 	const reqValidator = z.object({
-		trigger: z.string().default(''),
+		trigger: z.string().array().default([]),
 		random_string: z.boolean().default(false),
 		message: z.string().trim().default(''),
 		respond_to: z.enum([
