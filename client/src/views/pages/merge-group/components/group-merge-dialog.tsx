@@ -6,6 +6,8 @@ import {
 	Flex,
 	FormControl,
 	FormLabel,
+	Grid,
+	GridItem,
 	Icon,
 	IconButton,
 	Input,
@@ -73,6 +75,7 @@ import {
 	setPrivateReplyUnsavedSharedContactCards,
 	setPrivateReplyUnsavedText,
 	setRestrictedNumbers,
+	toggleMultipleResponses,
 	toggleRandomString,
 	toggleReplyBusinessOnly,
 	toggleSendToAdmin,
@@ -211,32 +214,48 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 									value={editSelectedGroup.max_delay}
 									onChange={(num) => dispatch(setMaxDelay(num))}
 								/>
-								<VStack flex={1} justifyContent={'flex-end'} alignItems={'flex-start'} gap={'0'}>
-									<Checkbox
-										colorScheme='green'
-										size='sm'
-										isChecked={editSelectedGroup.reply_business_only}
-										onChange={() => dispatch(toggleReplyBusinessOnly())}
-									>
-										Reply Businesses Only
-									</Checkbox>
-									<Checkbox
-										colorScheme='green'
-										size='sm'
-										isChecked={editSelectedGroup.random_string}
-										onChange={() => dispatch(toggleRandomString())}
-									>
-										Append Random Text
-									</Checkbox>
-									<Checkbox
-										colorScheme='green'
-										size='sm'
-										isChecked={editSelectedGroup.canSendAdmin}
-										onChange={() => dispatch(toggleSendToAdmin())}
-									>
-										Send to admin
-									</Checkbox>
-								</VStack>
+								<Grid width={'50%'} className='grid-cols-2' mt={'1rem'}>
+									<GridItem>
+										<Checkbox
+											colorScheme='green'
+											size='sm'
+											isChecked={editSelectedGroup.reply_business_only}
+											onChange={() => dispatch(toggleReplyBusinessOnly())}
+										>
+											Reply Businesses Only
+										</Checkbox>
+									</GridItem>
+									<GridItem>
+										<Checkbox
+											colorScheme='green'
+											size='sm'
+											isChecked={editSelectedGroup.random_string}
+											onChange={() => dispatch(toggleRandomString())}
+										>
+											Append Random Text
+										</Checkbox>
+									</GridItem>
+									<GridItem>
+										<Checkbox
+											colorScheme='green'
+											size='sm'
+											isChecked={editSelectedGroup.canSendAdmin}
+											onChange={() => dispatch(toggleSendToAdmin())}
+										>
+											Send to admin
+										</Checkbox>
+									</GridItem>
+									<GridItem>
+										<Checkbox
+											colorScheme='green'
+											size='sm'
+											isChecked={!editSelectedGroup.multiple_responses}
+											onChange={() => dispatch(toggleMultipleResponses())}
+										>
+											Only Reply Once
+										</Checkbox>
+									</GridItem>
+								</Grid>
 							</Flex>
 						</Box>
 						<Box>

@@ -35,6 +35,7 @@ const processGroup = (group: IMergedGroup) => {
 		random_string: group.random_string ?? false,
 		active: group.active ?? true,
 		canSendAdmin: group.canSendAdmin ?? false,
+		multiple_responses: group.multiple_responses ?? false,
 	};
 };
 
@@ -87,6 +88,7 @@ export default class GroupMergeService {
 			min_delay: number;
 			max_delay: number;
 			canSendAdmin: boolean;
+			multiple_responses: boolean;
 		}
 	) {
 		const group = await MergedGroupDB.create({
@@ -133,6 +135,7 @@ export default class GroupMergeService {
 			min_delay: number;
 			max_delay: number;
 			canSendAdmin: boolean;
+			multiple_responses: boolean;
 		}
 	) {
 		let merged_group = await MergedGroupDB.findById(id);
@@ -159,6 +162,9 @@ export default class GroupMergeService {
 					...(details.min_delay && { min_delay: details.min_delay }),
 					...(details.max_delay && { max_delay: details.max_delay }),
 					...(details.canSendAdmin !== undefined && { canSendAdmin: details.canSendAdmin }),
+					...(details.multiple_responses !== undefined && {
+						multiple_responses: details.multiple_responses,
+					}),
 				},
 			}
 		);
@@ -310,10 +316,12 @@ export default class GroupMergeService {
 			}[]
 		) {
 			if (!doc) return;
-			try {
-				await GroupReplyDB.create({ ...createDocData, mergedGroup: doc._id });
-			} catch (err) {
-				return;
+			if (!doc.multiple_responses) {
+				try {
+					await GroupReplyDB.create({ ...createDocData, mergedGroup: doc._id });
+				} catch (err) {
+					return;
+				}
 			}
 			for (const reply of allReplies) {
 				try {
@@ -390,10 +398,12 @@ export default class GroupMergeService {
 			}[]
 		) {
 			if (!doc) return;
-			try {
-				await GroupPrivateReplyDB.create({ ...createDocData, mergedGroup: doc._id });
-			} catch (err) {
-				return;
+			if (!doc.multiple_responses) {
+				try {
+					await GroupPrivateReplyDB.create({ ...createDocData, mergedGroup: doc._id });
+				} catch (err) {
+					return;
+				}
 			}
 
 			for (const reply of allReplies) {

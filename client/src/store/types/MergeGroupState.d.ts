@@ -63,4 +63,5 @@ type MergedGroup = {
 	random_string: boolean;
 	active: boolean;
 	canSendAdmin: boolean;
+	multiple_responses: boolean;
 };

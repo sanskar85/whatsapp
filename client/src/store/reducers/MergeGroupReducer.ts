@@ -331,6 +331,9 @@ const MergeGroupSlice = createSlice({
 		toggleReplyBusinessOnly: (state) => {
 			state.editSelectedGroup.reply_business_only = !state.editSelectedGroup.reply_business_only;
 		},
+		toggleMultipleResponses: (state) => {
+			state.editSelectedGroup.multiple_responses = !state.editSelectedGroup.multiple_responses;
+		},
 		setRestrictedNumbers: (
 			state,
 			action: PayloadAction<typeof initialState.editSelectedGroup.restricted_numbers>
@@ -395,6 +398,7 @@ export const {
 	removeGroupReplyUnsaved,
 	removePrivateReplySaved,
 	removePrivateReplyUnsaved,
+	toggleMultipleResponses,
 } = MergeGroupSlice.actions;
 
 export default MergeGroupSlice.reducer;

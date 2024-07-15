@@ -50,6 +50,7 @@ export type MergeGroupValidationResult = {
 	min_delay: number;
 	max_delay: number;
 	canSendAdmin: boolean;
+	multiple_responses: boolean;
 };
 
 export async function CreateGroupValidator(req: Request, res: Response, next: NextFunction) {
@@ -198,6 +199,7 @@ export async function MergeGroupValidator(req: Request, res: Response, next: Nex
 				.refine((r) => !r.some((value) => !Types.ObjectId.isValid(value)))
 				.transform((r) => r.map((value) => new Types.ObjectId(value))),
 			reply_business_only: z.boolean().default(false),
+			multiple_responses: z.boolean().default(false),
 			random_string: z.boolean().default(false),
 			min_delay: z.number().positive().default(2),
 			max_delay: z.number().positive().default(5),

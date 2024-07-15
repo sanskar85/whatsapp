@@ -38,4 +38,5 @@ export default interface IMergedGroup extends Document {
 	min_delay: number;
 	max_delay: number;
 	canSendAdmin: boolean;
+	multiple_responses: boolean;
 }

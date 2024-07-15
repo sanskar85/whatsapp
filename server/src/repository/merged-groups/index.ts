@@ -116,6 +116,7 @@ const mergedGroupSchema = new mongoose.Schema<IMergedGroup>({
 	min_delay: Number,
 	max_delay: Number,
 	canSendAdmin: Boolean,
+	multiple_responses: Boolean,
 });
 
 const MergedGroupDB = mongoose.model<IMergedGroup>('MergedGroup', mergedGroupSchema);
