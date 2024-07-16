@@ -44,7 +44,7 @@ async function validateClientID(req: Request, res: Response, next: NextFunction)
 			res,
 			status: 200,
 			data: {
-				session_expires_at: device.getExpiration(null).toDate(),
+				session_expires_at: device.getExpiration('Do MMM YYYY'),
 				isWhatsappReady: whatsapp.isReady(),
 				status: whatsapp.getStatus(),
 				phone_number: whatsapp.getContact().id.user,

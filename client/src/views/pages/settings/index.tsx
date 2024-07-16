@@ -189,7 +189,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 										<Flex marginTop={'0.5rem'} gap={'0.5rem'} alignItems={'center'}>
 											<InfoOutlineIcon color={'#BB2525'} width={4} />
 											<Text color={'#BB2525'}>
-												Expires On {session_expires_at?.split('T')?.[0]}
+												Expires On {session_expires_at}
 											</Text>
 										</Flex>
 									) : null}
