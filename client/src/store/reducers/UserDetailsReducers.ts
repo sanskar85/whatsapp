@@ -5,7 +5,6 @@ import { UserDetailsState } from '../types/UserDetails';
 const initialState: UserDetailsState = {
 	name: '',
 	isSubscribed: false,
-	subscriptionExpiration: '',
 	userType: 'PERSONAL',
 	canSendMessage: false,
 
@@ -30,7 +29,7 @@ const UserDetailsSlice = createSlice({
 			state.name = initialState.name;
 			state.isSubscribed = initialState.isSubscribed;
 			state.canSendMessage = initialState.canSendMessage;
-			state.subscriptionExpiration = initialState.subscriptionExpiration;
+			state.session_expires_at = initialState.session_expires_at;
 			state.userType = initialState.userType;
 
 			state.groups = initialState.groups;
@@ -45,9 +44,6 @@ const UserDetailsSlice = createSlice({
 			}
 			if (action.payload.canSendMessage) {
 				state.canSendMessage = action.payload.canSendMessage;
-			}
-			if (action.payload.subscriptionExpiration) {
-				state.subscriptionExpiration = action.payload.subscriptionExpiration;
 			}
 			if (action.payload.userType) {
 				state.userType = action.payload.userType;
@@ -70,7 +66,7 @@ const UserDetailsSlice = createSlice({
 			}
 
 			if (action.payload.session_expires_at) {
-				state.subscriptionExpiration = action.payload.session_expires_at;
+				state.session_expires_at = action.payload.session_expires_at;
 			}
 			if (action.payload.isWhatsappReady) {
 				state.isWhatsappReady = action.payload.isWhatsappReady;
@@ -98,7 +94,14 @@ const UserDetailsSlice = createSlice({
 	},
 });
 
-export const { reset, setUserDetails, setGroups, setLabels, setContactsCount, setDataLoaded,setSettingsOpen } =
-	UserDetailsSlice.actions;
+export const {
+	reset,
+	setUserDetails,
+	setGroups,
+	setLabels,
+	setContactsCount,
+	setDataLoaded,
+	setSettingsOpen,
+} = UserDetailsSlice.actions;
 
 export default UserDetailsSlice.reducer;

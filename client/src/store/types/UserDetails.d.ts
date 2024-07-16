@@ -4,7 +4,6 @@ export type UserDetailsState = {
 	name: string;
 	isSubscribed: boolean;
 	canSendMessage: boolean;
-	subscriptionExpiration: string;
 	userType: 'BUSINESS' | 'PERSONAL';
 
 	session_expires_at: string;
