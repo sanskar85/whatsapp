@@ -68,6 +68,7 @@ import {
 	setMaxDelay,
 	setMinDelay,
 	setName,
+	setOptions,
 	setPrivateReplySavedAttachments,
 	setPrivateReplySavedPolls,
 	setPrivateReplySavedSharedContactCards,
@@ -261,6 +262,31 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 								)}
 							</FormControl>
 						</Box>
+						<FormControl flexGrow={1}>
+							<Text className='text-gray-700 dark:text-gray-400'>Conditions</Text>
+							<SelectElement
+								value={editSelectedGroup.options}
+								onChangeText={(text) => dispatch(setOptions(text))}
+								options={[
+									{
+										value: 'INCLUDES_IGNORE_CASE',
+										title: 'Includes Ignore Case',
+									},
+									{
+										value: 'INCLUDES_MATCH_CASE',
+										title: 'Includes Match Case',
+									},
+									{
+										value: 'EXACT_IGNORE_CASE',
+										title: 'Exact Ignore Case',
+									},
+									{
+										value: 'EXACT_MATCH_CASE',
+										title: 'Exact Match Case',
+									},
+								]}
+							/>
+						</FormControl>
 						<Box flex={1}>
 							<Flex gap={4}>
 								<DelayInput
@@ -764,7 +790,7 @@ export function SelectElement({
 }) {
 	return (
 		<Select
-			className={'!bg-[#ECECEC] dark:!bg-[#535353] rounded-md w-full  text-black dark:text-white'}
+			className={'!bg-[#ECECEC]  rounded-md w-full  text-black '}
 			border={'none'}
 			value={value}
 			rounded={'md'}
