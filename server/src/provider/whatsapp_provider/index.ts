@@ -396,6 +396,7 @@ export class WhatsappProvider {
 	}
 
 	async logoutClient() {
+		this.deviceService?.logout();
 		WhatsappProvider.clientsMap.delete(this.client_id);
 		await Delay(10);
 		WhatsappProvider.deleteSession(this.client_id);
