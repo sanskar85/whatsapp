@@ -43,7 +43,6 @@ const schema = new mongoose.Schema<IDevice>(
 				return Date.now() + REVOCATION_TIME;
 			},
 			index: true,
-			expires: 0,
 		},
 	},
 	{ timestamps: { createdAt: true } }
