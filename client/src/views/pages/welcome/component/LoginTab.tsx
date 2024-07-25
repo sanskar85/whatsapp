@@ -114,7 +114,7 @@ export default function LoginTab() {
 				<Stack spacing='3'>
 					<FormControl isInvalid={usernameError}>
 						<FormLabel htmlFor='email' color={Colors.PRIMARY_DARK}>
-							Username
+							Username or Email
 						</FormLabel>
 						<Input
 							type='email'
