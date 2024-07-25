@@ -8,7 +8,7 @@ export default class VCFParser {
 				.setFirstName(contact.name ?? contact.public_name)
 				.setContactPhone(contact.number, contact.number)
 				.build();
-			return acc + text;
+			return acc + text + '\n';
 		}, '');
 		return vCardString;
 	}
@@ -19,7 +19,7 @@ export default class VCFParser {
 				.setContactPhone(contact.number, contact.number)
 				.setWorkEmail(contact.email)
 				.build();
-			return acc + text;
+			return acc + text + '\n';
 		}, '');
 		return vCardString;
 	}
