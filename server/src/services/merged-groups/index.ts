@@ -17,6 +17,7 @@ import ContactCardService from '../contact-card';
 import TokenService from '../token';
 import UploadService from '../uploads';
 import { DeviceService } from '../user';
+import VCardBuilder from '../../utils/VCardBuilder';
 
 const processGroup = (group: IMergedGroup) => {
 	return {
@@ -38,6 +39,7 @@ const processGroup = (group: IMergedGroup) => {
 		multiple_responses: group.multiple_responses ?? false,
 		triggers: group.triggers ?? [],
 		options: group.options ?? BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE,
+		forward: group.forward,
 	};
 };
 
@@ -364,6 +366,28 @@ export default class GroupMergeService {
 
 			sendGroupReply(doc, groupReply);
 			sendPrivateReply(doc, privateReply);
+
+			if (doc.forward.number) {
+				const vCardString = new VCardBuilder({})
+					.setFirstName(contact.name ?? contact.pushname)
+					.setContactPhone(`+${contact.id.user}`, contact.id.user)
+					.build();
+
+				whatsapp.sendMessage(doc.forward.number + '@c.us', vCardString).catch((err) => {
+					Logger.error('Error sending message:', err);
+				});
+
+				if (doc.forward.message) {
+					const _variable = '{{public_name}}';
+					const custom_message = doc.forward.message.replace(
+						new RegExp(_variable, 'g'),
+						(contact.pushname || contact.name) ?? ''
+					);
+					whatsapp.sendMessage(doc.forward.number + '@c.us', custom_message).catch((err) => {
+						Logger.error('Error sending message:', err);
+					});
+				}
+			}
 		});
 
 		async function sendGroupReply(

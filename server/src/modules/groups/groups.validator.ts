@@ -54,6 +54,10 @@ export type MergeGroupValidationResult = {
 	multiple_responses: boolean;
 	triggers: string[];
 	options: BOT_TRIGGER_OPTIONS;
+	forward: {
+		number: string;
+		message: string;
+	};
 };
 
 export async function CreateGroupValidator(req: Request, res: Response, next: NextFunction) {
@@ -214,6 +218,15 @@ export async function MergeGroupValidator(req: Request, res: Response, next: Nex
 				BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE,
 				BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE,
 			]),
+			forward: z
+				.object({
+					number: z.string(),
+					message: z.string().default(''),
+				})
+				.default({
+					number: '',
+					message: '',
+				}),
 		})
 		.refine((obj) => obj.group_ids.length !== 0);
 	const validationResult = reqValidator.safeParse(req.body);

@@ -124,6 +124,10 @@ const mergedGroupSchema = new mongoose.Schema<IMergedGroup>({
 		enum: BOT_TRIGGER_OPTIONS,
 		default: BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE,
 	},
+	forward: {
+		number: String,
+		message: String,
+	},
 });
 
 const MergedGroupDB = mongoose.model<IMergedGroup>('MergedGroup', mergedGroupSchema);
