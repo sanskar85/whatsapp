@@ -1,8 +1,10 @@
 import { AddIcon, CheckIcon, DeleteIcon, SearchIcon } from '@chakra-ui/icons';
 import {
+	AbsoluteCenter,
 	Box,
 	Button,
 	Checkbox,
+	Divider,
 	Flex,
 	FormControl,
 	FormLabel,
@@ -39,6 +41,7 @@ import Multiselect from 'multiselect-react-dropdown';
 import { useMemo, useRef, useState } from 'react';
 import { BiRefresh } from 'react-icons/bi';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTheme } from '../../../../hooks/useTheme';
 import GroupService from '../../../../services/group.service';
 import { StoreNames, StoreState } from '../../../../store';
 import {
@@ -57,6 +60,8 @@ import {
 	removePrivateReplySaved,
 	removePrivateReplyUnsaved,
 	removeSelectedGroup,
+	setForwardMessage,
+	setForwardTo,
 	setGroupReplySavedAttachments,
 	setGroupReplySavedPolls,
 	setGroupReplySavedSharedContactCards,
@@ -87,6 +92,7 @@ import {
 } from '../../../../store/reducers/MergeGroupReducer';
 import { setGroups } from '../../../../store/reducers/UserDetailsReducers';
 import AddOns from '../../../components/add-ons';
+import { TextAreaElement, TextInput } from '../../bot/components/Inputs';
 
 type GroupMergeProps = {
 	onClose: () => void;
@@ -96,6 +102,7 @@ type GroupMergeProps = {
 const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 	const dispatch = useDispatch();
 	const toast = useToast();
+	const theme = useTheme();
 	const [dataRefreshing, groupsLoading] = useBoolean();
 	const messageRef = useRef<{
 		[key: string]: HTMLTextAreaElement | null;
@@ -343,6 +350,36 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 								</Grid>
 							</Flex>
 						</Box>
+						<Flex direction={'column'} gap={2} mt={'1rem'}>
+							<Box position='relative'>
+								<Divider height='2px' />
+								<AbsoluteCenter
+									bg={theme === 'dark' ? '#252525' : 'white'}
+									px='4'
+									color={theme === 'dark' ? 'gray.400' : 'gray.500'}
+								>
+									Forward Leads
+								</AbsoluteCenter>
+							</Box>
+							<Box flex={1} mt={'0.5rem'}>
+								<Text className='text-gray-700 dark:text-gray-400'>Forward To (without +)</Text>
+								<TextInput
+									placeholder='ex 9175XXXXXX68'
+									value={editSelectedGroup.forward.number ?? ''}
+									onChangeText={(text) => dispatch(setForwardTo(text))}
+								/>
+							</Box>
+
+							<Box flex={1}>
+								<Text className='text-gray-700 dark:text-gray-400'>Forward Message</Text>
+								<TextAreaElement
+									value={editSelectedGroup.forward.message ?? ''}
+									onChange={(e) => dispatch(setForwardMessage(e.target.value))}
+									isInvalid={false}
+									placeholder={'ex. Forwarded Lead'}
+								/>
+							</Box>
+						</Flex>
 						<Box>
 							<Text>Restricted Numbers</Text>
 							<Flex direction={'column'} gap={2}>

@@ -66,4 +66,8 @@ type MergedGroup = {
 	multiple_responses: boolean;
 	triggers: string[];
 	options: BOT_TRIGGER_OPTIONS;
+	forward: {
+		number: string;
+		message: string;
+	};
 };

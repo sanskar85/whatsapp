@@ -23,6 +23,10 @@ const initialState: MergeGroupState = {
 		multiple_responses: false,
 		triggers: [],
 		options: 'EXACT_MATCH_CASE',
+		forward: {
+			number: '',
+			message: '',
+		},
 	},
 	uiDetails: {
 		isSaving: false,
@@ -361,6 +365,12 @@ const MergeGroupSlice = createSlice({
 		) => {
 			state.editSelectedGroup.restricted_numbers = action.payload;
 		},
+		setForwardTo: (state, action: PayloadAction<string>) => {
+			state.editSelectedGroup.forward.number = action.payload;
+		},
+		setForwardMessage: (state, action: PayloadAction<string>) => {
+			state.editSelectedGroup.forward.message = action.payload;
+		},
 	},
 });
 
@@ -425,6 +435,8 @@ export const {
 	removeTrigger,
 	setOptions,
 	setTriggerAtIndex,
+	setForwardMessage,
+	setForwardTo,
 } = MergeGroupSlice.actions;
 
 export default MergeGroupSlice.reducer;

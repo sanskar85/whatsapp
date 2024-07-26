@@ -20,6 +20,7 @@ function processMergedGroup(group: any) {
 		multiple_responses: group.multiple_responses,
 		options: group.options,
 		triggers: group.triggers,
+		forward: group.forward,
 	};
 }
 
@@ -137,6 +138,10 @@ export default class GroupService {
 		multiple_responses: boolean;
 		triggers: string[];
 		options: string;
+		forward: {
+			number: string;
+			message: string;
+		};
 	}) {
 		try {
 			const { data } = await APIInstance.post(`/whatsapp/groups/merge`, {
@@ -155,6 +160,7 @@ export default class GroupService {
 				multiple_responses: details.multiple_responses,
 				triggers: details.triggers,
 				options: details.options,
+				forward: details.forward,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {
@@ -226,6 +232,10 @@ export default class GroupService {
 			multiple_responses: boolean;
 			triggers: string[];
 			options: string;
+			forward: {
+				number: string;
+				message: string;
+			};
 		}
 	) {
 		try {
@@ -245,6 +255,7 @@ export default class GroupService {
 				multiple_responses: details.multiple_responses,
 				triggers: details.triggers,
 				options: details.options,
+				forward: details.forward,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {
