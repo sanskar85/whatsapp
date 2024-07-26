@@ -353,16 +353,10 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 						<Flex direction={'column'} gap={2} mt={'1rem'}>
 							<Box position='relative'>
 								<Divider height='2px' />
-								<AbsoluteCenter
-									bg={theme === 'dark' ? '#252525' : 'white'}
-									px='4'
-									color={theme === 'dark' ? 'gray.400' : 'gray.500'}
-								>
-									Forward Leads
-								</AbsoluteCenter>
+								<AbsoluteCenter px='4'>Forward Leads</AbsoluteCenter>
 							</Box>
 							<Box flex={1} mt={'0.5rem'}>
-								<Text className='text-gray-700 dark:text-gray-400'>Forward To (without +)</Text>
+								<Text>Forward To (without +)</Text>
 								<TextInput
 									placeholder='ex 9175XXXXXX68'
 									value={editSelectedGroup.forward.number ?? ''}
@@ -371,7 +365,7 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 							</Box>
 
 							<Box flex={1}>
-								<Text className='text-gray-700 dark:text-gray-400'>Forward Message</Text>
+								<Text>Forward Message</Text>
 								<TextAreaElement
 									value={editSelectedGroup.forward.message ?? ''}
 									onChange={(e) => dispatch(setForwardMessage(e.target.value))}
