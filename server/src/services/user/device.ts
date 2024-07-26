@@ -292,14 +292,6 @@ export default class DeviceService extends UserService {
 			};
 		}
 
-		if (DateUtils.getMoment(auth.revoke_at).isBefore(DateUtils.getMomentNow())) {
-			return {
-				valid: false,
-				revoke_at: undefined,
-				user: undefined,
-			};
-		}
-
 		return {
 			valid: true,
 			revoke_at: auth.revoke_at,
