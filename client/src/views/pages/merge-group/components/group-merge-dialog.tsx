@@ -41,7 +41,6 @@ import Multiselect from 'multiselect-react-dropdown';
 import { useMemo, useRef, useState } from 'react';
 import { BiRefresh } from 'react-icons/bi';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme } from '../../../../hooks/useTheme';
 import GroupService from '../../../../services/group.service';
 import { StoreNames, StoreState } from '../../../../store';
 import {
@@ -102,7 +101,6 @@ type GroupMergeProps = {
 const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 	const dispatch = useDispatch();
 	const toast = useToast();
-	const theme = useTheme();
 	const [dataRefreshing, groupsLoading] = useBoolean();
 	const messageRef = useRef<{
 		[key: string]: HTMLTextAreaElement | null;
