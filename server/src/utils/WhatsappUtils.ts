@@ -441,17 +441,6 @@ export default class WhatsappUtils {
 	}
 
 	static async resumeSessions() {
-		const { valid, user } = await DeviceService.isValidDevice(
-			'7697463a-e344-4351-bdc4-85ddc252de1d'
-		);
-		if (valid) {
-			WhatsappProvider.getInstance(
-				new UserService(user),
-				'7697463a-e344-4351-bdc4-85ddc252de1d'
-			).initialize();
-		} else {
-			console.log('error');
-		}
 		if (!IS_PRODUCTION) return;
 		const path = __basedir + '/.wwebjs_auth';
 		if (!fs.existsSync(path)) {
