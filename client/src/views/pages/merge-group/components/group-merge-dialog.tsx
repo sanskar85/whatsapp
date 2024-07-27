@@ -356,6 +356,7 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 							<Box flex={1} mt={'0.5rem'}>
 								<Text>Forward To (without +)</Text>
 								<TextInput
+									onlyLightMode
 									placeholder='ex 9175XXXXXX68'
 									value={editSelectedGroup.forward.number ?? ''}
 									onChangeText={(text) => dispatch(setForwardTo(text))}
@@ -365,6 +366,7 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 							<Box flex={1}>
 								<Text>Forward Message</Text>
 								<TextAreaElement
+									onlyLightMode
 									value={editSelectedGroup.forward.message ?? ''}
 									onChange={(e) => dispatch(setForwardMessage(e.target.value))}
 									isInvalid={false}

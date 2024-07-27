@@ -6,7 +6,9 @@ export function TextAreaElement({
 	isInvalid,
 	placeholder,
 	minHeight = '80px',
+	onlyLightMode = false,
 }: {
+	onlyLightMode?:boolean;
 	placeholder: string;
 	value: string;
 	onChange: React.ChangeEventHandler<HTMLTextAreaElement>;
@@ -20,7 +22,7 @@ export function TextAreaElement({
 			isInvalid={isInvalid}
 			placeholder={placeholder}
 			border={'none'}
-			className='text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353]'
+			className={`text-black   !bg-[#ECECEC] ${onlyLightMode ? '' : 'dark:text-white dark:!bg-[#535353]'} `}
 			_placeholder={{ opacity: 0.4, color: 'inherit' }}
 			_focus={{ border: 'none', outline: 'none' }}
 			value={value}
@@ -91,7 +93,9 @@ export function TextInput({
 	value,
 	onChangeText,
 	placeholder,
+	onlyLightMode = false,
 }: {
+	onlyLightMode?: boolean;
 	value: string;
 	placeholder: string;
 	onChangeText: (value: string) => void;
@@ -103,7 +107,9 @@ export function TextInput({
 			size={'md'}
 			rounded={'md'}
 			border={'none'}
-			className='text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353]'
+			className={`text-black ${
+				onlyLightMode ? '' : 'dark:text-white dark:!bg-[#535353]'
+			} !bg-[#ECECEC] `}
 			_focus={{
 				border: 'none',
 				outline: 'none',
