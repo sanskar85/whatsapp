@@ -12,7 +12,7 @@ import {
 	useToast,
 } from '@chakra-ui/react';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MdGroupAdd, MdGroups3 } from 'react-icons/md';
 import { RiUserAddFill } from 'react-icons/ri';
 import { useDispatch, useSelector } from 'react-redux';
@@ -70,7 +70,7 @@ const GroupMergePage = () => {
 		});
 	};
 
-	const exportPendingRequests = () => {
+	const exportPendingRequests = useCallback(() => {
 		GroupService.exportPendingRequests(selectedGroups);
 		toast({
 			title: 'Exporting Pending Requests',
@@ -79,7 +79,7 @@ const GroupMergePage = () => {
 			duration: 3000,
 			isClosable: true,
 		});
-	};
+	}, [selectedGroups, toast]);
 
 	useEffect(() => {
 		function handleSwitchChange(isWhatsappGroups: boolean) {
@@ -158,6 +158,7 @@ const GroupMergePage = () => {
 		tabIndex,
 		openSettingDialog,
 		theme,
+		exportPendingRequests,
 	]);
 
 	return (
