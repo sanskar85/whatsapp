@@ -84,7 +84,7 @@ const CSVUpload = () => {
 					>
 						GROUP
 					</Button>
-					{userType === 'BUSINESS' && (
+					{/* {userType === 'BUSINESS' && ( */}
 						<Button
 							size={'sm'}
 							leftIcon={<BiLabel />}
@@ -93,7 +93,7 @@ const CSVUpload = () => {
 						>
 							LABEL
 						</Button>
-					)}
+					{/* // )} */}
 					<NavbarDeleteElement
 						isDisabled={selectedFiles.length === 0}
 						onClick={() => deleteAlertRef.current?.open('')}
@@ -191,7 +191,9 @@ const CSVUpload = () => {
 			<CSVNameInputDialog ref={csvFileInputRef} />
 			<DeleteAlert ref={deleteAlertRef} onConfirm={deleteCSVFile} type={'CSV'} />
 			<CreateGroupDialog ref={createGroupDialogRef} />
-			{userType === 'BUSINESS' && <AssignLabelDialog ref={assignLabelDialogRef} />}
+			{/* {userType === 'BUSINESS' &&  */}
+			<AssignLabelDialog ref={assignLabelDialogRef} />
+			{/* } */}
 		</Box>
 	);
 };

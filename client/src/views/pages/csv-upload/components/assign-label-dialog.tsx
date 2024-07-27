@@ -118,7 +118,7 @@ const AssignLabelDialog = forwardRef<AssignLabelDialogHandler>((_, ref) => {
 						<FormControl>
 							<FormLabel>Select Label to Assign</FormLabel>
 							<Select
-								className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md w-full text-black dark:text-white '
+								className='!bg-[#ECECEC]  rounded-md w-full text-black '
 								border={'none'}
 								value={labelDetails.label_id}
 								onChange={(e) => handleChange('label_id', e.target.value)}
@@ -207,7 +207,7 @@ const AssignLabelDialog = forwardRef<AssignLabelDialogHandler>((_, ref) => {
 										width: '100%',
 									},
 								}}
-								className='  bg-[#ECECEC] dark:bg-[#535353] rounded-md border-none '
+								className='  bg-[#ECECEC]  rounded-md border-none '
 							/>
 						</FormControl>
 						<FormControl mt={'2rem'}>
