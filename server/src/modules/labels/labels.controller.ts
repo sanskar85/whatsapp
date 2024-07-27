@@ -158,7 +158,8 @@ async function exportLabels(req: Request, res: Response, next: NextFunction) {
 }
 
 async function addLabel(req: Request, res: Response, next: NextFunction) {
-	const { group_ids, csv_file, type, label_id } = req.locals.data as AssignLabelValidationResult;
+	const { group_ids, csv_file, type, label_id, numbers } = req.locals
+		.data as AssignLabelValidationResult;
 
 	const { client_id } = req.locals;
 
@@ -193,6 +194,16 @@ async function addLabel(req: Request, res: Response, next: NextFunction) {
 				const chat = await whatsappUtils.getChat(id as string);
 				if (!chat) return;
 				chat_ids.push(chat.id._serialized);
+			})
+		);
+	} else if (type === 'NUMBERS') {
+		await Promise.all(
+			numbers.map(async (number) => {
+				const numberWithId = await whatsappUtils.getNumberWithId(number);
+				if (!numberWithId) {
+					return; // Skips to the next iteration
+				}
+				chat_ids.push(numberWithId.numberId);
 			})
 		);
 	}
