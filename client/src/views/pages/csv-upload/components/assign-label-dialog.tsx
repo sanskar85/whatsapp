@@ -8,8 +8,10 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalOverlay,
+	Radio,
+	RadioGroup,
 	Select,
-	Switch,
+	Stack,
 	Text,
 	useDisclosure,
 } from '@chakra-ui/react';
@@ -19,6 +21,7 @@ import { useSelector } from 'react-redux';
 import GroupService from '../../../../services/group.service';
 import LabelService from '../../../../services/label.service';
 import { StoreNames, StoreState } from '../../../../store';
+import NumberInputDialog from '../../../components/number-input-dialog';
 
 export type AssignLabelDialogHandler = {
 	open: () => void;
@@ -32,6 +35,7 @@ const initState = {
 	group_ids: [],
 	csv_file: '',
 	error: '',
+	numbers: [],
 	isBusinessAccount: true,
 };
 
@@ -46,6 +50,12 @@ const AssignLabelDialog = forwardRef<AssignLabelDialogHandler>((_, ref) => {
 			onClose();
 		},
 	}));
+
+	const {
+		isOpen: isNumberInputOpen,
+		onOpen: openNumberInput,
+		onClose: closeNumberInput,
+	} = useDisclosure();
 
 	const [labelDetails, setLabelDetails] = useState(initState);
 
@@ -72,7 +82,8 @@ const AssignLabelDialog = forwardRef<AssignLabelDialogHandler>((_, ref) => {
 	const handleCreateLabel = () => {
 		if (
 			(labelDetails.type === 'CSV' && labelDetails.csv_file === '') ||
-			(labelDetails.type === 'GROUP' && labelDetails.group_ids.length === 0)
+			(labelDetails.type === 'GROUP' && labelDetails.group_ids.length === 0) ||
+			(labelDetails.type === 'NUMBERS' && labelDetails.numbers.length === 0)
 		) {
 			setLabelDetails((prev) => ({
 				...prev,
@@ -83,6 +94,7 @@ const AssignLabelDialog = forwardRef<AssignLabelDialogHandler>((_, ref) => {
 		LabelService.assignLabel(labelDetails.type, labelDetails.label_id, {
 			csv_file: labelDetails.csv_file,
 			group_ids: labelDetails.group_ids,
+			numbers: labelDetails.numbers,
 		}).then((res) => {
 			if (!res) {
 				setLabelDetails((prev) => ({
@@ -97,118 +109,132 @@ const AssignLabelDialog = forwardRef<AssignLabelDialogHandler>((_, ref) => {
 	};
 
 	return (
-		<Modal isOpen={isOpen} onClose={onClose} size={'xl'}>
-			<ModalOverlay />
-			<ModalContent>
-				<ModalHeader>Assign Label</ModalHeader>
-				<ModalBody>
-					<FormControl>
-						<FormLabel>Select Label to Assign</FormLabel>
-						<Select
-							className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md w-full text-black dark:text-white '
-							border={'none'}
-							value={labelDetails.label_id}
-							onChange={(e) => handleChange('label_id', e.target.value)}
-						>
-							<option
-								className='text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353] '
-								value={''}
+		<>
+			<Modal isOpen={isOpen} onClose={onClose} size={'xl'}>
+				<ModalOverlay />
+				<ModalContent>
+					<ModalHeader>Assign Label</ModalHeader>
+					<ModalBody>
+						<FormControl>
+							<FormLabel>Select Label to Assign</FormLabel>
+							<Select
+								className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md w-full text-black dark:text-white '
+								border={'none'}
+								value={labelDetails.label_id}
+								onChange={(e) => handleChange('label_id', e.target.value)}
 							>
-								Select Label
-							</option>
-							{labels.map(({ id, name }) => (
 								<option
 									className='text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353] '
-									value={id}
-									key={id}
+									value={''}
 								>
-									{name}
+									Select Label
 								</option>
-							))}
-						</Select>
-					</FormControl>
-					<FormControl
-						display='flex'
-						alignItems='center'
-						justifyContent={'center'}
-						mt={'1rem'}
-						gap={'0.5rem'}
-					>
-						<FormLabel htmlFor='csv-group' mb='0' mr='0'>
-							Assign to CSV
-						</FormLabel>
-						<Switch
-							id='csv-group'
-							isChecked={labelDetails.type === 'GROUP'}
-							onChange={(e) => handleChange('type', e.target.checked ? 'GROUP' : 'CSV')}
-						/>
-						<FormLabel htmlFor='csv-group' mb='0'>
-							Assign to Groups
-						</FormLabel>
-					</FormControl>
-					<FormControl mt={'1rem'}>
-						<FormLabel>Select Recipients from CSV</FormLabel>
-						<Select
-							name={labelDetails.csv_file}
-							onChange={(e) => handleChange('csv_file', e.target.value)}
-							disabled={labelDetails.type == 'GROUP'}
-						>
-							<option>Select CSV</option>
-							{list.map((item) => (
-								<option key={item.fileName} value={item.fileName}>
-									{item.name}
-								</option>
-							))}
-						</Select>
-					</FormControl>
-					<FormControl mt={'2rem'}>
-						<FormLabel>Select Groups</FormLabel>
-						<Multiselect
-							disable={labelDetails.type == 'CSV'}
-							displayValue='displayValue'
-							placeholder={'Select Groups'}
-							onRemove={(selectedList) =>
-								handleChange(
-									'group_ids',
-									selectedList.map((group: { id: string }) => group.id)
-								)
-							}
-							onSelect={(selectedList) => {
-								handleChange(
-									'group_ids',
-									selectedList.map((group: { id: string }) => group.id)
-								);
-							}}
-							showCheckbox={true}
-							hideSelectedList={true}
-							options={labelDetails.groups.map((item: { id: string; name: string }, index) => ({
-								...item,
-								displayValue: `${index + 1}. ${item.name}`,
-							}))}
-							style={{
-								searchBox: {
-									border: 'none',
-								},
-								inputField: {
-									width: '100%',
-								},
-							}}
-							className='  bg-[#ECECEC] dark:bg-[#535353] rounded-md border-none '
-						/>
-					</FormControl>
-				</ModalBody>
+								{labels.map(({ id, name }) => (
+									<option
+										className='text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353] '
+										value={id}
+										key={id}
+									>
+										{name}
+									</option>
+								))}
+							</Select>
+						</FormControl>
 
-				<ModalFooter>
-					{labelDetails.error && <Text color={'tomato'}>{labelDetails.error}</Text>}
-					<Button colorScheme='red' mr={3} onClick={onClose}>
-						Cancel
-					</Button>
-					<Button colorScheme='green' onClick={handleCreateLabel}>
-						Create
-					</Button>
-				</ModalFooter>
-			</ModalContent>
-		</Modal>
+						<FormControl
+							display='flex'
+							alignItems='center'
+							justifyContent={'center'}
+							mt={'1rem'}
+							gap={'0.5rem'}
+						>
+							<RadioGroup
+								colorScheme='green'
+								onChange={(value) => handleChange('type', value)}
+								value={labelDetails.type}
+							>
+								<Stack direction='row'>
+									<Radio value='CSV'>CSV</Radio>
+									<Radio value='GROUP'>Groups</Radio>
+									<Radio value='NUMBERS'>Numbers</Radio>
+								</Stack>
+							</RadioGroup>
+						</FormControl>
+						<FormControl mt={'1rem'}>
+							<FormLabel>Select Recipients from CSV</FormLabel>
+							<Select
+								name={labelDetails.csv_file}
+								onChange={(e) => handleChange('csv_file', e.target.value)}
+								disabled={labelDetails.type !== 'CSV'}
+							>
+								<option>Select CSV</option>
+								{list.map((item) => (
+									<option key={item.fileName} value={item.fileName}>
+										{item.name}
+									</option>
+								))}
+							</Select>
+						</FormControl>
+						<FormControl mt={'2rem'}>
+							<FormLabel>Select Groups</FormLabel>
+							<Multiselect
+								disable={labelDetails.type !== 'GROUP'}
+								displayValue='displayValue'
+								placeholder={'Select Groups'}
+								onRemove={(selectedList) =>
+									handleChange(
+										'group_ids',
+										selectedList.map((group: { id: string }) => group.id)
+									)
+								}
+								onSelect={(selectedList) => {
+									handleChange(
+										'group_ids',
+										selectedList.map((group: { id: string }) => group.id)
+									);
+								}}
+								showCheckbox={true}
+								hideSelectedList={true}
+								options={labelDetails.groups.map((item: { id: string; name: string }, index) => ({
+									...item,
+									displayValue: `${index + 1}. ${item.name}`,
+								}))}
+								style={{
+									searchBox: {
+										border: 'none',
+									},
+									inputField: {
+										width: '100%',
+									},
+								}}
+								className='  bg-[#ECECEC] dark:bg-[#535353] rounded-md border-none '
+							/>
+						</FormControl>
+						<FormControl mt={'2rem'}>
+							<Button width={'full'} isDisabled={labelDetails.type !== 'NUMBERS'} onClick={openNumberInput}>
+								Select Numbers ({labelDetails.numbers.length} selected)
+							</Button>
+							<NumberInputDialog
+								isOpen={isNumberInputOpen}
+								onClose={closeNumberInput}
+								numbers={labelDetails.numbers}
+								onConfirm={(value) => handleChange('numbers', value)}
+							/>
+						</FormControl>
+					</ModalBody>
+
+					<ModalFooter>
+						{labelDetails.error && <Text color={'tomato'}>{labelDetails.error}</Text>}
+						<Button colorScheme='red' mr={3} onClick={onClose}>
+							Cancel
+						</Button>
+						<Button colorScheme='green' onClick={handleCreateLabel}>
+							Create
+						</Button>
+					</ModalFooter>
+				</ModalContent>
+			</Modal>
+		</>
 	);
 });
 
