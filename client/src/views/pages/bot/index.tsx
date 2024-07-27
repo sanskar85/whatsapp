@@ -8,16 +8,18 @@ import {
 	Flex,
 	FormControl,
 	FormErrorMessage,
+	FormLabel,
 	HStack,
 	IconButton,
 	Input,
+	Switch,
 	Tag,
 	TagLabel,
 	Text,
 	Textarea,
 	useToast,
 } from '@chakra-ui/react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RiRobot2Line } from 'react-icons/ri';
 import { useDispatch, useSelector } from 'react-redux';
 import { NAVIGATION } from '../../../config/const';
@@ -62,6 +64,12 @@ export default function Bot() {
 	const theme = useTheme();
 	const toast = useToast();
 	const messageRef = useRef(0);
+
+	const [isAlertMessage, setIsAlertMessage] = useState(false);
+	const [readMoreDetails, setReadMoreDetails] = useState({
+		title: '',
+		message: '',
+	});
 
 	const { details, trigger_gap, response_delay, ui } = useSelector(
 		(state: StoreState) => state[StoreNames.CHATBOT]
@@ -113,20 +121,54 @@ export default function Bot() {
 		errorPayload.error = '';
 		dispatch(setError(errorPayload));
 
-		if (
-			!message &&
-			attachments.length === 0 &&
-			shared_contact_cards.length === 0 &&
-			details.polls.length === 0
-		) {
-			errorPayload.type = 'messageError';
-			errorPayload.error = 'Message or Attachment or Contact Card or Poll is required';
-			dispatch(setError(errorPayload));
-			notHasError = false;
+		if (isAlertMessage) {
+			if (
+				!readMoreDetails.title &&
+				attachments.length === 0 &&
+				shared_contact_cards.length === 0 &&
+				details.polls.length === 0
+			) {
+				errorPayload.type = 'messageError';
+				errorPayload.error = 'Title is required';
+				dispatch(setError(errorPayload));
+				notHasError = false;
+			} else {
+				errorPayload.type = 'messageError';
+				errorPayload.error = '';
+				dispatch(setError(errorPayload));
+			}
+
+			if (
+				!readMoreDetails.message &&
+				attachments.length === 0 &&
+				shared_contact_cards.length === 0 &&
+				details.polls.length === 0
+			) {
+				errorPayload.type = 'messageError';
+				errorPayload.error = 'Message is required';
+				dispatch(setError(errorPayload));
+				notHasError = false;
+			} else {
+				errorPayload.type = 'messageError';
+				errorPayload.error = '';
+				dispatch(setError(errorPayload));
+			}
 		} else {
-			errorPayload.type = 'messageError';
-			errorPayload.error = '';
-			dispatch(setError(errorPayload));
+			if (
+				!message &&
+				attachments.length === 0 &&
+				shared_contact_cards.length === 0 &&
+				details.polls.length === 0
+			) {
+				errorPayload.type = 'messageError';
+				errorPayload.error = 'Message or Attachment or Contact Card or Poll is required';
+				dispatch(setError(errorPayload));
+				notHasError = false;
+			} else {
+				errorPayload.type = 'messageError';
+				errorPayload.error = '';
+				dispatch(setError(errorPayload));
+			}
 		}
 
 		if (!respond_to) {
@@ -187,15 +229,28 @@ export default function Bot() {
 		);
 	};
 
+	const handleReadMoreInput = (type: string, value: string) => {
+		setReadMoreDetails((prev) => ({
+			...prev,
+			[type]: value,
+		}));
+	};
+
 	async function handleSave() {
 		if (!validate()) {
 			return;
 		}
 		if (isEditingBot && !details.bot_id) return;
+		const _details = {
+			...details,
+			message: isAlertMessage
+				? readMoreDetails.title + '\n' + '\u200B'.repeat(4000) + readMoreDetails.message
+				: message,
+		};
 		dispatch(setAddingBot(true));
 		const promise = isEditingBot
-			? BotService.updateBot(details.bot_id, details)
-			: BotService.createBot(details);
+			? BotService.updateBot(details.bot_id, _details)
+			: BotService.createBot(_details);
 
 		toast.promise(promise, {
 			success: (data) => {
@@ -333,8 +388,38 @@ export default function Bot() {
 					</Flex>
 
 					{/*--------------------------------- MESSAGE SECTION--------------------------- */}
+					<FormControl display={'flex'} mt={'1rem'}>
+						<FormLabel className='dark:text-gray-400' mb={0}>
+							Read more
+						</FormLabel>
+						<Switch
+							colorScheme='green'
+							checked={isAlertMessage}
+							onChange={(e) => setIsAlertMessage(e.target.checked)}
+						/>
+					</FormControl>
+					<Box hidden={!isAlertMessage}>
+						<FormControl>
+							<FormLabel className='dark:text-gray-400'>Title</FormLabel>
+							<TextAreaElement
+								onChange={(e) => handleReadMoreInput('title', e.target.value)}
+								placeholder='eg. ALERT'
+								value={readMoreDetails.title}
+								isInvalid={!!ui.messageError}
+							/>
+						</FormControl>
+						<FormControl>
+							<FormLabel className='dark:text-gray-400'>Message</FormLabel>
+							<TextAreaElement
+								onChange={(e) => handleReadMoreInput('message', e.target.value)}
+								placeholder='eg. You are invited to fanfest'
+								value={readMoreDetails.message}
+								isInvalid={!!ui.messageError}
+							/>
+						</FormControl>
+					</Box>
 
-					<FormControl isInvalid={!!ui.messageError}>
+					<FormControl hidden={isAlertMessage} isInvalid={!!ui.messageError}>
 						<Textarea
 							value={message ?? ''}
 							minHeight={'80px'}
@@ -356,31 +441,31 @@ export default function Bot() {
 							_focus={{ border: 'none', outline: 'none' }}
 						/>
 						{ui.messageError && <FormErrorMessage>{ui.messageError}</FormErrorMessage>}
+						<HStack width={'full'} justifyContent={'space-between'}>
+							<Tag
+								size={'sm'}
+								m={'0.25rem'}
+								p={'0.5rem'}
+								width={'fit-content'}
+								borderRadius='md'
+								variant='solid'
+								colorScheme='gray'
+								_hover={{ cursor: 'pointer' }}
+								onClick={() => insertVariablesToMessage('{{public_name}}')}
+							>
+								<TagLabel>{'{{public_name}}'}</TagLabel>
+							</Tag>
+							<Checkbox
+								colorScheme='green'
+								size='md'
+								isChecked={details.random_string}
+								onChange={() => dispatch(toggleRandomString())}
+								className='dark:text-white'
+							>
+								Append Random Text
+							</Checkbox>
+						</HStack>
 					</FormControl>
-					<HStack width={'full'} justifyContent={'space-between'}>
-						<Tag
-							size={'sm'}
-							m={'0.25rem'}
-							p={'0.5rem'}
-							width={'fit-content'}
-							borderRadius='md'
-							variant='solid'
-							colorScheme='gray'
-							_hover={{ cursor: 'pointer' }}
-							onClick={() => insertVariablesToMessage('{{public_name}}')}
-						>
-							<TagLabel>{'{{public_name}}'}</TagLabel>
-						</Tag>
-						<Checkbox
-							colorScheme='green'
-							size='md'
-							isChecked={details.random_string}
-							onChange={() => dispatch(toggleRandomString())}
-							className='dark:text-white'
-						>
-							Append Random Text
-						</Checkbox>
-					</HStack>
 
 					<HStack alignItems={'start'}>
 						{/*--------------------------------- GAP & DELAY SECTION--------------------------- */}
