@@ -311,7 +311,7 @@ export default function Bot() {
 									leftIcon={<AddIcon color='white' />}
 									onClick={() => dispatch(addTrigger())}
 								>
-									<Text fontSize='sm' color={theme === 'dark' ? 'white' : 'black'}>
+									<Text fontSize='sm'>
 										Add Trigger
 									</Text>
 								</Button>
