@@ -282,6 +282,10 @@ export default function Scheduler() {
 				}
 
 				dispatch(addScheduler(res));
+				setReadMoreDetails({
+					title: '',
+					message: '',
+				});
 			})
 			.finally(() => {
 				setUIDetails((prev) => ({
