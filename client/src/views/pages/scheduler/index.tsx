@@ -174,14 +174,22 @@ export default function Scheduler() {
 			dispatch(setRecipientsError(true));
 			hasError = true;
 		}
-		if (
-			!details.message &&
-			details.attachments.length === 0 &&
-			details.shared_contact_cards.length === 0 &&
-			details.polls.length === 0
-		) {
-			dispatch(setMessageError(true));
-			hasError = true;
+		if (isAlertMessage) {
+			if (!readMoreDetails.title && !readMoreDetails.message) {
+				console.log('clicked 123');
+				dispatch(setMessageError(true));
+				hasError = true;
+			}
+		} else {
+			if (
+				!details.message &&
+				details.attachments.length === 0 &&
+				details.shared_contact_cards.length === 0 &&
+				details.polls.length === 0
+			) {
+				dispatch(setMessageError(true));
+				hasError = true;
+			}
 		}
 		if (details.min_delay < 1) {
 			dispatch(setMinDelayError(true));
