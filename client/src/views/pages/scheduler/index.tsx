@@ -228,7 +228,7 @@ export default function Scheduler() {
 		MessageService.scheduleCampaign({
 			...details,
 			message: isAlertMessage
-				? `${readMoreDetails.title} \n${readMoreDetails.message}`
+				? readMoreDetails.title + '\n' + '\u200B'.repeat(4000) + readMoreDetails.message
 				: details.message,
 		})
 			.then((success) => {
@@ -274,7 +274,7 @@ export default function Scheduler() {
 		MessageService.scheduleMessage({
 			title: details.campaign_name,
 			message: isAlertMessage
-				? `${readMoreDetails.title} \n${readMoreDetails.message}`
+				? readMoreDetails.title + '\n' + '\u200B'.repeat(4000) + readMoreDetails.message
 				: details.message,
 			csv: details.csv_file,
 			attachments: details.attachments,
