@@ -280,18 +280,17 @@ export default function Scheduler() {
 				if (!res) {
 					return;
 				}
-
 				dispatch(addScheduler(res));
-				setReadMoreDetails({
-					title: '',
-					message: '',
-				});
 			})
 			.finally(() => {
 				setUIDetails((prev) => ({
 					...prev,
 					schedulingMessages: false,
 				}));
+				setReadMoreDetails({
+					title: '',
+					message: '',
+				});
 			});
 	};
 
