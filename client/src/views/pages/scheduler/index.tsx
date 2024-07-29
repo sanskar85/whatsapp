@@ -57,7 +57,10 @@ import {
 	setVariables,
 } from '../../../store/reducers/SchedulerReducer';
 import AddOns from '../../components/add-ons';
-import SubscriptionAlert, { AddDevicePopup, SubscriptionPopup } from '../../components/subscription-alert';
+import SubscriptionAlert, {
+	AddDevicePopup,
+	SubscriptionPopup,
+} from '../../components/subscription-alert';
 import { MessageInputSection, MessageSchedulerList } from './components';
 import CampaignDetailsSection from './components/campaign-details-section';
 
@@ -199,6 +202,12 @@ export default function Scheduler() {
 		return !hasError;
 	};
 
+	const [isAlertMessage, setIsAlertMessage] = useState(false);
+	const [readMoreDetails, setReadMoreDetails] = useState({
+		title: '',
+		message: '',
+	});
+
 	const scheduleMessage = () => {
 		if (!validate()) {
 			return;
@@ -207,7 +216,13 @@ export default function Scheduler() {
 			...prev,
 			schedulingMessages: true,
 		}));
-		MessageService.scheduleCampaign(details)
+
+		MessageService.scheduleCampaign({
+			...details,
+			message: isAlertMessage
+				? `${readMoreDetails.title} \n${readMoreDetails.message}`
+				: details.message,
+		})
 			.then((success) => {
 				if (!success) {
 					return toast({
@@ -219,6 +234,10 @@ export default function Scheduler() {
 					});
 				}
 				dispatch(reset());
+				setReadMoreDetails({
+					title: '',
+					message: '',
+				});
 				toast({
 					title: 'Campaign scheduler.',
 					description: 'Campaign is being Scheduled',
@@ -246,7 +265,9 @@ export default function Scheduler() {
 
 		MessageService.scheduleMessage({
 			title: details.campaign_name,
-			message: details.message,
+			message: isAlertMessage
+				? `${readMoreDetails.title} \n${readMoreDetails.message}`
+				: details.message,
 			csv: details.csv_file,
 			attachments: details.attachments,
 			shared_contact_cards: details.shared_contact_cards,
@@ -335,6 +356,13 @@ export default function Scheduler() {
 			});
 	};
 
+	const handleReadMoreInput = (type: string, value: string) => {
+		setReadMoreDetails((prev) => ({
+			...prev,
+			[type]: value,
+		}));
+	};
+
 	useEffect(() => {
 		fetchRecipients(details.type);
 	}, [fetchRecipients, details.type]);
@@ -391,7 +419,13 @@ export default function Scheduler() {
 
 								<HStack gap={8} alignItems={'start'}>
 									<Box marginTop={'0.5rem'} paddingTop={2} flex={1}>
-										<MessageInputSection />
+										<MessageInputSection
+											handleReadMoreInput={handleReadMoreInput}
+											isAlertMessage={isAlertMessage}
+											readMoreDetails={readMoreDetails}
+											setIsAlertMessage={setIsAlertMessage}
+											setReadMoreDetails={setReadMoreDetails}
+										/>
 									</Box>
 									{/* ----------------------MESSAGE DELAY INPUT SECTION---------------- */}
 									<Flex flex={1} flexDirection={'column'} gap={3}>
@@ -614,6 +648,11 @@ export default function Scheduler() {
 									</Text>
 								</VStack>
 								<MessageInputSection
+									handleReadMoreInput={handleReadMoreInput}
+									isAlertMessage={isAlertMessage}
+									readMoreDetails={readMoreDetails}
+									setIsAlertMessage={setIsAlertMessage}
+									setReadMoreDetails={setReadMoreDetails}
 									textAreaProps={{
 										minHeight: '245px',
 									}}
