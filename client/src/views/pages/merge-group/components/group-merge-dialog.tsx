@@ -108,15 +108,38 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 
 	const [searchText, setSearchText] = useState<string>('');
 
-	const { editSelectedGroup } = useSelector((store: StoreState) => store[StoreNames.MERGE_GROUP]);
+	const { editSelectedGroup, list } = useSelector(
+		(store: StoreState) => store[StoreNames.MERGE_GROUP]
+	);
 	const { groups } = useSelector((store: StoreState) => store[StoreNames.USER]);
 	const { list: csvList } = useSelector((store: StoreState) => store[StoreNames.CSV]);
 
 	const handleMergeGroup = () => {
+		if (list.some((group) => group.name === editSelectedGroup.name)) {
+			toast({
+				title: 'Group name already exists',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
+			return;
+		}
 		if (editSelectedGroup.name === '') {
+			toast({
+				title: 'Group name cannot be empty',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
 			return;
 		}
 		if (editSelectedGroup.groups.length === 0) {
+			toast({
+				title: 'Select at least one group to merge',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
 			return;
 		}
 		const { id, name, groups } = editSelectedGroup;
