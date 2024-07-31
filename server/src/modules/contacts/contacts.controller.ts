@@ -188,8 +188,12 @@ export async function validate(req: Request, res: Response, next: NextFunction) 
 
 	const valid_contacts_promises = chat_ids.map(async (chat_id) => {
 		const contact = await whatsapp.getClient().getContactById(chat_id);
-		const country_code = await contact.getCountryCode();
-		const country = COUNTRIES[country_code as string];
+		let country_code = '',
+			country = '';
+		try {
+			country_code = await contact.getCountryCode();
+			country = COUNTRIES[country_code as string];
+		} catch (e) {}
 		return {
 			name: contact.name ?? 'Unknown',
 			number: contact.number,

@@ -162,13 +162,17 @@ export default class WhatsappUtils {
 	}
 
 	async getContactDetails(contact: WAWebJS.Contact) {
-		let country_code = '';
-		if (Object.hasOwnProperty('getCountryCode')) {
-			country_code = await contact.getCountryCode();
-		} else if (Object.hasOwnProperty('number')) {
-			country_code = await this.whatsapp.getClient().getCountryCode(contact.number);
-		}
-		const country = COUNTRIES[country_code as string];
+		let country_code = '',
+			country = '';
+		try {
+			if (Object.hasOwnProperty('getCountryCode')) {
+				country_code = await contact.getCountryCode();
+			} else if (Object.hasOwnProperty('number')) {
+				country_code = await this.whatsapp.getClient().getCountryCode(contact.number);
+			}
+			country = COUNTRIES[country_code as string];
+		} catch (err) {}
+
 		return {
 			name: contact.name ?? '',
 			number: contact.number,
@@ -259,8 +263,10 @@ export default class WhatsappUtils {
 						return null;
 					}
 					contact_details.name = fetchedContact.name ?? '';
-					const country_code = await fetchedContact.getCountryCode();
-					contact_details.country = COUNTRIES[country_code as string];
+					try {
+						const country_code = await fetchedContact.getCountryCode();
+						contact_details.country = COUNTRIES[country_code as string];
+					} catch (err) {}
 					contact_details.isBusiness = fetchedContact.isBusiness ? 'Business' : 'Personal';
 					contact_details.public_name = fetchedContact.pushname;
 					contact_details.isSaved = fetchedContact.isMyContact;
