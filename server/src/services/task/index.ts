@@ -13,7 +13,7 @@ export default class TaskService {
 	}
 
 	async listTasks() {
-		const tasks = await TaskDB.find({ user: this.user._id });
+		const tasks = await TaskDB.find({ user: this.user._id }).sort({ createdAt: -1 });
 		return tasks.map((task) => ({
 			id: task._id as string,
 			type: task.type,

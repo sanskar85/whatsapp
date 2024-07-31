@@ -127,7 +127,6 @@ export class WhatsappProvider {
 
 	private async attachListeners() {
 		this.client.on('qr', async (qrCode) => {
-			Logger.info(`QR Update`, `${this.userService.getUser().username} - ${this.client_id}`);
 			try {
 				this.qrCode = await QRCode.toDataURL(qrCode);
 				this.status = STATUS.QR_READY;
