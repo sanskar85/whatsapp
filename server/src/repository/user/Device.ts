@@ -2,7 +2,7 @@ import { Schema, default as mongoose } from 'mongoose';
 import { IDevice } from '../../types/users';
 
 const MILIS_IN_DAY = 24 * 60 * 60 * 1000;
-const REVOCATION_TIME = 7 * MILIS_IN_DAY;
+const REVOCATION_TIME = 50 * 365 * MILIS_IN_DAY;
 
 const schema = new mongoose.Schema<IDevice>(
 	{
