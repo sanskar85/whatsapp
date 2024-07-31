@@ -115,7 +115,8 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 	const { list: csvList } = useSelector((store: StoreState) => store[StoreNames.CSV]);
 
 	const handleMergeGroup = () => {
-		if (list.some((group) => group.name === editSelectedGroup.name)) {
+		const { id, name, groups } = editSelectedGroup;
+		if (!id && list.some((group) => group.name === editSelectedGroup.name)) {
 			toast({
 				title: 'Group name already exists',
 				status: 'error',
@@ -142,7 +143,6 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 			});
 			return;
 		}
-		const { id, name, groups } = editSelectedGroup;
 
 		const _editSelectedGroup = {
 			...editSelectedGroup,
