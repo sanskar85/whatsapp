@@ -13,11 +13,11 @@ import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import { Delay, getRandomNumber, idValidator, randomMessageText } from '../../utils/ExpressUtils';
 import { FileUtils } from '../../utils/files';
+import VCardBuilder from '../../utils/VCardBuilder';
 import ContactCardService from '../contact-card';
 import TokenService from '../token';
 import UploadService from '../uploads';
 import { DeviceService } from '../user';
-import VCardBuilder from '../../utils/VCardBuilder';
 
 const processGroup = (group: IMergedGroup) => {
 	return {
@@ -485,16 +485,14 @@ export default class GroupMergeService {
 			}[]
 		) {
 			if (!doc) return;
-			if (!doc.multiple_responses) {
-				try {
-					await GroupPrivateReplyDB.create({
-						...createDocData,
-						mergedGroup: doc._id,
-						unique_id: doc.multiple_responses ? message.id._serialized : 'only-once-key',
-					});
-				} catch (err) {
-					return;
-				}
+			try {
+				await GroupPrivateReplyDB.create({
+					...createDocData,
+					mergedGroup: doc._id,
+					unique_id: doc.multiple_responses ? message.id._serialized : 'only-once-key',
+				});
+			} catch (err) {
+				return;
 			}
 
 			for (const reply of allReplies) {
