@@ -637,7 +637,10 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 						if (!info) {
 							return null;
 						}
-						const owner_details = await whatsappUtils.getContactDetails(info.owner.user);
+
+						const owner_details = await whatsappUtils.getContactDetails(
+							await whatsapp.getClient().getContactById(info.owner._serialized)
+						);
 
 						const participants: {
 							number: string;
