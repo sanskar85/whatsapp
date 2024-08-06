@@ -606,8 +606,6 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 	const { client_id, data } = req.locals;
 	const links = data as string[];
 
-	const codes = links.map((link) => link.split('/').pop() ?? '');
-
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
 	if (!whatsapp || !whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
@@ -629,55 +627,61 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 	});
 
 	try {
-		const groups = (
-			await Promise.all(
-				codes.map(async (code) => {
-					try {
-						const info: any = await whatsapp.getClient().getInviteInfo(code);
-						if (!info) {
-							return null;
-						}
-
-						const owner_details = await whatsappUtils.getContactDetails(
-							await whatsapp.getClient().getContactById(info.owner._serialized)
-						);
-
-						const participants: {
-							number: string;
-							type: string;
-						}[] = info.participants.map((participant: any) => ({
-							number: participant.id.user,
-							type: participant.isSuperAdmin ? 'CREATOR' : participant.isAdmin ? 'ADMIN' : 'USER',
-						}));
-
-						const participant_mapped = participants.reduce(
-							(acc, item, index) => {
-								acc[`Participant ${index + 1} Number`] = item.number;
-								acc[`Participant ${index + 1} Type`] = item.type;
-								return acc;
-							},
-							{} as {
-								[k: string]: string;
-							}
-						);
-
+		const groups = (await Promise.all(
+			links.map(async (link) => {
+				const code = link.split('/').pop() ?? '';
+				try {
+					const info: any = await whatsapp.getClient().getInviteInfo(code);
+					if (!info) {
 						return {
-							'Group ID': info.id.user,
-							'Group Name': info.subject,
-							Description: info.desc,
-							'Created At': DateUtils.getUnixMoment(info.creation).format('YYYY-MM-DD HH:mm:ss'),
-							'Member Count': info.size,
-							'Owner Name': owner_details.name,
-							'Owner Number': owner_details.number,
-							'Owner Public Name': owner_details.public_name,
-							...participant_mapped,
+							Link: link,
+							'Group ID': 'Unable to fetch records',
 						};
-					} catch (err) {
-						return null;
 					}
-				})
-			)
-		).filter((chat) => chat !== null) as {
+
+					const owner_details = await whatsappUtils.getContactDetails(
+						await whatsapp.getClient().getContactById(info.owner._serialized)
+					);
+
+					const participants: {
+						number: string;
+						type: string;
+					}[] = info.participants.map((participant: any) => ({
+						number: participant.id.user,
+						type: participant.isSuperAdmin ? 'CREATOR' : participant.isAdmin ? 'ADMIN' : 'USER',
+					}));
+
+					const participant_mapped = participants.reduce(
+						(acc, item, index) => {
+							acc[`Participant ${index + 1} Number`] = item.number;
+							acc[`Participant ${index + 1} Type`] = item.type;
+							return acc;
+						},
+						{} as {
+							[k: string]: string;
+						}
+					);
+
+					return {
+						Link: link,
+						'Group ID': info.id.user,
+						'Group Name': info.subject,
+						Description: info.desc,
+						'Created At': DateUtils.getUnixMoment(info.creation).format('YYYY-MM-DD HH:mm:ss'),
+						'Member Count': info.size,
+						'Owner Name': owner_details.name,
+						'Owner Number': owner_details.number,
+						'Owner Public Name': owner_details.public_name,
+						...participant_mapped,
+					};
+				} catch (err) {
+					return {
+						Link: link,
+						'Group ID': 'Unable to fetch records',
+					};
+				}
+			})
+		)) as {
 			[k: string]: string;
 		}[];
 
