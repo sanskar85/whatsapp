@@ -50,7 +50,10 @@ router
 	.route('/pending-requests')
 	.post(VerifyUser, VerifyClientID, GroupsController.pendingRequests);
 
-router.route('/group-links').all(VerifyUser, LinkReportValidator).post(GroupsController.groupLinks);
+router
+	.route('/group-links')
+	.all(VerifyUser, VerifyClientID, LinkReportValidator)
+	.post(GroupsController.groupLinks);
 
 router
 	.route('/')

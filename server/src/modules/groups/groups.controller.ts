@@ -609,10 +609,7 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 	const codes = links.map((link) => link.split('/').pop() ?? '');
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id);
-	if (!whatsapp) {
-		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
-	}
-	if (!whatsapp.isReady()) {
+	if (!whatsapp || !whatsapp.isReady()) {
 		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
 	}
 	const whatsappUtils = new WhatsappUtils(whatsapp);
