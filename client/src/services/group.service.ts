@@ -367,4 +367,15 @@ export default class GroupService {
 		});
 		return true;
 	}
+
+	static async generateInviteDetails(links: string[]) {
+		try {
+			await APIInstance.post(`/whatsapp/groups/group-links`, {
+				links: links,
+			});
+			return true;
+		} catch (err) {
+			return false;
+		}
+	}
 }

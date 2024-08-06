@@ -6,6 +6,7 @@ import GroupsController from './groups.controller';
 import {
 	CreateGroupValidator,
 	GroupSettingValidator,
+	LinkReportValidator,
 	MergeGroupValidator,
 } from './groups.validator';
 
@@ -48,6 +49,8 @@ router.route('/refresh').post(VerifyUser, VerifyClientID, GroupsController.refre
 router
 	.route('/pending-requests')
 	.post(VerifyUser, VerifyClientID, GroupsController.pendingRequests);
+
+router.route('/group-links').all(VerifyUser, LinkReportValidator).post(GroupsController.groupLinks);
 
 router
 	.route('/')

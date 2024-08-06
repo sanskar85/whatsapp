@@ -7,64 +7,80 @@ import {
 	ModalOverlay,
 	Text,
 	Textarea,
+	useToast,
 	VStack,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import GroupService from '../../../services/group.service';
 
 type Props = {
 	isOpen: boolean;
 	onClose: () => void;
-	onConfirm: (numbers: string[]) => void;
-	numbers: string[];
 };
-export default function NumberInputDialog({
-	isOpen,
-	onClose,
-	onConfirm,
-	numbers: prefilledNumbers,
-}: Props) {
-	const [numberInput, setNumberInput] = useState('');
-	const [numbers, setNumbers] = useState<string[]>(prefilledNumbers || []);
+export default function LinkInputDialog({ isOpen, onClose }: Props) {
+	const [linkInput, setLinkInput] = useState('');
+	const [links, setLinks] = useState<string[]>([]);
 	const [isChanged, setChanged] = useState(false);
+	const toast = useToast();
 
 	const handleTextChange = (text: string) => {
 		if (text.length === 0) {
 			setChanged(true);
-			return setNumberInput('');
+			return setLinkInput('');
 		}
-		setNumberInput(text);
+		setLinkInput(text);
 		setChanged(true);
 	};
 
 	const handleFormatClicked = () => {
-		const lines = numberInput.split('\n');
-		const res_lines = [];
-		const res_numbers: string[] = [];
+		const lines = linkInput.split('\n');
+		const res_links: string[] = [];
 		for (const line of lines) {
 			if (!line) continue;
-			const _numbers = line
-				.split(/[ ,]+/)
-				.map((number) => number.trim())
-				.filter((number) => number && !isNaN(Number(number)));
-			res_numbers.push(..._numbers);
-			res_lines.push(_numbers.join(', '));
+			const regex = /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]{22}$/;
+			if (regex.test(line)) {
+				res_links.push(line);
+				continue;
+			}
 		}
-
-		setNumberInput(res_lines.join('\n'));
-		setNumbers(res_numbers);
+		setLinkInput(res_links.join('\n'));
+		setLinks(res_links);
 		setChanged(false);
 	};
 
-	const handleClose = () => {
-		onConfirm(numbers);
-		onClose();
-		setNumberInput('');
-	};
+	const handleClose = async () => {
+		if (links.length === 0) {
+			toast({
+				title: 'No links provided',
+				description: 'Please provide at least one link',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
+			return;
+		}
+		const success = await GroupService.generateInviteDetails(links);
+		if (!success) {
+			toast({
+				title: 'Failed to export',
+				description: 'Please try again',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
+			return;
+		}
+		toast({
+			title: 'Export in progress.',
+			description: 'Check background tasks for further details',
+			status: 'success',
+			duration: 3000,
+			isClosable: true,
+		});
 
-	useEffect(() => {
-		if (!prefilledNumbers) return;
-		setNumberInput(prefilledNumbers.join(', '));
-	}, [prefilledNumbers]);
+		onClose();
+		setLinkInput('');
+	};
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} size={'3xl'}>
@@ -73,7 +89,7 @@ export default function NumberInputDialog({
 				<ModalBody>
 					<VStack>
 						<Text alignSelf={'start'} pt={4}>
-							Enter Recipients Number
+							Enter Whatsapp Invite Links
 						</Text>
 
 						<Textarea
@@ -82,7 +98,7 @@ export default function NumberInputDialog({
 							size={'sm'}
 							rounded={'md'}
 							placeholder={
-								'Enter recipients numbers separated by commas\nE.g. 91xxxxxxxxx8, 91xxxxxxxxx8'
+								'Enter links (one per line) of the format https://chat.whatsapp.com/XXXXXXXXXXXXX'
 							}
 							// border={'none'}
 							_placeholder={{
@@ -90,7 +106,7 @@ export default function NumberInputDialog({
 								color: 'inherit',
 							}}
 							_focus={{ border: 'none', outline: 'none' }}
-							value={numberInput}
+							value={linkInput}
 							onChange={(e) => handleTextChange(e.target.value)}
 							resize={'vertical'}
 						/>
@@ -107,7 +123,7 @@ export default function NumberInputDialog({
 								textUnderlineOffset={'3px'}
 								onClick={handleFormatClicked}
 							>
-								Format Numbers
+								Format Links
 							</Text>
 						) : (
 							<Text
@@ -116,7 +132,7 @@ export default function NumberInputDialog({
 								textDecoration={'underline'}
 								textUnderlineOffset={'3px'}
 							>
-								{numbers.length} numbers provided.
+								{links.length} links provided.
 							</Text>
 						)}
 						<Button
@@ -126,7 +142,7 @@ export default function NumberInputDialog({
 							onClick={handleClose}
 							isDisabled={isChanged}
 						>
-							Done
+							Generate Details
 						</Button>
 					</VStack>
 				</ModalFooter>

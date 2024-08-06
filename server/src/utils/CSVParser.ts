@@ -778,4 +778,19 @@ export default class CSVParser {
 		});
 		return csv;
 	}
+
+	static exportGroupLinkData(records: Record<string, string>[]) {
+		const allKeys = [...new Set(records.flatMap((record) => Object.keys(record)))];
+
+		const keys = allKeys.map((key) => ({
+			field: key,
+			title: key,
+		}));
+
+		const csv = json2csv(records, {
+			keys: keys,
+			emptyFieldValue: '',
+		});
+		return csv;
+	}
 }

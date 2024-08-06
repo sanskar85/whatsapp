@@ -19,6 +19,7 @@ import {
 	TGroupContact,
 } from '../../types/whatsapp';
 import CSVParser from '../../utils/CSVParser';
+import DateUtils from '../../utils/DateUtils';
 import { Respond, RespondCSV, idValidator } from '../../utils/ExpressUtils';
 import VCFParser from '../../utils/VCFParser';
 import WhatsappUtils, { MappedContacts } from '../../utils/WhatsappUtils';
@@ -601,6 +602,101 @@ async function pendingRequests(req: Request, res: Response, next: NextFunction) 
 	}
 }
 
+async function groupLinks(req: Request, res: Response, next: NextFunction) {
+	const { client_id, data } = req.locals;
+	const links = data as string[];
+
+	const codes = links.map((link) => link.split('/').pop() ?? '');
+
+	const whatsapp = WhatsappProvider.clientByClientID(client_id);
+	if (!whatsapp) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
+	}
+	if (!whatsapp.isReady()) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.SESSION_INVALIDATED));
+	}
+	const whatsappUtils = new WhatsappUtils(whatsapp);
+	const taskService = new TaskService(req.locals.user.getUser());
+
+	const task_id = await taskService.createTask(
+		TASK_TYPE.EXPORT_GROUP_LINK_DETAILS,
+		TASK_RESULT_TYPE.CSV,
+		{
+			description: `Generate group links details.`,
+		}
+	);
+
+	Respond({
+		res,
+		status: 201,
+	});
+
+	try {
+		const groups = (
+			await Promise.all(
+				codes.map(async (code) => {
+					try {
+						const info: any = await whatsapp.getClient().getInviteInfo(code);
+						if (!info) {
+							return null;
+						}
+						const owner_details = await whatsappUtils.getContactDetails(info.id.user);
+
+						const participants: {
+							number: string;
+							type: string;
+						}[] = info.participants.map((participant: any) => ({
+							number: participant.id.user,
+							type: participant.isSuperAdmin ? 'CREATOR' : participant.isAdmin ? 'ADMIN' : 'USER',
+						}));
+
+						const participant_mapped = participants.reduce(
+							(acc, item, index) => {
+								acc[`Participant ${index + 1} Number`] = item.number;
+								acc[`Participant ${index + 1} Type`] = item.type;
+								return acc;
+							},
+							{} as {
+								[k: string]: string;
+							}
+						);
+
+						return {
+							'Group ID': info.id.user,
+							'Group Name': info.subject,
+							Description: info.desc,
+							'Created At': DateUtils.getUnixMoment(info.creation).format('YYYY-MM-DD HH:mm:ss'),
+							'Member Count': info.size,
+							'Owner Name': owner_details.name,
+							'Owner Number': owner_details.number,
+							'Owner Public Name': owner_details.public_name,
+							...participant_mapped,
+						};
+					} catch (err) {
+						return null;
+					}
+				})
+			)
+		).filter((chat) => chat !== null) as {
+			[k: string]: string;
+		}[];
+
+		const data = CSVParser.exportGroupLinkData(groups);
+
+		const file_name = `Export Group Links Details.csv`;
+
+		const file_path = __basedir + TASK_PATH + task_id.toString() + '.csv';
+
+		await FileUtils.writeFile(file_path, data);
+
+		taskService.markCompleted(task_id, file_name);
+		whatsapp.sendToClient(SOCKET_RESPONSES.TASK_COMPLETED, task_id.toString());
+	} catch (err) {
+		taskService.markFailed(task_id);
+		whatsapp.sendToClient(SOCKET_RESPONSES.TASK_FAILED, task_id.toString());
+	}
+}
+
 const GroupsController = {
 	groups,
 	exportGroups,
@@ -616,6 +712,7 @@ const GroupsController = {
 	updateGroupsPicture,
 	updateGroupsDetails,
 	pendingRequests,
+	groupLinks,
 };
 
 export default GroupsController;

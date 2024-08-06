@@ -15,6 +15,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MdGroupAdd, MdGroups3 } from 'react-icons/md';
 import { RiUserAddFill } from 'react-icons/ri';
+import { TbListDetails } from 'react-icons/tb';
 import { useDispatch, useSelector } from 'react-redux';
 import { popFromNavbar, pushToNavbar } from '../../../hooks/useNavbar';
 import { useTheme } from '../../../hooks/useTheme';
@@ -28,6 +29,7 @@ import {
 	setIsDeleting,
 } from '../../../store/reducers/MergeGroupReducer';
 import DeleteAlert, { DeleteAlertHandle } from '../../components/delete-alert';
+import LinkInputDialog from '../../components/link-input-dialog';
 import { NavbarDeleteElement, NavbarSearchElement } from '../../components/navbar';
 import {
 	GroupMergeDialog,
@@ -41,6 +43,11 @@ const GroupMergePage = () => {
 		isOpen: isMergeDialogOpen,
 		onOpen: openMergeDialog,
 		onClose: closeMergeDialog,
+	} = useDisclosure();
+	const {
+		isOpen: isLinkDialogOpen,
+		onOpen: openLinkDialog,
+		onClose: closeLinkDialog,
 	} = useDisclosure();
 	const {
 		isOpen: isSettingDialogOpen,
@@ -107,17 +114,30 @@ const GroupMergePage = () => {
 					/>
 					{
 						tabIndex === 0 ? (
-							<Button
-								leftIcon={<MdGroupAdd />}
-								size={'sm'}
-								colorScheme='blue'
-								onClick={() => {
-									dispatch(clearEditMergeGroup());
-									openMergeDialog();
-								}}
-							>
-								MERGE
-							</Button>
+							<>
+								<Button
+									leftIcon={<MdGroupAdd />}
+									size={'sm'}
+									colorScheme='blue'
+									onClick={() => {
+										dispatch(clearEditMergeGroup());
+										openMergeDialog();
+									}}
+								>
+									MERGE
+								</Button>
+								<Button
+									leftIcon={<TbListDetails />}
+									size={'sm'}
+									colorScheme='blue'
+									onClick={() => {
+										dispatch(clearEditMergeGroup());
+										openLinkDialog();
+									}}
+								>
+									INVITE DETAILS
+								</Button>
+							</>
 						) : (
 							<Button
 								leftIcon={<RiUserAddFill />}
@@ -157,6 +177,7 @@ const GroupMergePage = () => {
 		dispatch,
 		tabIndex,
 		openSettingDialog,
+		openLinkDialog,
 		theme,
 		exportPendingRequests,
 	]);
@@ -176,6 +197,7 @@ const GroupMergePage = () => {
 			<DeleteAlert ref={deleteAlertRef} onConfirm={deleteGroup} type={'Merged Groups'} />
 			<GroupMergeDialog isOpen={isMergeDialogOpen} onClose={closeMergeDialog} />
 			<GroupSettingDialog isOpen={isSettingDialogOpen} onClose={closeSettingDialog} />
+			<LinkInputDialog isOpen={isLinkDialogOpen} onClose={closeLinkDialog} />
 		</Box>
 	);
 };
