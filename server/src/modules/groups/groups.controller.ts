@@ -643,7 +643,7 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 				} catch (err: any) {}
 				retry_count++;
 				if (retry_count < 3) {
-					await Delay(5);
+					await Delay(2);
 				}
 			}
 
