@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import Logger from 'n23-logger';
 import { GroupChat, MessageMedia } from 'whatsapp-web.js';
 import { getOrCache, saveToCache } from '../../config/cache';
 import {
@@ -627,71 +628,83 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 	});
 
 	try {
-		const groups = (await Promise.all(
-			links.map(async (link) => {
-				const code = link.split('/').pop() ?? '';
-				let retry_count = 0;
-				try {
-					let info: any = null;
-
-					while (!info && retry_count < 10) {
-						info = await whatsapp.getClient().getInviteInfo(code);
-						retry_count++;
-						await Delay(30);
-					}
-
-					if (!info) {
-						return {
-							Link: link,
-							'Group ID': 'Unable to fetch records',
-						};
-					}
-
-					const owner_details = await whatsappUtils.getContactDetails(
-						await whatsapp.getClient().getContactById(info.owner._serialized)
-					);
-
-					const participants: {
-						number: string;
-						type: string;
-					}[] = info.participants.map((participant: any) => ({
-						number: participant.id.user,
-						type: participant.isSuperAdmin ? 'CREATOR' : participant.isAdmin ? 'ADMIN' : 'USER',
-					}));
-
-					const participant_mapped = participants.reduce(
-						(acc, item, index) => {
-							acc[`Participant ${index + 1} Number`] = item.number;
-							acc[`Participant ${index + 1} Type`] = item.type;
-							return acc;
-						},
-						{} as {
-							[k: string]: string;
-						}
-					);
-
-					return {
-						Link: link,
-						'Group ID': info.id.user,
-						'Group Name': info.subject,
-						Description: info.desc,
-						'Created At': DateUtils.getUnixMoment(info.creation).format('YYYY-MM-DD HH:mm:ss'),
-						'Member Count': info.size,
-						'Owner Name': owner_details.name,
-						'Owner Number': owner_details.number,
-						'Owner Public Name': owner_details.public_name,
-						...participant_mapped,
-					};
-				} catch (err) {
-					return {
-						Link: link,
-						'Group ID': 'Unable to fetch records',
-					};
-				}
-			})
-		)) as {
+		const groups: {
 			[k: string]: string;
-		}[];
+		}[] = [];
+
+		for (const link of links) {
+			const code = link.split('/').pop() ?? '';
+			let retry_count = 0;
+			let info: any = null;
+
+			while (retry_count < 10) {
+				try {
+					info = await whatsapp.getClient().getInviteInfo(code);
+					if (info) break;
+				} catch (err) {
+					Logger.info(`Error fetching group info for link`, link);
+				}
+				retry_count++;
+				await Delay(30);
+			}
+
+			if (!info) {
+				groups.push({
+					Link: link,
+					'Group ID': 'Unable to fetch records',
+				});
+				continue;
+			}
+
+			let details = {
+				Link: link,
+				'Group ID': info.id.user,
+				'Group Name': info.subject,
+				Description: info.desc,
+				'Created At': DateUtils.getUnixMoment(info.creation).format('YYYY-MM-DD HH:mm:ss'),
+				'Member Count': info.size,
+				'Owner Name': '',
+				'Owner Number': '',
+				'Owner Public Name': '',
+			};
+
+			try {
+				const owner_details = await whatsappUtils.getContactDetails(
+					await whatsapp.getClient().getContactById(info.owner._serialized)
+				);
+				details = {
+					...details,
+					'Owner Name': owner_details.name,
+					'Owner Number': owner_details.number,
+					'Owner Public Name': owner_details.public_name,
+				};
+			} catch (err) {}
+
+			const participants: {
+				number: string;
+				type: string;
+			}[] = info.participants.map((participant: any) => ({
+				number: participant.id.user,
+				type: participant.isSuperAdmin ? 'CREATOR' : participant.isAdmin ? 'ADMIN' : 'USER',
+			}));
+
+			const participant_mapped = participants.reduce(
+				(acc, item, index) => {
+					acc[`Participant ${index + 1} Number`] = item.number;
+					acc[`Participant ${index + 1} Type`] = item.type;
+					return acc;
+				},
+				{} as {
+					[k: string]: string;
+				}
+			);
+			details = {
+				...details,
+				...participant_mapped,
+			};
+
+			groups.push(details);
+		}
 
 		const data = CSVParser.exportGroupLinkData(groups);
 
