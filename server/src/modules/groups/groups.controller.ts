@@ -637,7 +637,7 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 					while (!info && retry_count < 10) {
 						info = await whatsapp.getClient().getInviteInfo(code);
 						retry_count++;
-						await Delay(10);
+						await Delay(30);
 					}
 
 					if (!info) {
