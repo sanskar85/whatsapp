@@ -20,7 +20,7 @@ import {
 } from '../../types/whatsapp';
 import CSVParser from '../../utils/CSVParser';
 import DateUtils from '../../utils/DateUtils';
-import { Respond, RespondCSV, idValidator } from '../../utils/ExpressUtils';
+import { Delay, Respond, RespondCSV, idValidator } from '../../utils/ExpressUtils';
 import VCFParser from '../../utils/VCFParser';
 import WhatsappUtils, { MappedContacts } from '../../utils/WhatsappUtils';
 import {
@@ -630,8 +630,16 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 		const groups = (await Promise.all(
 			links.map(async (link) => {
 				const code = link.split('/').pop() ?? '';
+				let retry_count = 0;
 				try {
-					const info: any = await whatsapp.getClient().getInviteInfo(code);
+					let info: any = null;
+
+					while (!info && retry_count < 10) {
+						info = await whatsapp.getClient().getInviteInfo(code);
+						retry_count++;
+						await Delay(10);
+					}
+
 					if (!info) {
 						return {
 							Link: link,
