@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import Logger from 'n23-logger';
 import { GroupChat, MessageMedia } from 'whatsapp-web.js';
 import { getOrCache, saveToCache } from '../../config/cache';
 import {
@@ -637,15 +636,15 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 			let retry_count = 0;
 			let info: any = null;
 
-			while (retry_count < 10) {
+			while (retry_count < 3) {
 				try {
 					info = await whatsapp.getClient().getInviteInfo(code);
 					if (info) break;
-				} catch (err) {
-					Logger.info(`Error fetching group info for link`, link);
-				}
+				} catch (err: any) {}
 				retry_count++;
-				await Delay(30);
+				if (retry_count < 3) {
+					await Delay(5);
+				}
 			}
 
 			if (!info) {
