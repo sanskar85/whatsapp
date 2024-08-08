@@ -3,7 +3,7 @@ import Logger from 'n23-logger';
 import QRCode from 'qrcode';
 import { Socket } from 'socket.io';
 import WAWebJS, { BusinessContact, Client, GroupChat, LocalAuth } from 'whatsapp-web.js';
-import { CHROMIUM_PATH, MISC_PATH, SOCKET_RESPONSES } from '../../config/const';
+import { CHROMIUM_PATH, SOCKET_RESPONSES } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import StorageDB from '../../repository/storage';
 import { CampaignService } from '../../services';
@@ -13,10 +13,9 @@ import { DeviceService, UserService } from '../../services/user';
 import UserPreferencesService from '../../services/user/userPreferences';
 import VoteResponseService from '../../services/vote-response';
 import DateUtils from '../../utils/DateUtils';
-import { Delay, generateClientID } from '../../utils/ExpressUtils';
+import { Delay } from '../../utils/ExpressUtils';
 import WhatsappUtils from '../../utils/WhatsappUtils';
-import { FileUtils } from '../../utils/files';
-import { MessageLogger, uploadSingleFile } from '../google';
+import { MessageLogger } from '../google';
 
 type ClientID = string;
 
@@ -321,21 +320,20 @@ export class WhatsappProvider {
 				let link: string | undefined = '';
 
 				if (message.hasMedia) {
-					try {
-						const media = await message.downloadMedia();
-						if (!media) {
-							link = 'Unable to generate link';
-						} else if (media.mimetype.includes('image')) {
-							const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
-							const dest = __basedir + MISC_PATH + filename;
-							await FileUtils.createImageFile(media.data, dest);
-
-							link = await uploadSingleFile(filename, this.number!, dest);
-						}
-					} catch (err) {
-						link = 'Unable to generate link';
-						Logger.error('Error while saving image message', err as Error);
-					}
+					// try {
+					// 	const media = await message.downloadMedia();
+					// 	if (!media) {
+					// 		link = 'Unable to generate link';
+					// 	} else if (media.mimetype.includes('image')) {
+					// 		const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
+					// 		const dest = __basedir + MISC_PATH + filename;
+					// 		await FileUtils.createImageFile(media.data, dest);
+					// 		link = await uploadSingleFile(filename, this.number!, dest);
+					// 	}
+					// } catch (err) {
+					// 	link = 'Unable to generate link';
+					// 	Logger.error('Error while saving image message', err as Error);
+					// }
 				}
 
 				const messageLogService = new MessageLogger(sheetId);
