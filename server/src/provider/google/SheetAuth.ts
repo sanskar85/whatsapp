@@ -48,16 +48,21 @@ export async function addHeader(sheetId: string, headers: HeaderType = HEADERS) 
 }
 
 export async function shareToDrive(fileId: string, email: string) {
-	await drive.permissions.create({
-		auth: (await getAuthToken()) as any,
-		requestBody: {
-			type: 'user',
-			role: 'writer',
-			emailAddress: email,
-		},
-		fileId: fileId,
-		sendNotificationEmail: false,
-	});
+	try {
+		await drive.permissions.create({
+			auth: (await getAuthToken()) as any,
+			requestBody: {
+				type: 'user',
+				role: 'writer',
+				emailAddress: email,
+			},
+			fileId: fileId,
+			sendNotificationEmail: false,
+		});
+		return true;
+	} catch (e) {
+		return false;
+	}
 }
 
 export async function getSpreadSheet(spreadsheetId: string) {

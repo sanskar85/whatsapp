@@ -111,11 +111,10 @@ async function shareLogFile(req: Request, res: Response, next: NextFunction) {
 		return next(new APIError(API_ERRORS.COMMON_ERRORS.NOT_FOUND));
 	}
 
-	shareToDrive(sheetID, req.locals.data);
-
 	return Respond({
 		res,
-		status: 200,
+		status: (await shareToDrive(sheetID, req.locals.data)) ? 200 : 500,
+		data: {},
 	});
 }
 
