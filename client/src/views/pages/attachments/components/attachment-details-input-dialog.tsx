@@ -110,7 +110,14 @@ const AttachmentDetailsInputDialog = forwardRef<AttachmentDetailsInputDialogHand
 
 	const handleAttachmentInput = (files: File) => {
 		if (files === null) return;
-		if (files.size > 62914560) return dispatch(setError('File size should be less than 60MB'));
+		if (files.size > 62914560) {
+			toast({
+				title: 'Warning',
+				description: 'File size should be less than 60MB',
+				status: 'warning',
+			});
+			return dispatch(setError('File size should be less than 60MB'));
+		}
 		dispatch(setFile(files));
 	};
 
