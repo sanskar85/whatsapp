@@ -113,13 +113,22 @@ export class WhatsappProvider {
 		return this.client_id;
 	}
 
-	public initialize() {
+	public async initialize() {
 		if (this.status !== STATUS.UNINITIALIZED) return;
 		Logger.info(
 			`Initializing client`,
 			`${this.userService.getUser().username} - ${this.client_id}`
 		);
-		this.client.initialize();
+		try {
+			await this.client.initialize();
+		} catch (err) {
+			Logger.error('Error while initializing client', err as Error);
+			DeviceService.logout(this.client_id);
+			this.destroyClient();
+			this.status = STATUS.DESTROYED;
+			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_CLOSED);
+			return;
+		}
 		this.status = STATUS.INITIALIZED;
 		this.sendToClient(SOCKET_RESPONSES.INITIALIZED, this.client_id);
 	}
