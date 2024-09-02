@@ -217,7 +217,7 @@ export class WhatsappProvider {
 					voter_number: '',
 					voter_name: '',
 					group_name: '',
-					selected_option: vote.selectedOptions.map((opt) => opt.name),
+					selected_option: vote.selectedOptions.map((opt: { name: string }) => opt.name),
 					voted_at: DateUtils.getMoment(vote.interractedAtTs).toDate(),
 				};
 
@@ -230,7 +230,7 @@ export class WhatsappProvider {
 				details.voter_name = (contact.name || contact.pushname) ?? '';
 
 				await vote_response_service.saveVote(details);
-				details.selected_option.map((opt) => {
+				details.selected_option.map((opt: string) => {
 					this.deviceService!.handleMessage({
 						triggered_from: chat.id._serialized,
 						body: opt,

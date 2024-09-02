@@ -342,6 +342,7 @@ export default class BotService extends UserService {
 					.sendMessage(
 						triggered_from,
 						new Poll(title, options, {
+							messageSecret: undefined,
 							allowMultipleAnswers: isMultiSelect,
 						})
 					)
