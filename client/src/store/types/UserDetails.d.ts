@@ -30,6 +30,8 @@ export type UserDetailsState = {
 
 	data_loaded: boolean;
 	settingsOpen: boolean;
+
+	isLoggedIn: boolean;
 };
 
 export type PaymentRecords = {

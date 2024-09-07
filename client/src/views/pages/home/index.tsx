@@ -1,11 +1,12 @@
 import { Box, Flex, Image, Progress, Text, useToast } from '@chakra-ui/react';
 import Lottie from 'lottie-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useOutlet } from 'react-router-dom';
 import { LOGO } from '../../../assets/Images';
 import { LOTTIE_LOADER } from '../../../assets/Lottie';
 import { DATA_LOADED_DELAY, NAVIGATION } from '../../../config/const';
+import { startAuth, useAuth } from '../../../hooks/useAuth';
 import '../../../index.css';
 import AttachmentService from '../../../services/attachment.service';
 import AuthService from '../../../services/auth.service';
@@ -26,15 +27,29 @@ import { setLinksList } from '../../../store/reducers/LinkShortnerReducers';
 import { setMergedGroupList } from '../../../store/reducers/MergeGroupReducer';
 import { setAllSchedulers } from '../../../store/reducers/SchedulerReducer';
 import { setUserDetails } from '../../../store/reducers/UserDetailsReducers';
+import ConfirmationAlert, { ConfirmationAlertHandle } from '../../components/confirmation-alert';
 import Navbar from '../../components/navbar';
 import NavigationDrawer from '../../components/navigation-drawer';
+import AddDeviceDialog, { AddDeviceDialogHandle } from '../settings/components/AddDeviceDialog';
 
 export default function Home() {
 	const outlet = useOutlet();
-	const [isAuthenticated, setAuthenticated] = useState(false);
-	const [isAuthenticating, setAuthenticating] = useState(true);
 	const toast = useToast();
 	const dispatch = useDispatch();
+	const confirmationAlertRef = useRef<ConfirmationAlertHandle>(null);
+	const addProfileRef = useRef<AddDeviceDialogHandle | null>(null);
+	const {
+		isAuthenticating: _isAuthenticating,
+		qrCode,
+		isSocketInitialized,
+		isAuthenticated: _isAuthenticated,
+		qrGenerated,
+	} = useAuth();
+
+	console.log(qrCode);
+
+	const [isAuthenticated, setAuthenticated] = useState(false);
+	const [isAuthenticating, setAuthenticating] = useState(true);
 
 	const { data_loaded } = useSelector((state: StoreState) => state[StoreNames.USER]);
 
@@ -95,6 +110,11 @@ export default function Home() {
 			AuthService.validateClientID().then((res) => {
 				if (res) {
 					dispatch(setUserDetails(res));
+				} else {
+					confirmationAlertRef.current?.open({
+						disclaimer:
+							'No linked WhatsApp number found. Please link your WhatsApp number to use all the features.',
+					});
 				}
 			});
 		} catch (e) {
@@ -113,6 +133,21 @@ export default function Home() {
 			fetchUserDetails();
 		}
 	}, [fetchUserDetails, isAuthenticated]);
+
+	const handleDeviceAdded = () => {
+		AuthService.validateClientID().then((res) => {
+			if (res) {
+				dispatch(setUserDetails(res));
+				window.location.reload();
+			}
+		});
+	};
+
+	const handleConfirm = () => {
+		confirmationAlertRef.current?.close();
+		startAuth();
+		addProfileRef.current?.open();
+	};
 
 	if (isAuthenticating) {
 		return (
@@ -146,6 +181,23 @@ export default function Home() {
 				{outlet ? outlet : <Navigate to={NAVIGATION.CONTACT} />}
 				<Loading isLoaded={data_loaded} />
 			</Box>
+			<ConfirmationAlert ref={confirmationAlertRef} disclaimer='' onConfirm={handleConfirm} />
+			<AddDeviceDialog
+				ref={addProfileRef}
+				qr={qrCode}
+				status={
+					isSocketInitialized
+						? 'READY'
+						: _isAuthenticated
+						? 'AUTHENTICATED'
+						: qrGenerated
+						? 'QR_GENERATED'
+						: _isAuthenticating
+						? 'INITIALIZED'
+						: 'UNINITIALIZED'
+				}
+				onCompleted={handleDeviceAdded}
+			/>
 		</Box>
 	);
 }

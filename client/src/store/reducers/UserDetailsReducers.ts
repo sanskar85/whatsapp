@@ -19,6 +19,8 @@ const initialState: UserDetailsState = {
 	contactsCount: null,
 	data_loaded: false,
 	settingsOpen: false,
+
+	isLoggedIn: true,
 };
 
 const UserDetailsSlice = createSlice({
@@ -91,6 +93,9 @@ const UserDetailsSlice = createSlice({
 		setSettingsOpen: (state, action: PayloadAction<boolean>) => {
 			state.settingsOpen = action.payload;
 		},
+		setIsLoggedIn: (state, action: PayloadAction<boolean>) => {
+			state.isLoggedIn = action.payload;
+		},
 	},
 });
 
@@ -102,6 +107,7 @@ export const {
 	setContactsCount,
 	setDataLoaded,
 	setSettingsOpen,
+	setIsLoggedIn,
 } = UserDetailsSlice.actions;
 
 export default UserDetailsSlice.reducer;
