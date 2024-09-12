@@ -11,23 +11,26 @@ import {
 import { IUser } from '../../types/users';
 import { generateHashedPassword } from '../../utils/ExpressUtils';
 
-const schema = new Schema<IUser>({
-	name: String,
-	username: {
-		type: String,
-		unique: true,
-		index: true,
+const schema = new Schema<IUser>(
+	{
+		name: String,
+		username: {
+			type: String,
+			unique: true,
+			index: true,
+		},
+		password: {
+			type: String,
+			select: false,
+		},
+		role: {
+			type: String,
+			enum: Object.values(UserRoles),
+			default: UserRoles.USER,
+		},
 	},
-	password: {
-		type: String,
-		select: false,
-	},
-	role: {
-		type: String,
-		enum: Object.values(UserRoles),
-		default: UserRoles.USER,
-	},
-});
+	{ timestamps: true }
+);
 
 schema.pre('save', async function (next) {
 	if (!this.isModified('password')) return next();
