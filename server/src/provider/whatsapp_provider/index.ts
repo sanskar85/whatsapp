@@ -7,6 +7,7 @@ import { CHROMIUM_PATH, SOCKET_RESPONSES } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import StorageDB from '../../repository/storage';
 import { CampaignService } from '../../services';
+import ApiKeyService from '../../services/keys';
 import GroupMergeService from '../../services/merged-groups';
 import SchedulerService from '../../services/scheduler';
 import { DeviceService, UserService } from '../../services/user';
@@ -54,6 +55,7 @@ export class WhatsappProvider {
 	private socket: Socket | undefined;
 	private userService: UserService;
 	private deviceService: DeviceService | undefined;
+	private webhookService: ApiKeyService;
 	private userPrefService: UserPreferencesService | undefined;
 
 	private status: STATUS;
@@ -65,6 +67,7 @@ export class WhatsappProvider {
 	private constructor(user: UserService, cid: ClientID) {
 		this.userService = user;
 		this.client_id = cid;
+		this.webhookService = new ApiKeyService(user.getUserId());
 
 		this.client = new Client({
 			restartOnAuthFail: true,
@@ -355,6 +358,14 @@ export class WhatsappProvider {
 					link: link || '',
 				});
 			}
+
+			this.webhookService.sendWebhook({
+				recipient: contact.id.user,
+				recipient_name: contact.pushname || contact.name,
+				chat_id: chat.id._serialized,
+				chat_name: chat.name,
+				message,
+			});
 		});
 	}
 

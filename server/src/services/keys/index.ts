@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Types } from 'mongoose';
+import { MessageMedia } from 'whatsapp-web.js';
 import InternalError, { COMMON_ERRORS } from '../../errors/internal-errors';
 import APIKeyDB from '../../repository/keys/APIKey';
 import WebhookDB from '../../repository/keys/Webhook';
@@ -109,6 +110,47 @@ export default class ApiKeyService {
 		} catch (error) {
 			throw new InternalError(COMMON_ERRORS.NOT_FOUND);
 		}
+	}
+
+	async sendWebhook(details: {
+		recipient: string;
+		recipient_name: string | undefined;
+		chat_id: string;
+		chat_name: string;
+		message: import('whatsapp-web.js').Message;
+	}) {
+		const webhooks = await WebhookDB.find({ linked_to: this.userId });
+
+		let webhookData: any = {
+			recipient: details.recipient,
+			recipient_name: details.recipient_name,
+			chat_id: details.chat_id,
+			chat_name: details.chat_name,
+		};
+
+		if (details.message.hasMedia && details.message instanceof MessageMedia) {
+			const msg = details.message as MessageMedia;
+			webhookData.message = {
+				type: 'media',
+				media: {
+					caption: details.message.body,
+					mimetype: msg.mimetype,
+					filename: msg.filename,
+					size: msg.filesize,
+					base64: msg.data,
+				},
+			};
+		} else {
+			webhookData.message = {
+				type: 'text',
+				text: details.message.body,
+			};
+		}
+
+		webhooks.forEach(async (webhook) => {
+			const webhook_url = webhook.url;
+			axios.post(webhook_url, webhookData);
+		});
 	}
 
 	// public async sendWebhook(device: IWhatsappLink, body: any) {
