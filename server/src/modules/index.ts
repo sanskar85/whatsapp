@@ -1,4 +1,5 @@
 import express from 'express';
+import ApiKeysRoute from './api-keys/keys.route';
 import AuthRoute from './auth/auth.route';
 import BotRoute from './bot/bot.route';
 import ContactCardRoute from './contact-card/contact-card.route';
@@ -35,6 +36,8 @@ router.use('/webhooks', WebhooksRoute);
 // Next rotes are common routes
 
 router.use('/token', TokenRoute);
+
+router.use('/api-keys', ApiKeysRoute);
 
 router.use('/auth', AuthRoute);
 router.use('/payment', PaymentRoute);

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import ServerError from '../../config/ServerError';
 import APIError, { COMMON_ERRORS } from '../../errors/api-errors';
-import ApiKeyService from '../../services/apikeys';
+import ApiKeyService from '../../services/keys';
 import { Respond } from '../../utils/ExpressUtils';
 import { TCreateAPIKey, TWebhook } from './keys.validator';
 

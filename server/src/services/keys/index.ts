@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { Types } from 'mongoose';
 import InternalError, { COMMON_ERRORS } from '../../errors/internal-errors';
-import APIKeyDB from '../../repository/api/APIKey';
-import WebhookDB from '../../repository/api/Webhook';
-import IAPIKey from '../../types/apikey/apikey';
-import IWebhook from '../../types/apikey/webhook';
+import APIKeyDB from '../../repository/keys/APIKey';
+import WebhookDB from '../../repository/keys/Webhook';
+import IAPIKey from '../../types/keys/APIKey';
+import IWebhook from '../../types/keys/Webhook';
 import DateUtils from '../../utils/DateUtils';
 
 function processDocs(doc: IAPIKey) {
