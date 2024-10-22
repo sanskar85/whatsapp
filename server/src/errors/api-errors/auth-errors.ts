@@ -26,6 +26,11 @@ const USER_ERRORS = {
 		TITLE: 'ATTACHMENT_IN_USE',
 		MESSAGE: 'The requested attachment could not be deleted.',
 	},
+	INVALID_CONTACT: {
+		STATUS: 400,
+		TITLE: 'INVALID_CONTACT',
+		MESSAGE: 'The recipient contact is invalid.',
+	},
 } satisfies {
 	[error: string]: APIError;
 };

@@ -119,16 +119,13 @@ export class WhatsappProvider {
 			`Initializing client`,
 			`${this.userService.getUser().username} - ${this.client_id}`
 		);
-		try {
-			await this.client.initialize();
-		} catch (err) {
+		this.client.initialize().catch((err) => {
 			Logger.error('Error while initializing client', err as Error);
 			DeviceService.logout(this.client_id);
 			this.destroyClient();
 			this.status = STATUS.DESTROYED;
 			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_CLOSED);
-			return;
-		}
+		});
 		this.status = STATUS.INITIALIZED;
 		this.sendToClient(SOCKET_RESPONSES.INITIALIZED, this.client_id);
 	}
