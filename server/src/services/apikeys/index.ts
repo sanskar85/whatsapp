@@ -3,8 +3,8 @@ import { Types } from 'mongoose';
 import InternalError, { COMMON_ERRORS } from '../../errors/internal-errors';
 import APIKeyDB from '../../repository/api/APIKey';
 import WebhookDB from '../../repository/api/Webhook';
-import IAPIKey from '../../types/api/api';
-import IWebhook from '../../types/api/webhook';
+import IAPIKey from '../../types/apikey/apikey';
+import IWebhook from '../../types/apikey/webhook';
 import DateUtils from '../../utils/DateUtils';
 
 function processDocs(doc: IAPIKey) {

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { API_SECRET } from '../../config/const';
-import IAPIKey from '../../types/api/api';
+import IAPIKey from '../../types/apikey/apikey';
 
 const schema = new mongoose.Schema<IAPIKey>(
 	{

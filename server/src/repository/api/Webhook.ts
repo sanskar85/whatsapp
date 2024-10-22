@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import IWebhook from '../../types/api/webhook';
+import IWebhook from '../../types/apikey/webhook';
 
 const schema = new mongoose.Schema<IWebhook>(
 	{
