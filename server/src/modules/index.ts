@@ -19,6 +19,7 @@ import UserRoute from './user/user.route';
 
 import extract from 'extract-zip';
 import Logger from 'n23-logger';
+import VerifyAPIToken from '../middleware/VerifyAPIToken';
 import { WhatsappProvider } from '../provider/whatsapp_provider';
 import { UserService } from '../services';
 import { DeviceService } from '../services/user';
@@ -37,7 +38,7 @@ router.use('/webhooks', WebhooksRoute);
 
 router.use('/token', TokenRoute);
 
-router.use('/api-keys', ApiKeysRoute);
+router.use('/api-keys', VerifyAPIToken, ApiKeysRoute);
 
 router.use('/auth', AuthRoute);
 router.use('/payment', PaymentRoute);
