@@ -9,4 +9,5 @@ export enum StoreNames {
 	POLL = 'poll',
 	MERGE_GROUP = 'merge_group',
 	PAYMENTS = 'payments',
+	API = 'api',
 }

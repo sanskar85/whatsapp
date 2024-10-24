@@ -22,6 +22,7 @@ const CSVUpload = lazy(() => import('./views/pages/csv-upload'));
 const PollReport = lazy(() => import('./views/pages/polls-report'));
 const GroupMergePage = lazy(() => import('./views/pages/merge-group'));
 const NetworkError = lazy(() => import('./views/pages/network-error'));
+const APIPage = lazy(() => import('./views/pages/api-webhook'));
 
 function App() {
 	useTheme();
@@ -44,6 +45,7 @@ function App() {
 							<Route path={NAVIGATION.POLL_RESPONSES} element={<PollReport />} />
 							<Route path={NAVIGATION.GROUP_MERGE} element={<GroupMergePage />} />
 							<Route path={NAVIGATION.TASKS} element={<Tasks />} />
+							<Route path={NAVIGATION.API} element={<APIPage />} />
 						</Route>
 						<Route path={NAVIGATION.NETWORK_ERROR} element={<NetworkError />} />
 						<Route path='*' element={<Navigate to={NAVIGATION.WELCOME} />} />

@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import { StoreNames } from './config';
+import { default as APIWebhookReducers } from './reducers/APIWebhookReducer';
 import { default as AttachmentReducers } from './reducers/AttachmentReducers';
 import { default as BotReducers } from './reducers/BotReducers';
 import { default as CSVFileReducers } from './reducers/CSVFileReducers';
@@ -22,6 +23,7 @@ const store = configureStore({
 		[StoreNames.CSV]: CSVFileReducers,
 		[StoreNames.POLL]: PollReducers,
 		[StoreNames.MERGE_GROUP]: MergeGroupReducers,
+		[StoreNames.API]: APIWebhookReducers,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({

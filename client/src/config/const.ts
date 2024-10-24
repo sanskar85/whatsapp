@@ -22,6 +22,7 @@ export const NAVIGATION = {
 	GROUP_MERGE: '/group-merge',
 	TASKS: '/pending-tasks',
 	OPEN: '/open',
+	API: '/api-keys',
 };
 
 export enum CHROME_ACTION {

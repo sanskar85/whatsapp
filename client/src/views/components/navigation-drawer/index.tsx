@@ -1,7 +1,7 @@
 import { SettingsIcon } from '@chakra-ui/icons';
 import { Box, Flex, Icon, IconButton, Image, Text, VStack } from '@chakra-ui/react';
 import { IconType } from 'react-icons';
-import { BiPoll } from 'react-icons/bi';
+import { BiCode, BiPoll } from 'react-icons/bi';
 import { FiBarChart2, FiLink2 } from 'react-icons/fi';
 import { GrTasks } from 'react-icons/gr';
 import { MdGroups3, MdOutlineAttachment, MdOutlineContactPhone } from 'react-icons/md';
@@ -94,6 +94,7 @@ export default function NavigationDrawer() {
 							<MenuButton icon={TbCsv} route={NAVIGATION.CSV} name='CSV ' />
 							<MenuButton icon={MdGroups3} route={NAVIGATION.GROUP_MERGE} name='Groups' />
 							<MenuButton icon={GrTasks} route={NAVIGATION.TASKS} name='Tasks' />
+							<MenuButton icon={BiCode} route={NAVIGATION.API} name='API Keys' />
 						</Flex>
 					</Box>
 					<VStack alignItems={'flex-start'} pl={4}>
@@ -152,7 +153,7 @@ function MenuButton({ route, icon, name }: MenuButtonProps) {
 	const navigate = useNavigate();
 	return (
 		<Flex
-			className={`cursor-pointer overflow-hidden
+			className={`cursor-pointer overflow-hidden whitespace-nowrap
 							hover:!shadow-xl  hover:!drop-shadow-lg hover:!bg-green-100 hover:!font-medium 
 							${
 								isActiveTab(route, location.pathname) &&
