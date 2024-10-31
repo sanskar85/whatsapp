@@ -196,7 +196,7 @@ export default class WhatsappUtils {
 		return {
 			description: business_details?.description ?? '',
 			email: business_details?.email ?? '',
-			websites: business_details?.website ?? [],
+			websites: [],
 			latitude: business_details?.latitude ?? 0,
 			longitude: business_details?.longitude ?? 0,
 			address: business_details?.address ?? '',
