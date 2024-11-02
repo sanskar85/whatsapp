@@ -193,6 +193,7 @@ export default class MessageService {
 					.sendMessage(
 						msg.receiver,
 						new Poll(title, options, {
+							messageSecret: undefined,
 							allowMultipleAnswers: isMultiSelect,
 						})
 					)

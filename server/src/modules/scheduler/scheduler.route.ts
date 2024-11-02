@@ -1,5 +1,5 @@
 import express from 'express';
-import { VerifyUser } from '../../middleware';
+import { VerifyClientID, VerifyUser } from '../../middleware';
 import PaymentValidator from '../../middleware/VerifyPayment';
 import { IDValidator } from '../../middleware/idValidator';
 import SchedulerController from './scheduler.controller';
@@ -19,14 +19,14 @@ router
 	.get(SchedulerController.schedulerById)
 	.delete(SchedulerController.deleteScheduler)
 	.put(SchedulerController.toggleActive)
-	.all(CreateSchedulerValidator, PaymentValidator.isPseudoSubscribed)
+	.all(VerifyClientID,CreateSchedulerValidator, PaymentValidator.isPseudoSubscribed)
 	.patch(SchedulerController.updateScheduler);
 
 router
 	.route('/')
 	.all(VerifyUser)
 	.get(SchedulerController.allSchedulers)
-	.all(PaymentValidator.isPseudoSubscribed, CreateSchedulerValidator)
+	.all(VerifyClientID,PaymentValidator.isPseudoSubscribed, CreateSchedulerValidator)
 	.post(SchedulerController.createScheduler);
 
 export default router;

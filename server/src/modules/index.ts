@@ -1,4 +1,5 @@
 import express from 'express';
+import ApiKeysRoute from './api-keys/keys.route';
 import AuthRoute from './auth/auth.route';
 import BotRoute from './bot/bot.route';
 import ContactCardRoute from './contact-card/contact-card.route';
@@ -18,6 +19,7 @@ import UserRoute from './user/user.route';
 
 import extract from 'extract-zip';
 import Logger from 'n23-logger';
+import VerifyAPIToken from '../middleware/VerifyAPIToken';
 import { WhatsappProvider } from '../provider/whatsapp_provider';
 import { UserService } from '../services';
 import { DeviceService } from '../services/user';
@@ -35,6 +37,8 @@ router.use('/webhooks', WebhooksRoute);
 // Next rotes are common routes
 
 router.use('/token', TokenRoute);
+
+router.use('/api-keys', VerifyAPIToken, ApiKeysRoute);
 
 router.use('/auth', AuthRoute);
 router.use('/payment', PaymentRoute);

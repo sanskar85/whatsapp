@@ -7,6 +7,8 @@ export default interface IUser extends Document {
 	name: string;
 	role: UserRoles;
 
+	createdAt: Date;
+
 	verifyPassword(password: string): Promise<boolean>;
 
 	getSignedToken(): string;

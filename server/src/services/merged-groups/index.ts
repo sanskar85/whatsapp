@@ -459,7 +459,12 @@ export default class GroupMergeService {
 
 					polls?.forEach(async (poll) => {
 						const { title, options, isMultiSelect } = poll;
-						message.reply(new Poll(title, options, { allowMultipleAnswers: isMultiSelect }));
+						message.reply(
+							new Poll(title, options, {
+								messageSecret: undefined,
+								allowMultipleAnswers: isMultiSelect,
+							})
+						);
 					});
 
 					if (shared_contact_cards && shared_contact_cards.length > 0) {
@@ -575,14 +580,24 @@ export default class GroupMergeService {
 					polls?.forEach(async (poll) => {
 						const { title, options, isMultiSelect } = poll;
 						whatsapp
-							.sendMessage(to, new Poll(title, options, { allowMultipleAnswers: isMultiSelect }), {
-								quotedMessageId: message.id._serialized,
-							})
+							.sendMessage(
+								to,
+								new Poll(title, options, {
+									messageSecret: undefined,
+									allowMultipleAnswers: isMultiSelect,
+								}),
+								{
+									quotedMessageId: message.id._serialized,
+								}
+							)
 							.catch(() => {
 								whatsapp
 									.sendMessage(
 										to,
-										new Poll(title, options, { allowMultipleAnswers: isMultiSelect })
+										new Poll(title, options, {
+											messageSecret: undefined,
+											allowMultipleAnswers: isMultiSelect,
+										})
 									)
 									.catch((err) => {
 										Logger.error('Error sending message:', err);

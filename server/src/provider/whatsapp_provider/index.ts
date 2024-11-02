@@ -7,6 +7,7 @@ import { CHROMIUM_PATH, SOCKET_RESPONSES } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import StorageDB from '../../repository/storage';
 import { CampaignService } from '../../services';
+import ApiKeyService from '../../services/keys';
 import GroupMergeService from '../../services/merged-groups';
 import SchedulerService from '../../services/scheduler';
 import { DeviceService, UserService } from '../../services/user';
@@ -54,6 +55,7 @@ export class WhatsappProvider {
 	private socket: Socket | undefined;
 	private userService: UserService;
 	private deviceService: DeviceService | undefined;
+	private webhookService: ApiKeyService;
 	private userPrefService: UserPreferencesService | undefined;
 
 	private status: STATUS;
@@ -65,6 +67,7 @@ export class WhatsappProvider {
 	private constructor(user: UserService, cid: ClientID) {
 		this.userService = user;
 		this.client_id = cid;
+		this.webhookService = new ApiKeyService(user.getUserId());
 
 		this.client = new Client({
 			restartOnAuthFail: true,
@@ -113,13 +116,19 @@ export class WhatsappProvider {
 		return this.client_id;
 	}
 
-	public initialize() {
+	public async initialize() {
 		if (this.status !== STATUS.UNINITIALIZED) return;
 		Logger.info(
 			`Initializing client`,
 			`${this.userService.getUser().username} - ${this.client_id}`
 		);
-		this.client.initialize();
+		this.client.initialize().catch((err) => {
+			Logger.error('Error while initializing client', err as Error);
+			DeviceService.logout(this.client_id);
+			this.destroyClient();
+			this.status = STATUS.DESTROYED;
+			this.sendToClient(SOCKET_RESPONSES.WHATSAPP_CLOSED);
+		});
 		this.status = STATUS.INITIALIZED;
 		this.sendToClient(SOCKET_RESPONSES.INITIALIZED, this.client_id);
 	}
@@ -217,7 +226,7 @@ export class WhatsappProvider {
 					voter_number: '',
 					voter_name: '',
 					group_name: '',
-					selected_option: vote.selectedOptions.map((opt) => opt.name),
+					selected_option: vote.selectedOptions.map((opt: { name: string }) => opt.name),
 					voted_at: DateUtils.getMoment(vote.interractedAtTs).toDate(),
 				};
 
@@ -230,7 +239,7 @@ export class WhatsappProvider {
 				details.voter_name = (contact.name || contact.pushname) ?? '';
 
 				await vote_response_service.saveVote(details);
-				details.selected_option.map((opt) => {
+				details.selected_option.map((opt: string) => {
 					this.deviceService!.handleMessage({
 						triggered_from: chat.id._serialized,
 						body: opt,
@@ -349,6 +358,14 @@ export class WhatsappProvider {
 					link: link || '',
 				});
 			}
+
+			this.webhookService.sendWebhook({
+				recipient: contact.id.user,
+				recipient_name: contact.pushname || contact.name,
+				chat_id: chat.id._serialized,
+				chat_name: chat.name,
+				message,
+			});
 		});
 	}
 

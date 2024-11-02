@@ -1,7 +1,9 @@
+import axios from 'axios';
 import csv from 'csvtojson/v2';
 import fs from 'fs';
 import mime from 'mime';
 import { CSV_PATH } from '../../config/const';
+import { generateRandomText } from '../ExpressUtils';
 
 const moveFile = (from: string, to: string) => {
 	try {
@@ -99,6 +101,48 @@ async function createImageFile(base64WithoutHeader: string, path: string) {
 	});
 }
 
+async function downloadFile(url: string, path: string) {
+	return new Promise<string>(async (resolve, reject) => {
+		try {
+			// Fetch the file
+			const response = await axios({
+				url: url,
+				method: 'GET',
+				responseType: 'stream',
+			});
+
+			// Check if the response is OK
+			if (response.status !== 200 || !response.data) {
+				return null;
+			}
+
+			// Extract the MIME type from the response
+			const contentType = response.headers['content-type'];
+			const extension = getExt(contentType ?? 'text/plain');
+
+			// Generate a filename with the appropriate extension
+			const dest = path + generateRandomText(10) + '.' + extension;
+			const fileStream = fs.createWriteStream(dest);
+
+			// Pipe the response data to the file stream
+			response.data.pipe(fileStream);
+
+			// Handle the end of the download process
+			fileStream.on('finish', () => {
+				resolve(dest);
+			});
+
+			// Handle errors
+			fileStream.on('error', (err) => {
+				reject(err);
+			});
+		} catch (error) {
+			console.error('Error:', error);
+			reject(error);
+		}
+	});
+}
+
 export default {
 	moveFile,
 	deleteFile,
@@ -111,4 +155,5 @@ export default {
 	getExt,
 	getMimeType,
 	createImageFile,
+	downloadFile,
 };

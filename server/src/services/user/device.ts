@@ -73,7 +73,7 @@ export default class DeviceService extends UserService {
 			? DateUtils.getMoment(this.device.subscription_expiry).isAfter(DateUtils.getMomentNow())
 			: false;
 
-		const isNew = DateUtils.getMoment(this.device.createdAt)
+		const isNew = DateUtils.getMoment(this.getUser().createdAt)
 			.add(7, 'days')
 			.isAfter(DateUtils.getMomentNow());
 
