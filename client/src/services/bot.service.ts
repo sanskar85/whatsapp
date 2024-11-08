@@ -193,6 +193,8 @@ export default class BotService {
 					attachments: { _id: string }[];
 					shared_contact_cards: { _id: string }[];
 					polls: { title: string; options: string[]; isMultiSelect: boolean }[];
+					start_from: string;
+					end_at: string;
 				}[];
 			};
 
@@ -225,6 +227,8 @@ export default class BotService {
 								(contact) => contact._id as string
 							),
 							polls: nurturing.polls ?? [],
+							start_from: nurturing.start_from ?? '',
+							end_at: nurturing.end_at ?? '',
 						};
 					}) ?? [],
 			} as Bot;
