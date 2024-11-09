@@ -111,6 +111,7 @@ export default class CampaignService extends UserService {
 					name: { $first: '$name' },
 					description: { $first: '$description' },
 					status: { $first: '$status' },
+					startDate: { $first: '$startDate' },
 					startTime: { $first: '$startTime' },
 					endTime: { $first: '$endTime' },
 					createdAt: { $first: '$createdAt' },
@@ -136,6 +137,7 @@ export default class CampaignService extends UserService {
 					failed: 1,
 					pending: 1,
 					createdAt: 1,
+					startDate: 1,
 					startTime: 1,
 					endTime: 1,
 					isPaused: { $eq: ['$status', CAMPAIGN_STATUS.PAUSED] },
@@ -154,6 +156,7 @@ export default class CampaignService extends UserService {
 				sent: message.sent as number,
 				failed: message.failed as number,
 				pending: message.pending as number,
+				startDate: DateUtils.format(message.startDate, 'DD-MM-YYYY HH:mm') as string,
 				createdAt: DateUtils.format(message.createdAt, 'DD-MM-YYYY HH:mm') as string,
 				isPaused: message.isPaused as boolean,
 			}));
