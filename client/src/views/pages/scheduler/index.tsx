@@ -176,7 +176,6 @@ export default function Scheduler() {
 		}
 		if (isAlertMessage) {
 			if (!readMoreDetails.title && !readMoreDetails.message) {
-				console.log('clicked 123');
 				dispatch(setMessageError(true));
 				hasError = true;
 			}

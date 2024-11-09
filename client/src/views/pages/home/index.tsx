@@ -48,8 +48,6 @@ export default function Home() {
 		qrGenerated,
 	} = useAuth();
 
-	console.log(qrCode);
-
 	const [isAuthenticated, setAuthenticated] = useState(false);
 	const [isAuthenticating, setAuthenticating] = useState(true);
 
