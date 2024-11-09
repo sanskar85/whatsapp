@@ -19,17 +19,16 @@ import WhatsappUtils from '../../utils/WhatsappUtils';
 import { MessageLogger } from '../google';
 
 type ClientID = string;
-
 const PUPPETEER_ARGS = [
 	'--no-sandbox',
 	'--disable-setuid-sandbox',
 	'--unhandled-rejections=strict',
-	'--disable-dev-shm-usage',
-	'--disable-accelerated-2d-canvas',
-	'--no-first-run',
-	'--no-zygote',
-	'--single-process', // <- this one doesn't works in Windows
-	'--disable-gpu',
+	// '--disable-dev-shm-usage',
+	// '--disable-accelerated-2d-canvas',
+	// '--no-first-run',
+	// '--no-zygote',
+	// '--single-process', // <- this one doesn't works in Windows
+	// '--disable-gpu',
 ];
 
 enum STATUS {
