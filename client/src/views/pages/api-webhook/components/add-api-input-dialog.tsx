@@ -57,7 +57,7 @@ const APIKeyDetailsInputDialog = forwardRef<APIKeyDetailsInputDialogHandle>((_, 
 		},
 	}));
 
-	const handleAddAttachment = async () => {
+	const handleAddAPI = async () => {
 		if (!details.name) {
 			dispatch(setError('Please enter a file name'));
 			return;
@@ -118,7 +118,7 @@ const APIKeyDetailsInputDialog = forwardRef<APIKeyDetailsInputDialogHandle>((_, 
 							<Button
 								colorScheme='whatsapp'
 								mr={3}
-								onClick={handleAddAttachment}
+								onClick={handleAddAPI}
 								isLoading={loading}
 							>
 								Save
