@@ -16,6 +16,7 @@ import TemplateRoute from './template/template.route';
 import TokenRoute from './token/token.route';
 import UploadsRoute from './uploads/upload.route';
 import UserRoute from './user/user.route';
+import V1Route from './v1';
 
 import extract from 'extract-zip';
 import Logger from 'n23-logger';
@@ -38,7 +39,8 @@ router.use('/webhooks', WebhooksRoute);
 
 router.use('/token', TokenRoute);
 
-router.use('/api-keys', VerifyAPIToken, ApiKeysRoute);
+router.use('/api-keys', ApiKeysRoute);
+router.use('/v1', VerifyAPIToken, V1Route);
 
 router.use('/auth', AuthRoute);
 router.use('/payment', PaymentRoute);
