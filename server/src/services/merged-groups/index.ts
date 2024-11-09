@@ -95,6 +95,10 @@ export default class GroupMergeService {
 			multiple_responses: boolean;
 			triggers: string[];
 			options: BOT_TRIGGER_OPTIONS;
+			forward: {
+				number: string;
+				message: string;
+			};
 		}
 	) {
 		const group = await MergedGroupDB.create({
@@ -144,6 +148,10 @@ export default class GroupMergeService {
 			multiple_responses: boolean;
 			triggers: string[];
 			options: BOT_TRIGGER_OPTIONS;
+			forward: {
+				number: string;
+				message: string;
+			};
 		}
 	) {
 		let merged_group = await MergedGroupDB.findById(id);
@@ -175,6 +183,7 @@ export default class GroupMergeService {
 					}),
 					...(details.triggers && { triggers: details.triggers }),
 					...(details.options && { options: details.options }),
+					...(details.forward && { forward: details.forward }),
 				},
 			}
 		);
