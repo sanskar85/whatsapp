@@ -50,6 +50,7 @@ export type ScheduledCampaign = {
 	isPaused: boolean;
 	createdAt: string;
 	description: string;
+	startDate: string;
 };
 
 export type SchedulerDetails = {

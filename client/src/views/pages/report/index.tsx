@@ -153,6 +153,9 @@ const Reports = () => {
 							<Th width={'5%'} textAlign={'center'}>
 								Created At
 							</Th>
+							<Th width={'5%'} textAlign={'center'}>
+								Start Date
+							</Th>
 							<Th width={'10%'} textColor={'green'} isNumeric>
 								Messages Sent
 							</Th>
@@ -218,6 +221,11 @@ const Reports = () => {
 									<Td className='whitespace-break-spaces'>{campaign.description}</Td>
 									<Td textAlign={'center'}>
 										{campaign.createdAt.split(' ').map((time, index) => (
+											<Box key={index}>{time}</Box>
+										))}
+									</Td>
+									<Td textAlign={'center'}>
+										{campaign.startDate.split(' ').map((time, index) => (
 											<Box key={index}>{time}</Box>
 										))}
 									</Td>

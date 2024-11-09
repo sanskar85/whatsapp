@@ -19,6 +19,7 @@ export default class ReportsService {
 				isPaused: boolean;
 				createdAt: string;
 				description: string;
+				startDate:string;
 			}[];
 		} catch (err) {
 			return [];
