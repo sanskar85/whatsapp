@@ -1,9 +1,10 @@
 import fs from 'fs';
 import Logger from 'n23-logger';
 import WAWebJS, { BusinessContact, Contact, ContactId, GroupChat } from 'whatsapp-web.js';
-import { COUNTRIES, IS_PRODUCTION, SESSION_STARTUP_WAIT_TIME } from '../config/const';
+import { COUNTRIES, IS_PRODUCTION, SESSION_STARTUP_WAIT_TIME, TASK_STATUS } from '../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../errors/internal-errors';
 import { WhatsappProvider } from '../provider/whatsapp_provider';
+import TaskDB from '../repository/tasks';
 import { UserService } from '../services';
 import { DeviceService } from '../services/user';
 import {
@@ -449,6 +450,12 @@ export default class WhatsappUtils {
 	static async resumeSessions() {
 		if (!IS_PRODUCTION) return;
 		const path = __basedir + '/.wwebjs_auth';
+
+		await TaskDB.updateMany(
+			{ status: TASK_STATUS.PENDING },
+			{ $set: { status: TASK_STATUS.FAILED } }
+		);
+
 		if (!fs.existsSync(path)) {
 			return;
 		}
