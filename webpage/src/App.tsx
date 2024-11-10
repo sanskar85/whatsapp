@@ -6,6 +6,7 @@ import PaymentPage from './views/pages/payment';
 import PricePage from './views/pages/pricing';
 import PrivacyPage from './views/pages/privacy';
 import Terms from './views/pages/terms';
+import API from './views/pages/api';
 
 function App() {
     return (
@@ -25,6 +26,7 @@ function App() {
                         <Route path={ROUTES.PLANS} element={<PaymentPage />} />
                     </Route>
                     <Route path={ROUTES.FEATURES} element={<Features />} />
+                    <Route path={ROUTES.API} element={<API />} />
                     <Route path="*" element={<Navigate to={ROUTES.HOME} />} />
                 </Routes>
             </BrowserRouter>

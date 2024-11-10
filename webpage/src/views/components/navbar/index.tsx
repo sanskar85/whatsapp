@@ -109,6 +109,16 @@ export default function Navbar() {
                 >
                     URL Shortner
                 </Button>
+                <Button
+                    color={'white'}
+                    variant={'link'}
+                    outline={'none'}
+                    border={'none'}
+                    _hover={{ textColor: 'green.300' }}
+                    onClick={() => navigate(ROUTES.API)}
+                >
+                    API Docs
+                </Button>
 
                 <Button
                     variant={'solid'}

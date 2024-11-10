@@ -8,6 +8,7 @@ export const ROUTES = {
     PLANS: ':plan',
     TERMS_AND_CONDITIONS: '/terms-and-conditions',
     FEATURES: '/features',
+    API: '/api-docs',
 };
 
 export const THEME = {
