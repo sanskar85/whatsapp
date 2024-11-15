@@ -37,6 +37,7 @@ export default class MessageLogger {
 			});
 			return true;
 		} catch (err) {
+			console.error(err);
 			return false;
 		}
 	}

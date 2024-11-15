@@ -321,41 +321,39 @@ export class WhatsappProvider {
 			}
 			if (this.userPrefService!.isMessagesLogEnabled()) {
 				const sheetId = this.userPrefService!.getMessageLogSheetId();
-				if (!sheetId) {
-					return;
+				if (sheetId) {
+					let link: string | undefined = '';
+
+					if (message.hasMedia) {
+						// try {
+						// 	const media = await message.downloadMedia();
+						// 	if (!media) {
+						// 		link = 'Unable to generate link';
+						// 	} else if (media.mimetype.includes('image')) {
+						// 		const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
+						// 		const dest = __basedir + MISC_PATH + filename;
+						// 		await FileUtils.createImageFile(media.data, dest);
+						// 		link = await uploadSingleFile(filename, this.number!, dest);
+						// 	}
+						// } catch (err) {
+						// 	link = 'Unable to generate link';
+						// 	Logger.error('Error while saving image message', err as Error);
+						// }
+					}
+
+					const messageLogService = new MessageLogger(sheetId);
+					messageLogService.appendMessage({
+						timestamp: DateUtils.getUnixMoment(message.timestamp).format('DD-MMM-YYYY HH:mm:ss'),
+						from: contact.id.user,
+						to: message.to.split('@')[0],
+						savedName: contact.name || '',
+						displayName: contact.pushname || '',
+						groupName: isGroup ? chat.name : '',
+						message: message.body,
+						isCaption: message.hasMedia && message.body ? 'Yes' : 'No',
+						link: link || '',
+					});
 				}
-
-				let link: string | undefined = '';
-
-				if (message.hasMedia) {
-					// try {
-					// 	const media = await message.downloadMedia();
-					// 	if (!media) {
-					// 		link = 'Unable to generate link';
-					// 	} else if (media.mimetype.includes('image')) {
-					// 		const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
-					// 		const dest = __basedir + MISC_PATH + filename;
-					// 		await FileUtils.createImageFile(media.data, dest);
-					// 		link = await uploadSingleFile(filename, this.number!, dest);
-					// 	}
-					// } catch (err) {
-					// 	link = 'Unable to generate link';
-					// 	Logger.error('Error while saving image message', err as Error);
-					// }
-				}
-
-				const messageLogService = new MessageLogger(sheetId);
-				messageLogService.appendMessage({
-					timestamp: DateUtils.getUnixMoment(message.timestamp).format('DD-MMM-YYYY HH:mm:ss'),
-					from: contact.id.user,
-					to: message.to.split('@')[0],
-					savedName: contact.name || '',
-					displayName: contact.pushname || '',
-					groupName: isGroup ? chat.name : '',
-					message: message.body,
-					isCaption: message.hasMedia && message.body ? 'Yes' : 'No',
-					link: link || '',
-				});
 			}
 
 			this.webhookService.sendWebhook({
