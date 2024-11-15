@@ -27,18 +27,21 @@ import { NAVIGATION } from '../../../config/const';
 import { popFromNavbar, pushToNavbar } from '../../../hooks/useNavbar';
 import { useTheme } from '../../../hooks/useTheme';
 import MessageService from '../../../services/message.service';
+import ReportsService from '../../../services/reports.service';
 import { StoreNames, StoreState } from '../../../store';
 import {
 	addScheduler,
 	editSelectedScheduler,
 	reset,
 	setAPIError,
+	setAllCampaigns,
 	setAttachments,
 	setBatchDelay,
 	setBatchDelayError,
 	setBatchSize,
 	setBatchSizeError,
 	setCSVFile,
+	setCampaignLoading,
 	setCampaignName,
 	setCampaignNameError,
 	setContactCards,
@@ -116,7 +119,9 @@ export default function Scheduler() {
 			batchDelayError,
 			batchSizeError,
 		},
+		all_campaigns,
 	} = useSelector((state: StoreState) => state[StoreNames.SCHEDULER]);
+	console.log(all_campaigns);
 
 	const { groups, labels } = useSelector((state: StoreState) => state[StoreNames.USER]);
 	const { list: csvList } = useSelector((state: StoreState) => state[StoreNames.CSV]);
@@ -138,6 +143,21 @@ export default function Scheduler() {
 		};
 	}, []);
 
+	const fetchCampaigns = useCallback(() => {
+		ReportsService.generateAllCampaigns()
+			.then((res) => {
+				dispatch(setAllCampaigns(res));
+			})
+			.finally(() => {
+				dispatch(setCampaignLoading(false));
+			});
+	}, [dispatch]);
+
+	useEffect(() => {
+		dispatch(setCampaignLoading(true));
+		fetchCampaigns();
+	}, [dispatch, fetchCampaigns]);
+
 	const fetchRecipients = useCallback(
 		function (type: string) {
 			if (type === 'GROUP' || type === 'GROUP_INDIVIDUAL') {
@@ -157,7 +177,17 @@ export default function Scheduler() {
 			dispatch(setCampaignNameError(true));
 			hasError = true;
 		}
-
+		if (all_campaigns.find((campaign) => campaign.campaignName === details.campaign_name)) {
+			toast({
+				title: 'Campaign Name',
+				description: 'Campaign name already exists',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
+			console.log('Campaign name already exists');
+			hasError = true;
+		}
 		if (details.type === 'CSV' && details.csv_file === '') {
 			dispatch(setRecipientsError(true));
 			hasError = true;
