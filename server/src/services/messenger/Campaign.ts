@@ -156,7 +156,7 @@ export default class CampaignService extends UserService {
 				sent: message.sent as number,
 				failed: message.failed as number,
 				pending: message.pending as number,
-				startDate: DateUtils.format(message.startDate, 'DD-MM-YYYY') as string,
+				startDate: DateUtils.format(message.startDate || message.createdAt, 'DD-MM-YYYY') as string,
 				createdAt: DateUtils.format(message.createdAt, 'DD-MM-YYYY HH:mm') as string,
 				isPaused: message.isPaused as boolean,
 			}));
