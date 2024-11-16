@@ -59,6 +59,8 @@ export async function CreateBotValidator(req: Request, res: Response, next: Next
 			BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE,
 			BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE,
 			BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE,
+			BOT_TRIGGER_OPTIONS.ANYWHERE_MATCH_CASE,
+			BOT_TRIGGER_OPTIONS.ANYWHERE_IGNORE_CASE,
 		]),
 		shared_contact_cards: z
 			.string()

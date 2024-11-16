@@ -232,6 +232,40 @@ export default class BotService extends UserService {
 								sentence_paragraph.join()
 						);
 				}
+				if (bot.options === BOT_TRIGGER_OPTIONS.ANYWHERE_IGNORE_CASE) {
+					const lowerCaseSentence = trigger.toLowerCase();
+					const lowerCaseParagraph = message_body.toLowerCase();
+
+					// Split the paragraph into words
+					const words_paragraph = lowerCaseParagraph.split(/\s+/);
+					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+					cond =
+						cond ||
+						sentence_paragraph.every((word) => {
+							const wordIndex = words_paragraph.indexOf(word);
+							return (
+								wordIndex >= 0 && wordIndex < words_paragraph.length - sentence_paragraph.length + 1
+							);
+						});
+				}
+				if (bot.options === BOT_TRIGGER_OPTIONS.ANYWHERE_MATCH_CASE) {
+					const lowerCaseSentence = trigger;
+					const lowerCaseParagraph = message_body;
+
+					// Split the paragraph into words
+					const words_paragraph = lowerCaseParagraph.split(/\s+/);
+					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+					cond =
+						cond ||
+						sentence_paragraph.every((word) => {
+							const wordIndex = words_paragraph.indexOf(word);
+							return (
+								wordIndex >= 0 && wordIndex < words_paragraph.length - sentence_paragraph.length + 1
+							);
+						});
+				}
 			}
 
 			return cond;

@@ -217,6 +217,8 @@ export async function MergeGroupValidator(req: Request, res: Response, next: Nex
 				BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE,
 				BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE,
 				BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE,
+				BOT_TRIGGER_OPTIONS.ANYWHERE_MATCH_CASE,
+				BOT_TRIGGER_OPTIONS.ANYWHERE_IGNORE_CASE,
 			]),
 			forward: z
 				.object({
