@@ -20,7 +20,7 @@ import ShortenerService from '../../../services/shortener.service';
 import UploadsService from '../../../services/uploads.service';
 import UserService from '../../../services/user.service';
 import { StoreNames, StoreState, store } from '../../../store';
-import { setAPIList } from '../../../store/reducers/APIWebhookReducer';
+import { setAPIList, setWebhookList } from '../../../store/reducers/APIWebhookReducer';
 import { setAttachments } from '../../../store/reducers/AttachmentReducers';
 import { setBots } from '../../../store/reducers/BotReducers';
 import { setCSVFileList } from '../../../store/reducers/CSVFileReducers';
@@ -88,6 +88,7 @@ export default function Home() {
 				MessageService.getScheduledMessages(),
 				UserService.getUserPreferences(),
 				APIWebhookService.listKeys(),
+				APIWebhookService.listWebhooks(),
 			];
 
 			const results = await Promise.all(promises);
@@ -108,6 +109,7 @@ export default function Home() {
 			dispatch(setMergedGroupList(results[7]));
 			dispatch(setAllSchedulers(results[8]));
 			dispatch(setAPIList(results[10]));
+			dispatch(setWebhookList(results[11]));
 
 			AuthService.validateClientID().then((res) => {
 				if (res) {

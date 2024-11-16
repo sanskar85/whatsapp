@@ -3,16 +3,26 @@ import { StoreNames } from '../config';
 import { APIWebhookState } from '../types/APIWebhookState';
 
 const initState: APIWebhookState = {
-	error: '',
-	loading: false,
-	list: [],
-	details: {
+	APIerror: '',
+	APIloading: false,
+	APIlist: [],
+	APIdetails: {
 		id: '',
 		name: '',
 		createdAt: '',
 	},
-	selectedList: [],
+	APIselectedList: [],
 	token: '',
+	webhookDetails: {
+		id: '',
+		name: '',
+		url: '',
+		createdAt: '',
+	},
+	webhookError: '',
+	webhookLoading: false,
+	webhookList: [],
+	webhookSelectedList: [],
 };
 
 const APIWebhookSlice = createSlice({
@@ -20,46 +30,90 @@ const APIWebhookSlice = createSlice({
 	initialState: initState,
 	reducers: {
 		reset: (state) => {
-			state.list = initState.list;
-			state.details = initState.details;
-			state.loading = initState.loading;
-			state.error = initState.error;
+			state.APIlist = initState.APIlist;
+			state.APIdetails = initState.APIdetails;
+			state.APIloading = initState.APIloading;
+			state.APIerror = initState.APIerror;
+			state.APIselectedList = initState.APIselectedList;
+			state.token = initState.token;
+			state.webhookDetails = initState.webhookDetails;
+			state.webhookError = initState.webhookError;
+			state.webhookLoading = initState.webhookLoading;
 		},
-		setAPIDetails: (state, action: PayloadAction<typeof initState.details>) => {
-			state.details = action.payload;
+		setAPIDetails: (state, action: PayloadAction<typeof initState.APIdetails>) => {
+			state.APIdetails = action.payload;
 		},
-		setAPIList: (state, action: PayloadAction<typeof initState.list>) => {
-			state.list = action.payload;
+		setWebhookDetails: (state, action: PayloadAction<typeof initState.webhookDetails>) => {
+			state.webhookDetails = action.payload;
+		},
+		setAPIList: (state, action: PayloadAction<typeof initState.APIlist>) => {
+			state.APIlist = action.payload;
+		},
+		setWebhookList: (state, action: PayloadAction<typeof initState.webhookList>) => {
+			state.webhookList = action.payload;
 		},
 		deleteAPI: (state, action: PayloadAction<string[]>) => {
-			state.list = state.list.filter((item) => !action.payload.includes(item.id));
+			state.APIlist = state.APIlist.filter((item) => !action.payload.includes(item.id));
 		},
-		addAPI: (state, action: PayloadAction<typeof initState.details>) => {
-			state.list.push(action.payload);
+		deleteWebhook: (state, action: PayloadAction<string[]>) => {
+			state.webhookList = state.webhookList.filter((item) => !action.payload.includes(item.id));
 		},
-		setLoading: (state, action: PayloadAction<boolean>) => {
-			state.loading = action.payload;
+		addAPI: (state, action: PayloadAction<typeof initState.APIdetails>) => {
+			state.APIlist.push(action.payload);
 		},
-		setError: (state, action: PayloadAction<string>) => {
-			state.error = action.payload;
+		addWebhook: (state, action: PayloadAction<typeof initState.webhookDetails>) => {
+			state.webhookList.push(action.payload);
+		},
+		setAPILoading: (state, action: PayloadAction<boolean>) => {
+			state.APIloading = action.payload;
+		},
+		setWebhookLoading: (state, action: PayloadAction<boolean>) => {
+			state.webhookLoading = action.payload;
+		},
+		setAPIError: (state, action: PayloadAction<string>) => {
+			state.APIerror = action.payload;
+		},
+		setWebhookError: (state, action: PayloadAction<string>) => {
+			state.webhookError = action.payload;
 		},
 		setAPIName: (state, action: PayloadAction<string>) => {
-			state.details.name = action.payload;
+			state.APIdetails.name = action.payload;
 		},
-		addToSelectedList: (state, action: PayloadAction<string>) => {
-			state.selectedList.push(action.payload);
+		setWebhookName: (state, action: PayloadAction<string>) => {
+			state.webhookDetails.name = action.payload;
+		},
+		setWebhookURL: (state, action: PayloadAction<string>) => {
+			state.webhookDetails.url = action.payload;
+		},
+		addToSelectedAPIList: (state, action: PayloadAction<string>) => {
+			state.APIselectedList.push(action.payload);
+		},
+		addToSelectedListWebhook: (state, action: PayloadAction<string>) => {
+			state.webhookSelectedList.push(action.payload);
 		},
 		removeFromSelectedList: (state, action: PayloadAction<string>) => {
-			state.selectedList = state.selectedList.filter((item) => item !== action.payload);
+			state.APIselectedList = state.APIselectedList.filter((item) => item !== action.payload);
 		},
-		clearSelectedList: (state) => {
-			state.selectedList = [];
+		removeFromSelectedListWebhook: (state, action: PayloadAction<string>) => {
+			state.webhookSelectedList = state.APIselectedList.filter((item) => item !== action.payload);
 		},
-		selectAllList: (state) => {
-			state.selectedList = state.list.map((item) => item.id);
+		clearSelectedListAPI: (state) => {
+			state.APIselectedList = [];
 		},
-		clearSelectedDetails: (state) => {
-			state.details = initState.details;
+		clearSelectedListWebhook: (state) => {
+			state.webhookSelectedList = [];
+		},
+		selectAllListAPI: (state) => {
+			state.APIselectedList = state.APIlist.map((item) => item.id);
+		},
+		selectAllListWebhook: (state) => {
+			state.APIselectedList = state.webhookList.map((item) => item.id);
+		},
+		clearSelectedAPIDetails: (state) => {
+			state.APIdetails = initState.APIdetails;
+		},
+		clearSelectedWebhookDetails: (state) => {
+			state.webhookDetails = initState.webhookDetails;
 		},
 		setToken: (state, action: PayloadAction<string>) => {
 			state.token = action.payload;
@@ -72,16 +126,29 @@ export const {
 	setAPIDetails,
 	setAPIList,
 	addAPI,
-	setLoading,
-	setError,
+	setAPILoading,
+	setAPIError,
 	setAPIName,
-	addToSelectedList,
-	clearSelectedList,
+	addToSelectedAPIList,
+	clearSelectedListAPI,
+	addToSelectedListWebhook,
 	removeFromSelectedList,
-	selectAllList,
+	selectAllListAPI,
 	deleteAPI,
-	clearSelectedDetails,
+	clearSelectedWebhookDetails,
 	setToken,
+	addWebhook,
+	clearSelectedAPIDetails,
+	clearSelectedListWebhook,
+	deleteWebhook,
+	removeFromSelectedListWebhook,
+	selectAllListWebhook,
+	setWebhookDetails,
+	setWebhookError,
+	setWebhookList,
+	setWebhookLoading,
+	setWebhookName,
+	setWebhookURL,
 } = APIWebhookSlice.actions;
 
 export default APIWebhookSlice.reducer;

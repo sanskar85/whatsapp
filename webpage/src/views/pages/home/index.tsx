@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Image, Text } from '@chakra-ui/react';
 import { useEffect } from 'react';
-import { CHROME, HERO_BG, SCREEN_SHOT } from '../../../assets/Images';
+import { HERO_BG, SCREEN_SHOT } from '../../../assets/Images';
 import { THEME } from '../../../utils/const';
 import PageWrapper from '../../components/pageWrapper';
 import Details from './components/Details';
@@ -89,14 +89,11 @@ const Home = () => {
 								rounded={'full'}
 								className='my-4 mx-auto md:ml-0'
 								onClick={() => {
-									window.open(
-										'https://chrome.google.com/webstore/detail/whatsleads/fcgjgjellnemnioihojklppanoldamnd?hl=en-GB&authuser=0'
-									);
+									window.open('https://app.whatsleads.in/');
 								}}
 								_hover={{ backgroundColor: 'green.300' }}
 							>
-								<Image src={CHROME} alt='' height={'60%'} />
-								<Text px={'0.5rem'}>Add to Chrome</Text>
+								<Text px={'0.5rem'}>Try Now</Text>
 							</Button>
 						</Flex>
 					</Box>

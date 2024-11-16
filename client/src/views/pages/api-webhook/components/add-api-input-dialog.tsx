@@ -20,9 +20,9 @@ import APIWebhookService from '../../../../services/api-webhook.service';
 import { StoreNames, StoreState } from '../../../../store';
 import {
 	addAPI,
-	clearSelectedDetails,
+	clearSelectedAPIDetails,
 	setAPIName,
-	setError,
+	setAPIError,
 	setToken,
 } from '../../../../store/reducers/APIWebhookReducer';
 
@@ -36,19 +36,23 @@ const APIKeyDetailsInputDialog = forwardRef<APIKeyDetailsInputDialogHandle>((_, 
 	const toast = useToast();
 	const [isOpen, setOpen] = useState(false);
 
-	const { list, details, error, loading, token } = useSelector(
-		(state: StoreState) => state[StoreNames.API]
-	);
+	const {
+		APIlist: list,
+		APIdetails: details,
+		APIerror: error,
+		APIloading: loading,
+		token,
+	} = useSelector((state: StoreState) => state[StoreNames.API]);
 
 	const onClose = () => {
-		dispatch(clearSelectedDetails());
+		dispatch(clearSelectedAPIDetails());
 		dispatch(setToken(''));
 		setOpen(false);
 	};
 
 	useImperativeHandle(ref, () => ({
 		close: () => {
-			dispatch(clearSelectedDetails());
+			dispatch(clearSelectedAPIDetails());
 			dispatch(setToken(''));
 			setOpen(false);
 		},
@@ -59,12 +63,12 @@ const APIKeyDetailsInputDialog = forwardRef<APIKeyDetailsInputDialogHandle>((_, 
 
 	const handleAddAPI = async () => {
 		if (!details.name) {
-			dispatch(setError('Please enter a file name'));
+			dispatch(setAPIError('Please enter a file name'));
 			return;
 		}
 
 		if (list.some((item) => item.name === details.name)) {
-			dispatch(setError('Name already exists'));
+			dispatch(setAPIError('Name already exists'));
 			return;
 		}
 
@@ -115,12 +119,7 @@ const APIKeyDetailsInputDialog = forwardRef<APIKeyDetailsInputDialogHandle>((_, 
 							<Button onClick={onClose} colorScheme='red' isDisabled={loading}>
 								Cancel
 							</Button>
-							<Button
-								colorScheme='whatsapp'
-								mr={3}
-								onClick={handleAddAPI}
-								isLoading={loading}
-							>
+							<Button colorScheme='whatsapp' mr={3} onClick={handleAddAPI} isLoading={loading}>
 								Save
 							</Button>
 						</HStack>

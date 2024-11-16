@@ -128,12 +128,11 @@ export default function Navbar() {
                     gap={'0.5rem'}
                     onClick={() => {
                         window.open(
-                            'https://chrome.google.com/webstore/detail/whatsleads/fcgjgjellnemnioihojklppanoldamnd?hl=en-GB&authuser=0'
+                            'https://app.whatsleads.in'
                         );
                     }}
                 >
-                    <Image src={CHROME_GREEN} alt="" height={'60%'} />
-                    <Text textColor={'#4CB072'}>Add to Chrome</Text>
+                    <Text textColor={'#4CB072'}>Try Now</Text>
                 </Button>
             </Flex>
             <Button

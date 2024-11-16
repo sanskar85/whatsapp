@@ -18,4 +18,7 @@ export { default as SCREEN_SHOT } from './images/SS.png';
 export { default as TRANSACTION } from './images/transaction.png';
 export { default as TWITTER } from './images/twitter.svg';
 export { default as API_PAGE } from './images/Untitled design.png';
+export { default as WEBHOOK_CREATE } from './images/webhook_create.png';
+export { default as WEBHOOK_INPUT } from './images/webhook_input.png';
+export { default as WEBHOOK_VALIDATE } from './images/webhook_validate.png';
 export { default as WHATSAPP } from './images/whatsapp.svg';
