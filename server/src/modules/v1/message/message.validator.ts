@@ -11,6 +11,7 @@ export type SendMessageValidationResult = {
 		| {
 				type: 'media';
 				link: string;
+				caption: string;
 		  }
 		| {
 				type: 'contact';
@@ -53,6 +54,7 @@ export async function SendMessageValidator(req: Request, res: Response, next: Ne
 	const mediaType = z.object({
 		type: z.literal('media'),
 		link: z.string().trim().min(1).url(),
+		caption: z.string().trim().default(''),
 	});
 
 	const contactType = z.object({

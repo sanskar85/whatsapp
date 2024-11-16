@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import Logger from 'n23-logger';
-import { MessageMedia, Poll } from 'whatsapp-web.js';
+import WAWebJS, { MessageMedia, Poll } from 'whatsapp-web.js';
 import { MISC_PATH } from '../../../config/const';
 import APIError, { API_ERRORS } from '../../../errors/api-errors';
 import { WhatsappProvider } from '../../../provider/whatsapp_provider';
@@ -24,6 +24,7 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 	const recipient = data.recipient + '@c.us';
 
 	let contact;
+	const opts = {} as WAWebJS.MessageSendOptions;
 	try {
 		contact = await whatsapp.getClient().getContactById(recipient);
 	} catch (e) {
@@ -51,6 +52,10 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 		const media = MessageMedia.fromFilePath(path);
 		if (!media) {
 			return next(new APIError(API_ERRORS.COMMON_ERRORS.INTERNAL_SERVER_ERROR));
+		}
+
+		if (data.message.caption) {
+			opts.caption = data.message.caption;
 		}
 
 		message = media;
@@ -84,7 +89,7 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 
 	whatsapp
 		.getClient()
-		.sendMessage(recipient, message)
+		.sendMessage(recipient, message, opts)
 		.then(() => {
 			return Respond({
 				res,
