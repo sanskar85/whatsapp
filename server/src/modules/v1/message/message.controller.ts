@@ -87,19 +87,18 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
 	}
 
-	whatsapp
-		.getClient()
-		.sendMessage(recipient, message, opts)
-		.then(() => {
-			return Respond({
-				res,
-				status: 200,
-			});
-		})
-		.catch((err) => {
-			Logger.info('Error sending message: ', err.message);
-			return next(new APIError(API_ERRORS.COMMON_ERRORS.INTERNAL_SERVER_ERROR));
+	try {
+		whatsapp.getClient().sendMessage(recipient, message, opts);
+
+		await whatsapp.getClient().interface.openChatWindow(recipient);
+		return Respond({
+			res,
+			status: 200,
 		});
+	} catch (e: any) {
+		Logger.info('Error sending message: ', e.message);
+		return next(new APIError(API_ERRORS.COMMON_ERRORS.INTERNAL_SERVER_ERROR));
+	}
 }
 
 const Controller = {

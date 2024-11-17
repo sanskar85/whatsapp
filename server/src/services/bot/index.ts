@@ -380,6 +380,9 @@ export default class BotService extends UserService {
 							allowMultipleAnswers: isMultiSelect,
 						})
 					)
+					.then(() => {
+						whatsapp.getClient().interface.openChatWindow(triggered_from);
+					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
 					});
