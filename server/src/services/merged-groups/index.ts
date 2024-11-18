@@ -512,7 +512,6 @@ export default class GroupMergeService {
 							})
 						);
 					});
-					whatsapp.interface.openChatWindow(message.from);
 
 					if (shared_contact_cards && shared_contact_cards.length > 0) {
 						if (PROMOTIONAL_MESSAGE_2) {
@@ -637,9 +636,6 @@ export default class GroupMergeService {
 									quotedMessageId: message.id._serialized,
 								}
 							)
-							.then(() => {
-								whatsapp.interface.openChatWindow(message.from);
-							})
 							.catch(() => {
 								whatsapp
 									.sendMessage(
@@ -649,9 +645,6 @@ export default class GroupMergeService {
 											allowMultipleAnswers: isMultiSelect,
 										})
 									)
-									.then(() => {
-										whatsapp.interface.openChatWindow(message.from);
-									})
 									.catch((err) => {
 										Logger.error('Error sending message:', err);
 									});

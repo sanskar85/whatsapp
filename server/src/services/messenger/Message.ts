@@ -197,9 +197,6 @@ export default class MessageService {
 							allowMultipleAnswers: isMultiSelect,
 						})
 					)
-					.then(() => {
-						whatsapp.getClient().interface.openChatWindow(msg.receiver);
-					})
 					.catch((err) => {
 						msg.status = MESSAGE_STATUS.FAILED;
 						msg.save();

@@ -90,7 +90,6 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 	try {
 		whatsapp.getClient().sendMessage(recipient, message, opts);
 
-		await whatsapp.getClient().interface.openChatWindow(recipient);
 		return Respond({
 			res,
 			status: 200,
