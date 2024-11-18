@@ -148,6 +148,7 @@ export default function APIWebhook() {
     "message": {
         "type": "media",
         "link": "https://________"
+		"caption": "Caption here..."
     }
 }'`}
 												language={'bash'}
@@ -173,7 +174,11 @@ export default function APIWebhook() {
 												recipient: <span className='text-gray-400'>string</span>
 												<span className='text-red-500'> (required)</span>
 											</p>
-											<p>Recipient number with country code (without &lsquo;+&lsquo;).</p>
+											<Divider className='w-3/4 my-4' />
+											<p>
+												caption: <span className='text-gray-400'>string</span>
+											</p>
+											<p>Custom caption for the media.</p>
 											<Divider className='w-3/4 my-4' />
 										</div>
 										<div>
@@ -183,7 +188,8 @@ export default function APIWebhook() {
     "recipient": "91XXXXXXXXXX",
     "message": {
         "type": "media",
-        "link": "https://________"
+        "link": "https://________",
+		"caption": "Caption here..."
     }
 }`}
 												language={'javascript'}
