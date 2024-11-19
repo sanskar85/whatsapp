@@ -766,8 +766,11 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 								))}
 							</VStack>
 						</Box>
+						<Box>
+							<Text>Select Group Range</Text>
+						</Box>
 						<Flex gap={2}>
-							<Box>
+							<Box flex={1}>
 								<Input
 									onChange={(e) =>
 										setRange((prev) => {
@@ -782,7 +785,7 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 									placeholder='Start Range'
 								/>
 							</Box>
-							<Box>
+							<Box flex={1}>
 								<Input
 									onChange={(e) =>
 										setRange((prev) => {
@@ -797,7 +800,7 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 									placeholder='End Range'
 								/>
 							</Box>
-							<Button colorScheme='green' onClick={handleSelectRange}>
+							<Button flex={1} colorScheme='green' onClick={handleSelectRange}>
 								Select range
 							</Button>
 						</Flex>
