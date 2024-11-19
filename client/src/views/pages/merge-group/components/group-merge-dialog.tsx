@@ -108,6 +108,11 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 
 	const [searchText, setSearchText] = useState<string>('');
 
+	const [range, setRange] = useState<{ start: string; end: string }>({
+		start: '',
+		end: '',
+	});
+
 	const { editSelectedGroup, list } = useSelector(
 		(store: StoreState) => store[StoreNames.MERGE_GROUP]
 	);
@@ -217,6 +222,26 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 	const filtered = groups.filter((group) =>
 		group.name?.toLowerCase().startsWith(searchText.toLowerCase())
 	);
+
+	const handleSelectRange = () => {
+		if (
+			Number(range.start) <= 0 ||
+			Number(range.end) <= 0 ||
+			Number(range.start) >= Number(range.end)
+		) {
+			toast({
+				title: 'Invalid range',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
+			return;
+		}
+		const selected = groups.slice((Number(range.start) - 1), Number(range.end));
+		const selectedIds = selected.map((group) => group.id);
+		dispatch(addMultipleSelectedGroup(selectedIds));
+		setRange({ start: '', end: '' });
+	};
 
 	return (
 		<Modal isOpen={isOpen} onClose={onClose} size={'6xl'} scrollBehavior='inside'>
@@ -723,7 +748,41 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 								))}
 							</VStack>
 						</Box>
-
+						<Flex gap={2}>
+							<Box>
+								<Input
+									onChange={(e) =>
+										setRange((prev) => {
+											return {
+												...prev,
+												start: e.target.value,
+											};
+										})
+									}
+									value={range.start}
+									type='number'
+									placeholder='Start Range'
+								/>
+							</Box>
+							<Box>
+								<Input
+									onChange={(e) =>
+										setRange((prev) => {
+											return {
+												...prev,
+												end: e.target.value,
+											};
+										})
+									}
+									value={range.end}
+									type='number'
+									placeholder='End Range'
+								/>
+							</Box>
+							<Button colorScheme='green' onClick={handleSelectRange}>
+								Select range
+							</Button>
+						</Flex>
 						<TableContainer>
 							<Table>
 								<Thead>
