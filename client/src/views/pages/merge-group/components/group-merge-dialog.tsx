@@ -237,7 +237,25 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 			});
 			return;
 		}
-		const selected = groups.slice((Number(range.start) - 1), Number(range.end));
+		if (Number(range.end) > groups.length) {
+			toast({
+				title: 'End range should be less than or equal to total groups',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
+			return;
+		}
+		if (Number(range.start) > groups.length) {
+			toast({
+				title: 'Start range should be less than or equal to total groups',
+				status: 'error',
+				duration: 3000,
+				isClosable: true,
+			});
+			return;
+		}
+		const selected = groups.slice(Number(range.start) - 1, Number(range.end));
 		const selectedIds = selected.map((group) => group.id);
 		dispatch(addMultipleSelectedGroup(selectedIds));
 		setRange({ start: '', end: '' });
