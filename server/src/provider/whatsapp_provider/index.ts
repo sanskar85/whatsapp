@@ -212,7 +212,6 @@ export class WhatsappProvider {
 		});
 
 		this.client.on('vote_update', async (vote) => {
-			console.log(vote);
 			if (!vote.parentMessage.id?.fromMe) return;
 			const vote_response_service = new VoteResponseService(this.userService.getUser());
 			const pollDetails = vote_response_service.getPollDetails(vote.parentMessage);
