@@ -63,7 +63,7 @@ export default function Home() {
 						})
 					);
 					return {
-						title: 'Groups loaded.',
+						title: 'Details loaded.',
 						duration: 3000,
 					};
 				},
@@ -72,7 +72,7 @@ export default function Home() {
 					duration: 3000,
 				},
 				loading: {
-					title: 'Loading groups.',
+					title: 'Loading details.',
 				},
 			});
 

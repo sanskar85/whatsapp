@@ -169,3 +169,11 @@ export function validatePhoneNumber(num: string) {
 export async function generateHashedPassword(password: string) {
 	return await bcrypt.hash(password, SALT_FACTOR);
 }
+
+export function randomVector(length: number) {
+	const vector = [];
+	for (let i = 0; i < length; i++) {
+		vector.push(Math.floor(Math.random() * 8) + 1);
+	}
+	return vector;
+}

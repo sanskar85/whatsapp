@@ -17,7 +17,7 @@ import TimeGenerator from '../../structures/TimeGenerator';
 import IUpload from '../../types/uploads';
 import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
-import { Delay, randomMessageText } from '../../utils/ExpressUtils';
+import { Delay, randomMessageText, randomVector } from '../../utils/ExpressUtils';
 import VCardBuilder from '../../utils/VCardBuilder';
 import { MessageService } from '../messenger';
 import TokenService from '../token';
@@ -376,10 +376,13 @@ export default class BotService extends UserService {
 					.sendMessage(
 						triggered_from,
 						new Poll(title, options, {
-							messageSecret: undefined,
+							messageSecret: randomVector(32),
 							allowMultipleAnswers: isMultiSelect,
 						})
 					)
+					.then(async () => {
+						await whatsapp.getClient().interface.openChatWindow(triggered_from);
+					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
 					});

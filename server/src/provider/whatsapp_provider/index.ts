@@ -98,7 +98,7 @@ export class WhatsappProvider {
 
 	public static getInstance(user: UserService, client_id: ClientID) {
 		if (!client_id) {
-			throw new Error();
+			throw new Error('Client Id Required');
 		}
 		if (WhatsappProvider.clientsMap.has(client_id)) {
 			return WhatsappProvider.clientsMap.get(client_id)!;
@@ -212,6 +212,7 @@ export class WhatsappProvider {
 		});
 
 		this.client.on('vote_update', async (vote) => {
+			console.log(vote);
 			if (!vote.parentMessage.id?.fromMe) return;
 			const vote_response_service = new VoteResponseService(this.userService.getUser());
 			const pollDetails = vote_response_service.getPollDetails(vote.parentMessage);

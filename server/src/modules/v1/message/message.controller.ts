@@ -4,7 +4,7 @@ import WAWebJS, { MessageMedia, Poll } from 'whatsapp-web.js';
 import { MISC_PATH } from '../../../config/const';
 import APIError, { API_ERRORS } from '../../../errors/api-errors';
 import { WhatsappProvider } from '../../../provider/whatsapp_provider';
-import { Respond } from '../../../utils/ExpressUtils';
+import { randomVector, Respond } from '../../../utils/ExpressUtils';
 import { FileUtils } from '../../../utils/files';
 import VCardBuilder from '../../../utils/VCardBuilder';
 import { SendMessageValidationResult } from './message.validator';
@@ -78,7 +78,7 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 	} else if (data.message.type === 'poll') {
 		const { title, options, isMultiSelect } = data.message.poll;
 		message = new Poll(title, options, {
-			messageSecret: undefined,
+			messageSecret: randomVector(32),
 			allowMultipleAnswers: isMultiSelect,
 		});
 	}
@@ -88,7 +88,12 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 	}
 
 	try {
-		whatsapp.getClient().sendMessage(recipient, message, opts);
+		whatsapp
+			.getClient()
+			.sendMessage(recipient, message, opts)
+			.then(async () => {
+				await whatsapp.getClient().interface.openChatWindow(recipient);
+			});
 
 		return Respond({
 			res,

@@ -10,6 +10,7 @@ import UploadDB from '../../repository/uploads';
 import { IMessage } from '../../types/messenger';
 import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
+import { randomVector } from '../../utils/ExpressUtils';
 import TokenService from '../token';
 
 export type Message = {
@@ -193,10 +194,13 @@ export default class MessageService {
 					.sendMessage(
 						msg.receiver,
 						new Poll(title, options, {
-							messageSecret: undefined,
+							messageSecret: randomVector(32),
 							allowMultipleAnswers: isMultiSelect,
 						})
 					)
+					.then(async () => {
+						await whatsapp.getClient().interface.openChatWindow(msg.receiver);
+					})
 					.catch((err) => {
 						msg.status = MESSAGE_STATUS.FAILED;
 						msg.save();

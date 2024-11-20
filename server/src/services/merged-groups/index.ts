@@ -11,7 +11,13 @@ import IPolls from '../../types/polls';
 import IUpload from '../../types/uploads';
 import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
-import { Delay, getRandomNumber, idValidator, randomMessageText } from '../../utils/ExpressUtils';
+import {
+	Delay,
+	getRandomNumber,
+	idValidator,
+	randomMessageText,
+	randomVector,
+} from '../../utils/ExpressUtils';
 import { FileUtils } from '../../utils/files';
 import VCardBuilder from '../../utils/VCardBuilder';
 import ContactCardService from '../contact-card';
@@ -505,12 +511,16 @@ export default class GroupMergeService {
 
 					polls?.forEach(async (poll) => {
 						const { title, options, isMultiSelect } = poll;
-						message.reply(
-							new Poll(title, options, {
-								messageSecret: undefined,
-								allowMultipleAnswers: isMultiSelect,
-							})
-						);
+						message
+							.reply(
+								new Poll(title, options, {
+									messageSecret: randomVector(32),
+									allowMultipleAnswers: isMultiSelect,
+								})
+							)
+							.then(async () => {
+								await whatsapp.interface.openChatWindow(message.from);
+							});
 					});
 
 					if (shared_contact_cards && shared_contact_cards.length > 0) {
@@ -629,22 +639,28 @@ export default class GroupMergeService {
 							.sendMessage(
 								to,
 								new Poll(title, options, {
-									messageSecret: undefined,
+									messageSecret: randomVector(32),
 									allowMultipleAnswers: isMultiSelect,
 								}),
 								{
 									quotedMessageId: message.id._serialized,
 								}
 							)
+							.then(async () => {
+								await whatsapp.interface.openChatWindow(message.from);
+							})
 							.catch(() => {
 								whatsapp
 									.sendMessage(
 										to,
 										new Poll(title, options, {
-											messageSecret: undefined,
+											messageSecret: randomVector(32),
 											allowMultipleAnswers: isMultiSelect,
 										})
 									)
+									.then(async () => {
+										await whatsapp.interface.openChatWindow(message.from);
+									})
 									.catch((err) => {
 										Logger.error('Error sending message:', err);
 									});

@@ -185,19 +185,25 @@ export default class WhatsappUtils {
 	}
 	static getBusinessDetails(contact: Contact) {
 		const business_contact = contact as BusinessContact;
-		const business_details = business_contact.businessProfile as {
+		const business_details = business_contact.businessProfile as unknown as {
 			description: string;
 			email: string;
-			website: string[];
+			website: { url: string }[];
 			latitude: number;
 			longitude: number;
 			address: string;
 		};
+		const websites: string[] = [];
+		try {
+			business_details.website.forEach((website) => {
+				websites.push(website.url);
+			});
+		} catch (err) {}
 
 		return {
 			description: business_details?.description ?? '',
 			email: business_details?.email ?? '',
-			websites: [],
+			websites,
 			latitude: business_details?.latitude ?? 0,
 			longitude: business_details?.longitude ?? 0,
 			address: business_details?.address ?? '',
