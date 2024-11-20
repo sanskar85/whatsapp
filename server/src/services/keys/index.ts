@@ -149,7 +149,7 @@ export default class ApiKeyService {
 
 		webhooks.forEach(async (webhook) => {
 			const webhook_url = webhook.url;
-			axios.post(webhook_url, webhookData);
+			axios.post(webhook_url, webhookData).catch((e) => {});
 		});
 	}
 
