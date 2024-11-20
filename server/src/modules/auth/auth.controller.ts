@@ -55,8 +55,7 @@ async function validateClientID(req: Request, res: Response, next: NextFunction)
 }
 
 async function initiateWhatsapp(req: Request, res: Response, next: NextFunction) {
-	// const client_id = generateClientID();
-	const client_id = '118746d6-c9e8-43d2-a997-0e9f82b51731';
+	const client_id = generateClientID();
 
 	const whatsapp = WhatsappProvider.getInstance(req.locals.user, client_id);
 	whatsapp.initialize();
