@@ -375,14 +375,14 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 										value: 'EXACT_MATCH_CASE',
 										title: 'Exact Match Case',
 									},
-									{
-										value: 'ANYWHERE_MATCH_CASE',
-										title: 'Anywhere Match Case',
-									},
-									{
-										value: 'ANYWHERE_IGNORE_CASE',
-										title: 'Anywhere Ignore Case',
-									},
+									// {
+									// 	value: 'ANYWHERE_MATCH_CASE',
+									// 	title: 'Anywhere Match Case',
+									// },
+									// {
+									// 	value: 'ANYWHERE_IGNORE_CASE',
+									// 	title: 'Anywhere Ignore Case',
+									// },
 								]}
 							/>
 						</FormControl>

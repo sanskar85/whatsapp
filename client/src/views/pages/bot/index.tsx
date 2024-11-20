@@ -398,14 +398,14 @@ export default function Bot() {
 										value: 'EXACT_MATCH_CASE',
 										title: 'Exact Match Case',
 									},
-									{
-										value: 'ANYWHERE_MATCH_CASE',
-										title: 'Anywhere Match Case',
-									},
-									{
-										value: 'ANYWHERE_IGNORE_CASE',
-										title: 'Anywhere Ignore Case',
-									},
+									// {
+									// 	value: 'ANYWHERE_MATCH_CASE',
+									// 	title: 'Anywhere Match Case',
+									// },
+									// {
+									// 	value: 'ANYWHERE_IGNORE_CASE',
+									// 	title: 'Anywhere Ignore Case',
+									// },
 								]}
 							/>
 							{ui.optionsError && <FormErrorMessage>{ui.optionsError}</FormErrorMessage>}
