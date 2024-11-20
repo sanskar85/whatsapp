@@ -20,6 +20,7 @@ import {
 	useToast,
 } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
+import { BiTrash } from 'react-icons/bi';
 import { RiRobot2Line } from 'react-icons/ri';
 import { useDispatch, useSelector } from 'react-redux';
 import { NAVIGATION } from '../../../config/const';
@@ -31,6 +32,7 @@ import {
 	addBot,
 	addTrigger,
 	removeAllTriggers,
+	removeTrigger,
 	reset,
 	setAddingBot,
 	setAttachments,
@@ -289,7 +291,14 @@ export default function Bot() {
 						gap={2}
 					>
 						<Flex justifyContent={'space-between'} alignItems={'center'}>
-							<Text className='text-gray-700 dark:text-gray-400'>Triggers</Text>
+							<div>
+								<Text className='text-gray-700 dark:text-gray-400'>Triggers</Text>
+								{(options === 'ANYWHERE_MATCH_CASE' || options === 'ANYWHERE_IGNORE_CASE') && (
+									<Text className='text-red-500'>
+										Spaces in the trigger will be used as delimiter for multiple keywords.
+									</Text>
+								)}
+							</div>
 							<Flex justifyContent={'flex-end'} alignItems={'center'} gap={'1rem'}>
 								<IconButton
 									isRound={true}
@@ -311,20 +320,27 @@ export default function Bot() {
 									leftIcon={<AddIcon color='white' />}
 									onClick={() => dispatch(addTrigger())}
 								>
-									<Text fontSize='sm'>
-										Add Trigger
-									</Text>
+									<Text fontSize='sm'>Add Trigger</Text>
 								</Button>
 							</Flex>
 						</Flex>
 						{trigger.map((t, index) => (
-							<TextAreaElement
-								key={index}
-								value={t ?? ''}
-								onChange={(e) => dispatch(setTriggerAtIndex({ index, value: e.target.value }))}
-								isInvalid={!!ui.triggerError}
-								placeholder={`ex. Trigger ${index + 1}`}
-							/>
+							<Flex gap={2}>
+								<TextAreaElement
+									key={index}
+									value={t ?? ''}
+									onChange={(e) => dispatch(setTriggerAtIndex({ index, value: e.target.value }))}
+									isInvalid={!!ui.triggerError}
+									placeholder={`ex. Trigger ${index + 1}`}
+								/>
+								<IconButton
+									colorScheme='red'
+									aria-label='delete trigger'
+									icon={<BiTrash />}
+									onClick={() => dispatch(removeTrigger(index))}
+									className='rounded-md'
+								/>
+							</Flex>
 						))}
 						{trigger.length === 0 && (
 							<Text textAlign={'center'} color={theme === 'dark' ? 'gray.200' : 'gray.800'}>
@@ -361,6 +377,7 @@ export default function Bot() {
 						</FormControl>
 						<FormControl isInvalid={!!ui.optionsError} flexGrow={1}>
 							<Text className='text-gray-700 dark:text-gray-400'>Conditions</Text>
+
 							<SelectElement
 								value={options}
 								onChangeText={(text) => dispatch(setOptions(text))}
@@ -380,6 +397,14 @@ export default function Bot() {
 									{
 										value: 'EXACT_MATCH_CASE',
 										title: 'Exact Match Case',
+									},
+									{
+										value: 'ANYWHERE_MATCH_CASE',
+										title: 'Anywhere Match Case',
+									},
+									{
+										value: 'ANYWHERE_IGNORE_CASE',
+										title: 'Anywhere Ignore Case',
 									},
 								]}
 							/>
@@ -472,8 +497,9 @@ export default function Bot() {
 
 						<FormControl isInvalid={!!ui.triggerGapError} flex={1}>
 							<Flex alignItems={'center'}>
-								<Text className='text-gray-700 dark:text-gray-400'>Gap Delay</Text>
-								<Info>Time Gap if same trigger is sent.</Info>
+								<Text className='text-gray-700 dark:text-gray-400'>
+									Gap Delay<Info>Time Gap if same trigger is sent.</Info>
+								</Text>
 							</Flex>
 
 							<HStack>
@@ -504,8 +530,9 @@ export default function Bot() {
 						</FormControl>
 						<FormControl isInvalid={!!ui.responseGapError} flex={1}>
 							<Flex alignItems={'center'}>
-								<Text className='text-gray-700 dark:text-gray-400'>Message Delay</Text>
-								<Info>Time Delay between trigger and response.</Info>
+								<Text className='text-gray-700 dark:text-gray-400'>
+									Message Delay<Info>Time Delay between trigger and response.</Info>
+								</Text>
 							</Flex>
 							<HStack>
 								<NumberInput

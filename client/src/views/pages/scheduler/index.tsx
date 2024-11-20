@@ -121,7 +121,6 @@ export default function Scheduler() {
 		},
 		all_campaigns,
 	} = useSelector((state: StoreState) => state[StoreNames.SCHEDULER]);
-	console.log(all_campaigns);
 
 	const { groups, labels } = useSelector((state: StoreState) => state[StoreNames.USER]);
 	const { list: csvList } = useSelector((state: StoreState) => state[StoreNames.CSV]);
@@ -185,7 +184,6 @@ export default function Scheduler() {
 				duration: 3000,
 				isClosable: true,
 			});
-			console.log('Campaign name already exists');
 			hasError = true;
 		}
 		if (details.type === 'CSV' && details.csv_file === '') {

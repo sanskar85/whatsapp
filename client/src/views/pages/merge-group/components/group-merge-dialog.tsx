@@ -39,7 +39,7 @@ import {
 } from '@chakra-ui/react';
 import Multiselect from 'multiselect-react-dropdown';
 import { useMemo, useRef, useState } from 'react';
-import { BiRefresh } from 'react-icons/bi';
+import { BiRefresh, BiTrash } from 'react-icons/bi';
 import { useDispatch, useSelector } from 'react-redux';
 import GroupService from '../../../../services/group.service';
 import { StoreNames, StoreState } from '../../../../store';
@@ -59,6 +59,7 @@ import {
 	removePrivateReplySaved,
 	removePrivateReplyUnsaved,
 	removeSelectedGroup,
+	removeTrigger,
 	setForwardMessage,
 	setForwardTo,
 	setGroupReplySavedAttachments,
@@ -280,7 +281,15 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 						<Box flex={1}>
 							<FormControl display={'flex'} flexDirection={'column'} gap={2}>
 								<Flex justifyContent={'space-between'} alignItems={'center'}>
-									<Text className='text-gray-700 dark:text-gray-400'>Triggers</Text>
+									<Box>
+										<Text className='text-gray-700 dark:text-gray-400'>Triggers</Text>
+										{(editSelectedGroup.options === 'ANYWHERE_MATCH_CASE' ||
+											editSelectedGroup.options === 'ANYWHERE_IGNORE_CASE') && (
+											<Text className='text-red-500'>
+												Spaces in the trigger will be used as delimiter for multiple keywords.
+											</Text>
+										)}
+									</Box>
 									<Flex justifyContent={'flex-end'} alignItems={'center'} gap={'1rem'}>
 										<IconButton
 											isRound={true}
@@ -313,18 +322,29 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 									</Flex>
 								</Flex>
 								{editSelectedGroup.triggers.map((t, index) => (
-									<Textarea
-										width={'full'}
-										key={index}
-										minHeight={'70px'}
-										placeholder={`ex. Trigger ${index + 1}`}
-										border={'none'}
-										className='text-black  !bg-[#ECECEC]'
-										_placeholder={{ opacity: 0.4, color: 'inherit' }}
-										_focus={{ border: 'none', outline: 'none' }}
-										value={t ?? ''}
-										onChange={(e) => dispatch(setTriggerAtIndex({ index, value: e.target.value }))}
-									/>
+									<Flex gap={2}>
+										<Textarea
+											width={'full'}
+											key={index}
+											minHeight={'70px'}
+											placeholder={`ex. Trigger ${index + 1}`}
+											border={'none'}
+											className='text-black  !bg-[#ECECEC]'
+											_placeholder={{ opacity: 0.4, color: 'inherit' }}
+											_focus={{ border: 'none', outline: 'none' }}
+											value={t ?? ''}
+											onChange={(e) =>
+												dispatch(setTriggerAtIndex({ index, value: e.target.value }))
+											}
+										/>
+										<IconButton
+											colorScheme='red'
+											aria-label='delete trigger'
+											icon={<BiTrash />}
+											onClick={() => dispatch(removeTrigger(index))}
+											className='rounded-md'
+										/>
+									</Flex>
 								))}
 								{editSelectedGroup.triggers.length === 0 && (
 									<Text textAlign={'center'}>
@@ -354,6 +374,14 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 									{
 										value: 'EXACT_MATCH_CASE',
 										title: 'Exact Match Case',
+									},
+									{
+										value: 'ANYWHERE_MATCH_CASE',
+										title: 'Anywhere Match Case',
+									},
+									{
+										value: 'ANYWHERE_IGNORE_CASE',
+										title: 'Anywhere Ignore Case',
 									},
 								]}
 							/>

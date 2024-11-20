@@ -454,7 +454,7 @@ export default class WhatsappUtils {
 	}
 
 	static async resumeSessions() {
-		if (!IS_PRODUCTION) return;
+		// if (!IS_PRODUCTION) return;
 		const path = __basedir + '/.wwebjs_auth';
 
 		await TaskDB.updateMany(

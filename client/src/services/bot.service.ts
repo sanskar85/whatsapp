@@ -42,7 +42,7 @@ export default class BotService {
 			return {
 				bot_id: res.bot_id ?? '',
 				trigger: res.trigger ?? [],
-				options: res.options ?? '',
+				options: res.options ?? 'INCLUDES_MATCH_CASE',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
 				respond_to: res.respond_to ?? '',
@@ -70,7 +70,7 @@ export default class BotService {
 			return {
 				bot_id: res.bot_id ?? '',
 				trigger: res.trigger ?? [],
-				options: res.options ?? '',
+				options: res.options ?? 'INCLUDES_MATCH_CASE',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
 				respond_to: res.respond_to ?? '',
@@ -96,7 +96,7 @@ export default class BotService {
 			return response.bots.map((res: Bot) => ({
 				bot_id: res.bot_id ?? '',
 				trigger: res.trigger ?? [],
-				options: res.options ?? '',
+				options: res.options ?? 'INCLUDES_MATCH_CASE',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
 				respond_to: res.respond_to ?? '',
