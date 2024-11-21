@@ -244,9 +244,7 @@ export default class BotService extends UserService {
 						cond ||
 						sentence_paragraph.every((word) => {
 							const wordIndex = words_paragraph.indexOf(word);
-							return (
-								wordIndex >= 0 && wordIndex < words_paragraph.length - sentence_paragraph.length + 1
-							);
+							return wordIndex >= 0;
 						});
 				}
 				if (bot.options === BOT_TRIGGER_OPTIONS.ANYWHERE_MATCH_CASE) {
@@ -261,9 +259,7 @@ export default class BotService extends UserService {
 						cond ||
 						sentence_paragraph.every((word) => {
 							const wordIndex = words_paragraph.indexOf(word);
-							return (
-								wordIndex >= 0 && wordIndex < words_paragraph.length - sentence_paragraph.length + 1
-							);
+							return wordIndex >= 0;
 						});
 				}
 			}
