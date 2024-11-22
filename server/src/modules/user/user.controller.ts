@@ -87,6 +87,7 @@ async function enableMessageLogger(req: Request, res: Response, next: NextFuncti
 		status: 200,
 		data: {
 			messageLoggerEnabled: true,
+			...userPrefService.messagesLogPrefs(),
 		},
 	});
 }
