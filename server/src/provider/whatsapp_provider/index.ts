@@ -338,16 +338,22 @@ export class WhatsappProvider {
 
 					let log = false;
 					let downloadMedia = false;
-					if (msgLogPrefs.individual_text_message && !isGroup && !message.hasMedia) {
-						log = true;
-					} else if (msgLogPrefs.group_text_message && isGroup && !message.hasMedia) {
-						log = true;
-					} else if (msgLogPrefs.individual_media_message && !isGroup && message.hasMedia) {
-						log = true;
-						downloadMedia = true;
-					} else if (msgLogPrefs.group_media_message && isGroup && message.hasMedia) {
-						log = true;
-						downloadMedia = true;
+					if (isGroup) {
+						if (msgLogPrefs.group_text_message && !message.hasMedia) {
+							log = true;
+						}
+						if (msgLogPrefs.group_media_message && message.hasMedia) {
+							log = true;
+							downloadMedia = true;
+						}
+					} else {
+						if (msgLogPrefs.individual_text_message && !message.hasMedia) {
+							log = true;
+						}
+						if (msgLogPrefs.individual_media_message && message.hasMedia) {
+							log = true;
+							downloadMedia = true;
+						}
 					}
 
 					if (log) {
