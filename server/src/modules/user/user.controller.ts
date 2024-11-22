@@ -6,6 +6,7 @@ import UserPreferencesService from '../../services/user/userPreferences';
 import CSVParser from '../../utils/CSVParser';
 import DateUtils from '../../utils/DateUtils';
 import { Respond, RespondCSV } from '../../utils/ExpressUtils';
+import { UserLogPrefs } from './user.validator';
 
 async function listUsers(req: Request, res: Response, next: NextFunction) {
 	const userService = req.locals.admin;
@@ -70,14 +71,16 @@ async function getPreferences(req: Request, res: Response, next: NextFunction) {
 		status: 200,
 		data: {
 			messageLoggerEnabled: userPrefService.isMessagesLogEnabled(),
+			...userPrefService.messagesLogPrefs(),
 		},
 	});
 }
 
 async function enableMessageLogger(req: Request, res: Response, next: NextFunction) {
 	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
-
+	const data = req.locals.data as UserLogPrefs;
 	await userPrefService.setMessagesLogEnabled(true);
+	await userPrefService.setMessagesLogPrefs(data);
 
 	return Respond({
 		res,

@@ -14,6 +14,22 @@ const schema = new Schema<IUserPreferences>({
 		type: String,
 		default: '',
 	},
+	individual_text_message: {
+		type: Boolean,
+		default: false,
+	},
+	individual_media_message: {
+		type: Boolean,
+		default: false,
+	},
+	group_text_message: {
+		type: Boolean,
+		default: false,
+	},
+	group_media_message: {
+		type: Boolean,
+		default: false,
+	},
 });
 
 const UserPreferencesDB = mongoose.model<IUserPreferences>('UserPreferences', schema);
