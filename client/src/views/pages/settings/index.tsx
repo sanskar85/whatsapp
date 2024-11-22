@@ -108,43 +108,45 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 	const handleUserPref = async (action: string, value: string | boolean) => {
 		if (action === 'message-logger') {
 			if (value) {
-				await UserService.enableMessageLogging({});
+				const data = await UserService.enableMessageLogging({
+					individual_text_message: true,
+					individual_media_message: true,
+					group_text_message: true,
+					group_media_message: true,
+				});
+				dispatch(setUserDetails(data));
 			} else {
-				await UserService.disableMessageLogging();
+				const data = await UserService.disableMessageLogging();
+				dispatch(setUserDetails(data));
 			}
-			dispatch(setUserDetails({ messageLoggerEnabled: !!value }));
 		}
 
 		if (action === 'individual-text-message') {
-			await UserService.enableMessageLogging({
+			const data = await UserService.enableMessageLogging({
 				individual_text_message: !!value,
 			});
-
-			dispatch(setUserDetails({ individual_text_message: !!value }));
+			dispatch(setUserDetails(data));
 		}
 
-		if(action === 'individual-media-message'){
-			await UserService.enableMessageLogging({
+		if (action === 'individual-media-message') {
+			const data = await UserService.enableMessageLogging({
 				individual_media_message: !!value,
 			});
-
-			dispatch(setUserDetails({ individual_media_message: !!value }));
+			dispatch(setUserDetails(data));
 		}
 
-		if(action === 'groups-text-message'){
-			await UserService.enableMessageLogging({
+		if (action === 'groups-text-message') {
+			const data = await UserService.enableMessageLogging({
 				group_text_message: !!value,
 			});
-
-			dispatch(setUserDetails({ group_text_message: !!value }));
+			dispatch(setUserDetails(data));
 		}
 
-		if(action === 'groups-media-message'){
-			await UserService.enableMessageLogging({
+		if (action === 'groups-media-message') {
+			const data = await UserService.enableMessageLogging({
 				group_media_message: !!value,
 			});
-
-			dispatch(setUserDetails({ group_media_message: !!value }));
+			dispatch(setUserDetails(data));
 		}
 	};
 

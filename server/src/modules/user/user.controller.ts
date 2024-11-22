@@ -86,7 +86,7 @@ async function enableMessageLogger(req: Request, res: Response, next: NextFuncti
 		res,
 		status: 200,
 		data: {
-			messageLoggerEnabled: true,
+			messageLoggerEnabled: userPrefService.isMessagesLogEnabled(),
 			...userPrefService.messagesLogPrefs(),
 		},
 	});
@@ -96,12 +96,19 @@ async function disableMessageLogger(req: Request, res: Response, next: NextFunct
 	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
 
 	await userPrefService.setMessagesLogEnabled(false);
+	await userPrefService.setMessagesLogPrefs({
+		individual_text_message: false,
+		individual_media_message: false,
+		group_text_message: false,
+		group_media_message: false,
+	});
 
 	return Respond({
 		res,
 		status: 200,
 		data: {
-			messageLoggerEnabled: false,
+			messageLoggerEnabled: userPrefService.isMessagesLogEnabled(),
+			...userPrefService.messagesLogPrefs(),
 		},
 	});
 }
