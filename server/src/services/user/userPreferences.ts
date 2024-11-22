@@ -81,6 +81,15 @@ export default class UserPreferencesService {
 		if (data.group_media_message !== undefined) {
 			this.userPref.group_media_message = data.group_media_message;
 		}
+		if (
+			!this.userPref.individual_text_message &&
+			!this.userPref.individual_media_message &&
+			!this.userPref.group_text_message &&
+			!this.userPref.group_media_message
+		) {
+			this.userPref.isMessagesLogEnabled = false;
+		}
+
 		await this.userPref.save();
 	}
 }
