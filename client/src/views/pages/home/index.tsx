@@ -28,7 +28,7 @@ import { setContactList } from '../../../store/reducers/ContactCardReducers';
 import { setLinksList } from '../../../store/reducers/LinkShortnerReducers';
 import { setMergedGroupList } from '../../../store/reducers/MergeGroupReducer';
 import { setAllSchedulers } from '../../../store/reducers/SchedulerReducer';
-import { setUserDetails } from '../../../store/reducers/UserDetailsReducers';
+import { setUserDetails, setUserPreferences } from '../../../store/reducers/UserDetailsReducers';
 import ConfirmationAlert, { ConfirmationAlertHandle } from '../../components/confirmation-alert';
 import Navbar from '../../components/navbar';
 import NavigationDrawer from '../../components/navigation-drawer';
@@ -108,6 +108,7 @@ export default function Home() {
 			dispatch(setLinksList(results[6]));
 			dispatch(setMergedGroupList(results[7]));
 			dispatch(setAllSchedulers(results[8]));
+			dispatch(setUserPreferences(results[9]));
 			dispatch(setAPIList(results[10]));
 			dispatch(setWebhookList(results[11]));
 

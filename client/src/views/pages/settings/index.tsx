@@ -72,6 +72,10 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 		isWhatsappReady,
 		phone_number,
 		name,
+		group_media_message,
+		group_text_message,
+		individual_media_message,
+		individual_text_message,
 	} = useSelector((state: StoreState) => state[StoreNames.USER]);
 
 	const [PAYMENT_RECORDS, setPaymentRecords] = useState<(Payment | Subscription)[]>([]);
@@ -104,11 +108,43 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 	const handleUserPref = async (action: string, value: string | boolean) => {
 		if (action === 'message-logger') {
 			if (value) {
-				await UserService.enableMessageLogging();
+				await UserService.enableMessageLogging({});
 			} else {
 				await UserService.disableMessageLogging();
 			}
 			dispatch(setUserDetails({ messageLoggerEnabled: !!value }));
+		}
+
+		if (action === 'individual-text-message') {
+			await UserService.enableMessageLogging({
+				individual_text_message: !!value,
+			});
+
+			dispatch(setUserDetails({ individual_text_message: !!value }));
+		}
+
+		if(action === 'individual-media-message'){
+			await UserService.enableMessageLogging({
+				individual_media_message: !!value,
+			});
+
+			dispatch(setUserDetails({ individual_media_message: !!value }));
+		}
+
+		if(action === 'groups-text-message'){
+			await UserService.enableMessageLogging({
+				group_text_message: !!value,
+			});
+
+			dispatch(setUserDetails({ group_text_message: !!value }));
+		}
+
+		if(action === 'groups-media-message'){
+			await UserService.enableMessageLogging({
+				group_media_message: !!value,
+			});
+
+			dispatch(setUserDetails({ group_media_message: !!value }));
 		}
 	};
 
@@ -188,9 +224,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 									{isSubscribed ? (
 										<Flex marginTop={'0.5rem'} gap={'0.5rem'} alignItems={'center'}>
 											<InfoOutlineIcon color={'#BB2525'} width={4} />
-											<Text color={'#BB2525'}>
-												Expires On {session_expires_at}
-											</Text>
+											<Text color={'#BB2525'}>Expires On {session_expires_at}</Text>
 										</Flex>
 									) : null}
 								</section>
@@ -330,6 +364,62 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 									<InfoOutlineIcon />
 									Ask to admin to access the Google Sheet File.
 								</Flex>
+								<FormControl display='flex' alignItems='center' hidden={!messageLoggerEnabled}>
+									<FormLabel
+										htmlFor='individual-text-message'
+										mb='0'
+										color={theme === 'dark' ? 'white' : 'black'}
+									>
+										Individual Text Message?
+									</FormLabel>
+									<Switch
+										id='individual-text-message'
+										isChecked={individual_text_message}
+										onChange={(e) => handleUserPref('individual-text-message', e.target.checked)}
+									/>
+								</FormControl>
+								<FormControl display='flex' alignItems='center' hidden={!messageLoggerEnabled}>
+									<FormLabel
+										htmlFor='individual-media-message'
+										mb='0'
+										color={theme === 'dark' ? 'white' : 'black'}
+									>
+										Individual Media Message?
+									</FormLabel>
+									<Switch
+										id='individual-media-message'
+										isChecked={individual_media_message}
+										onChange={(e) => handleUserPref('individual-media-message', e.target.checked)}
+									/>
+								</FormControl>
+								<FormControl display='flex' alignItems='center' hidden={!messageLoggerEnabled}>
+									<FormLabel
+										htmlFor='groups-text-message'
+										mb='0'
+										color={theme === 'dark' ? 'white' : 'black'}
+									>
+										Groups Text Message?
+									</FormLabel>
+									<Switch
+										id='groups-text-message'
+										isChecked={group_text_message}
+										onChange={(e) => handleUserPref('groups-text-message', e.target.checked)}
+									/>
+								</FormControl>
+								<FormControl display='flex' alignItems='center' hidden={!messageLoggerEnabled}>
+									<FormLabel
+										htmlFor='groups-media-message'
+										mb='0'
+										color={theme === 'dark' ? 'white' : 'black'}
+									>
+										Groups Media Message?
+									</FormLabel>
+									<Switch
+										id='groups-media-message'
+										isChecked={group_media_message}
+										onChange={(e) => handleUserPref('groups-media-message', e.target.checked)}
+									/>
+								</FormControl>
 							</section>
 
 							<section className=' flex flex-col justify-end flex-1'>

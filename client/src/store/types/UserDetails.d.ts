@@ -12,6 +12,11 @@ export type UserDetailsState = {
 
 	messageLoggerEnabled: boolean;
 
+	individual_text_message:boolean;
+	individual_media_message:boolean;
+	group_text_message:boolean;
+	group_media_message:boolean;
+
 	groups: {
 		id: string;
 		name: string;

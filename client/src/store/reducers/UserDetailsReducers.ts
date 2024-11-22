@@ -14,6 +14,11 @@ const initialState: UserDetailsState = {
 
 	messageLoggerEnabled: false,
 
+	individual_text_message: false,
+	individual_media_message: false,
+	group_text_message: false,
+	group_media_message: false,
+
 	groups: [],
 	labels: [],
 	contactsCount: null,
@@ -66,6 +71,18 @@ const UserDetailsSlice = createSlice({
 			if (action.payload.messageLoggerEnabled !== undefined) {
 				state.messageLoggerEnabled = action.payload.messageLoggerEnabled;
 			}
+			if(action.payload.individual_text_message !== undefined){
+				state.individual_text_message = action.payload.individual_text_message;
+			}
+			if(action.payload.individual_media_message !== undefined){
+				state.individual_media_message = action.payload.individual_media_message;
+			}
+			if(action.payload.group_text_message !== undefined){
+				state.group_text_message = action.payload.group_text_message;
+			}
+			if(action.payload.group_media_message !== undefined){
+				state.group_media_message = action.payload.group_media_message;
+			}
 
 			if (action.payload.session_expires_at) {
 				state.session_expires_at = action.payload.session_expires_at;
@@ -96,6 +113,23 @@ const UserDetailsSlice = createSlice({
 		setIsLoggedIn: (state, action: PayloadAction<boolean>) => {
 			state.isLoggedIn = action.payload;
 		},
+		setUserPreferences: (state, action: PayloadAction<Partial<typeof initialState>>) => {
+			if (action.payload.messageLoggerEnabled !== undefined) {
+				state.messageLoggerEnabled = action.payload.messageLoggerEnabled;
+			}
+			if (action.payload.individual_text_message !== undefined) {
+				state.individual_text_message = action.payload.individual_text_message;
+			}
+			if (action.payload.individual_media_message !== undefined) {
+				state.individual_media_message = action.payload.individual_media_message;
+			}
+			if (action.payload.group_text_message !== undefined) {
+				state.group_text_message = action.payload.group_text_message;
+			}
+			if (action.payload.group_media_message !== undefined) {
+				state.group_media_message = action.payload.group_media_message;
+			}
+		}
 	},
 });
 
@@ -108,6 +142,7 @@ export const {
 	setDataLoaded,
 	setSettingsOpen,
 	setIsLoggedIn,
+	setUserPreferences,
 } = UserDetailsSlice.actions;
 
 export default UserDetailsSlice.reducer;
