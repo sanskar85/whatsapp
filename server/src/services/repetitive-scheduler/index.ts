@@ -340,7 +340,7 @@ export default class RepetitiveSchedulerService extends UserService {
 
 		while (scheduling_index < target_index) {
 			const recipient = scheduler.recipients[scheduling_index % scheduler.recipients.length];
-			const record = variablesRecords[recipient];
+			const record = variablesRecords[recipient.replace('@c.us', '')] ?? {};
 			let _message = scheduler.message;
 
 			for (const variable of headers) {
@@ -352,7 +352,7 @@ export default class RepetitiveSchedulerService extends UserService {
 
 			schedulerService.scheduleMessage(
 				{
-					receiver: `${recipient}@c.us`,
+					receiver: recipient,
 					sendAt: timeGenerator.next().value,
 					attachments: scheduler.attachments.map((attachment) => ({
 						name: attachment.name,
