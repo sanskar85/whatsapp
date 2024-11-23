@@ -227,7 +227,7 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 	}
 
 	try {
-		const bot = await schedulerService.modifyScheduler(req.locals.id, {
+		const scheduler = await schedulerService.modifyScheduler(req.locals.id, {
 			...data,
 			recipients: numbers,
 			attachments: media_attachments,
@@ -237,10 +237,10 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 			res,
 			status: 200,
 			data: {
-				bot: {
-					...bot,
-					attachments: bot.attachments.map((attachments) => attachments.id),
-					shared_contact_cards: bot.shared_contact_cards.map((cards) => cards._id),
+				scheduler: {
+					...scheduler,
+					attachments: scheduler.attachments.map((attachments) => attachments.id),
+					shared_contact_cards: scheduler.shared_contact_cards.map((cards) => cards._id),
 				},
 			},
 		});
@@ -319,7 +319,7 @@ async function downloadSchedulerReport(req: Request, res: Response, next: NextFu
 	}
 }
 
-const BotController = {
+const schedulerController = {
 	allSchedulers,
 	deleteScheduler,
 	updateScheduler,
@@ -330,4 +330,4 @@ const BotController = {
 	reschedule,
 };
 
-export default BotController;
+export default schedulerController;
