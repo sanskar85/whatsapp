@@ -241,18 +241,6 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 
 		taskService.markCompleted(task_id, scheduler.id.toString());
 		whatsapp.sendToClient(SOCKET_RESPONSES.TASK_COMPLETED, task_id.toString());
-
-		return Respond({
-			res,
-			status: 200,
-			data: {
-				scheduler: {
-					...scheduler,
-					attachments: scheduler.attachments.map((attachments) => attachments.id),
-					shared_contact_cards: scheduler.shared_contact_cards.map((cards) => cards._id),
-				},
-			},
-		});
 	} catch (err) {
 		return taskService.markFailed(task_id);
 	}
