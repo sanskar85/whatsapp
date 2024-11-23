@@ -32,6 +32,8 @@ function formatDoc(doc: IRepetitiveScheduler) {
 		description: doc.description,
 		dates: doc.dates,
 		daily_count: doc.daily_count,
+		start_time: doc.start_time,
+		end_time: doc.end_time,
 	};
 }
 
