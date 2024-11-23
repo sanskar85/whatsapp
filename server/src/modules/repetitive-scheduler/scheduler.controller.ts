@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { TASK_RESULT_TYPE, TASK_TYPE } from '../../config/const';
+import { SOCKET_RESPONSES, TASK_RESULT_TYPE, TASK_TYPE } from '../../config/const';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import { WhatsappProvider } from '../../provider/whatsapp_provider';
@@ -69,6 +69,11 @@ async function createScheduler(req: Request, res: Response, next: NextFunction) 
 		description: data.title,
 	});
 
+	Respond({
+		res,
+		status: 201,
+	});
+
 	const schedulerService = new RepetitiveSchedulerService(req.locals.user.getUser());
 	const [_, media_attachments] = await new UploadService(req.locals.user.getUser()).listAttachments(
 		data.attachments
@@ -130,22 +135,18 @@ async function createScheduler(req: Request, res: Response, next: NextFunction) 
 		}
 	}
 
-	const scheduler = schedulerService.createScheduler({
-		...data,
-		recipients: numbers,
-		attachments: media_attachments,
-	});
+	try {
+		const scheduler = schedulerService.createScheduler({
+			...data,
+			recipients: numbers,
+			attachments: media_attachments,
+		});
 
-	return Respond({
-		res,
-		status: 201,
-		data: {
-			scheduler: {
-				...scheduler,
-				attachments: scheduler.attachments.map((attachments) => attachments.id),
-			},
-		},
-	});
+		taskService.markCompleted(task_id, scheduler.id.toString());
+		whatsapp.sendToClient(SOCKET_RESPONSES.TASK_COMPLETED, task_id.toString());
+	} catch (err) {
+		return taskService.markFailed(task_id);
+	}
 }
 
 async function updateScheduler(req: Request, res: Response, next: NextFunction) {
@@ -168,6 +169,11 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 	const taskService = new TaskService(req.locals.user.getUser());
 	const task_id = await taskService.createTask(TASK_TYPE.SCHEDULE_CAMPAIGN, TASK_RESULT_TYPE.NONE, {
 		description: `Update scheduler ${req.locals.id}`,
+	});
+
+	Respond({
+		res,
+		status: 200,
 	});
 
 	const type = data.recipient_from;
@@ -233,6 +239,9 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 			attachments: media_attachments,
 		});
 
+		taskService.markCompleted(task_id, scheduler.id.toString());
+		whatsapp.sendToClient(SOCKET_RESPONSES.TASK_COMPLETED, task_id.toString());
+
 		return Respond({
 			res,
 			status: 200,
@@ -245,7 +254,7 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 			},
 		});
 	} catch (err) {
-		return next(new APIError(API_ERRORS.COMMON_ERRORS.NOT_FOUND));
+		return taskService.markFailed(task_id);
 	}
 }
 
