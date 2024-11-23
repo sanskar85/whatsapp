@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SchedulerByDateService } from '../../../../services/scheduler-by-date.service';
 import { StoreNames, StoreState } from '../../../../store';
 import {
+	deleteScheduler,
 	editSelectedScheduler,
 	setSelectedScheduler,
 } from '../../../../store/reducers/SchedulerByDateReducer';
@@ -56,8 +57,8 @@ const SchedulerList = () => {
 	const handleDeleteScheduledMessage = (id: string) => {
 		toast.promise(SchedulerByDateService.deleteScheduler(id), {
 			loading: { title: 'Deleting Scheduler' },
-			success: (res) => {
-				dispatch(editSelectedScheduler(res));
+			success: () => {
+				dispatch(deleteScheduler(id));
 				return {
 					title: 'Scheduler deleted.',
 				};
@@ -74,8 +75,7 @@ const SchedulerList = () => {
 			title: 'Downloading report.',
 			description: 'Check task page for download.',
 			duration: 1500,
-		})
-
+		});
 	};
 	const reschedule = async (id: string) => {
 		SchedulerByDateService.reschedule(id);
