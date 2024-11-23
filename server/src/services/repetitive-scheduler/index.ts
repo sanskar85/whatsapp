@@ -302,7 +302,7 @@ export default class RepetitiveSchedulerService extends UserService {
 
 		const timeGenerator = new TimeGenerator({
 			min_delay: 2,
-			max_delay: totalTimeInSec / daily_count,
+			max_delay: Math.min(5, totalTimeInSec / daily_count),
 			batch_size: 99999,
 			batch_delay: 1,
 			startDate: DateUtils.getMomentNow().format('YYYY-MM-DD'),
