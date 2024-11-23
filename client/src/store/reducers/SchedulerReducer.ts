@@ -75,7 +75,6 @@ const SchedulerSlice = createSlice({
 			state.ui.editingMessage = false;
 		},
 		setAllSchedulers: (state, action: PayloadAction<typeof initialState.all_schedulers>) => {
-			console.log(action.payload);
 			state.all_schedulers = action.payload;
 		},
 		addScheduler: (state, action: PayloadAction<(typeof initialState.all_schedulers)[0]>) => {

@@ -37,7 +37,6 @@ export class SchedulerByDateService {
 		scheduler: Omit<SchedulerByDateDetails, 'daily_count'> & { daily_count: number }
 	) {
 		const { data } = await APIInstance.post('/repetitive-scheduler', scheduler);
-		console.log(data);
 		return validateScheduler([data.scheduler])[0];
 	}
 

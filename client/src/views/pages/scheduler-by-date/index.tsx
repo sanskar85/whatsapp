@@ -90,7 +90,6 @@ export default function SchedulerByDate() {
 		let hasError = false;
 		if (!details.title) {
 			dispatch(setCampaignNameError(true));
-			console.log('11');
 
 			hasError = true;
 		}
@@ -106,31 +105,26 @@ export default function SchedulerByDate() {
 		}
 		if (details.recipient_from === 'CSV' && details.recipient_data === '') {
 			dispatch(setRecipientsError(true));
-			console.log('9');
 
 			hasError = true;
 		}
 		if (details.recipient_from === 'GROUP' && details.recipient_data.length === 0) {
 			dispatch(setRecipientsError(true));
-			console.log('8');
 
 			hasError = true;
 		}
 		if (details.recipient_from === 'GROUP_INDIVIDUAL' && details.recipient_data.length === 0) {
 			dispatch(setRecipientsError(true));
-			console.log('7');
 
 			hasError = true;
 		}
 		if (details.recipient_from === 'LABEL' && details.recipient_data.length === 0) {
-			console.log('6');
 			dispatch(setRecipientsError(true));
 			hasError = true;
 		}
 		if (isAlertMessage) {
 			if (!readMoreDetails.title && !readMoreDetails.message) {
 				dispatch(setMessageError(true));
-				console.log('5');
 
 				hasError = true;
 			}
@@ -142,7 +136,6 @@ export default function SchedulerByDate() {
 				details.polls.length === 0
 			) {
 				dispatch(setMessageError(true));
-				console.log('4');
 
 				hasError = true;
 			}
@@ -153,7 +146,6 @@ export default function SchedulerByDate() {
 			Number.isNaN(Number(details.daily_count))
 		) {
 			dispatch(setDailyCountError(true));
-			console.log('3');
 
 			hasError = true;
 		}
@@ -164,13 +156,11 @@ export default function SchedulerByDate() {
 				status: 'error',
 			});
 			hasError = true;
-			console.log('2');
 		}
 		for (let i = 0; i < details.dates.length; i++) {
 			if (details.dates[i] === '') {
 				dispatch(setDateError(true));
 				hasError = true;
-				console.log('1');
 			}
 		}
 		return !hasError;
