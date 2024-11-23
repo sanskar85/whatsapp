@@ -22,6 +22,7 @@ import APIError from './errors/api-errors';
 import InternalError from './errors/internal-errors';
 import { WhatsappProvider } from './provider/whatsapp_provider';
 import { MessageService } from './services/messenger';
+import RepetitiveSchedulerService from './services/repetitive-scheduler';
 import SchedulerService from './services/scheduler';
 import WhatsappUtils from './utils/WhatsappUtils';
 
@@ -144,7 +145,11 @@ export default function (app: Express) {
 
 	//0 0 * * *
 	cron.schedule('30 0 * * *', function () {
+		RepetitiveSchedulerService.scheduleDailyMessages();
 		SchedulerService.scheduleDailyMessages();
+	});
+
+	cron.schedule('45 0 * * *', function () {
 		WhatsappUtils.removeUnwantedSessions();
 	});
 
