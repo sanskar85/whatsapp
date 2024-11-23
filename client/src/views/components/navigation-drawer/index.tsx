@@ -1,7 +1,7 @@
 import { SettingsIcon } from '@chakra-ui/icons';
 import { Box, Flex, Icon, IconButton, Image, Text, VStack } from '@chakra-ui/react';
 import { IconType } from 'react-icons';
-import { BiCode, BiPoll } from 'react-icons/bi';
+import { BiCalendarMinus, BiCode, BiPoll } from 'react-icons/bi';
 import { FiBarChart2, FiLink2 } from 'react-icons/fi';
 import { GrTasks } from 'react-icons/gr';
 import { MdGroups3, MdOutlineAttachment, MdOutlineContactPhone } from 'react-icons/md';
@@ -82,7 +82,11 @@ export default function NavigationDrawer() {
 							<MenuButton icon={MdOutlineContactPhone} route={NAVIGATION.CONTACT} name='Contacts' />
 
 							<MenuButton icon={TbMessage2Minus} route={NAVIGATION.SCHEDULER} name='Messages' />
-							<MenuButton icon={TbMessage2Minus} route={NAVIGATION.SCHEDULER_BY_DATE} name='Scheduler' />
+							<MenuButton
+								icon={BiCalendarMinus}
+								route={NAVIGATION.SCHEDULER_BY_DATE}
+								name='Scheduler'
+							/>
 							<MenuButton icon={SiProbot} route={NAVIGATION.BOT} name='Bot' />
 							<MenuButton
 								icon={MdOutlineAttachment}
