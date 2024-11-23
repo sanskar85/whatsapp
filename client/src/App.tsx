@@ -23,6 +23,7 @@ const PollReport = lazy(() => import('./views/pages/polls-report'));
 const GroupMergePage = lazy(() => import('./views/pages/merge-group'));
 const NetworkError = lazy(() => import('./views/pages/network-error'));
 const APIPage = lazy(() => import('./views/pages/api-webhook'));
+const SchedulerByDate = lazy(() => import('./views/pages/scheduler-by-date'));
 
 function App() {
 	useTheme();
@@ -37,6 +38,7 @@ function App() {
 						<Route path={NAVIGATION.HOME} element={<Home />}>
 							<Route path={NAVIGATION.CONTACT} element={<Contact />} />
 							<Route path={NAVIGATION.SCHEDULER} element={<Scheduler />} />
+							<Route path={NAVIGATION.SCHEDULER_BY_DATE} element={<SchedulerByDate />} />
 							<Route path={NAVIGATION.BOT} element={<Bot />} />
 							<Route path={NAVIGATION.REPORTS} element={<Report />} />
 							<Route path={NAVIGATION.SHORT} element={<LinkShortner />} />

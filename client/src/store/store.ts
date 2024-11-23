@@ -9,6 +9,7 @@ import { default as ContactCardReducers } from './reducers/ContactCardReducers';
 import { default as LinkShortenerReducer } from './reducers/LinkShortnerReducers';
 import { default as MergeGroupReducers } from './reducers/MergeGroupReducer';
 import { default as PollReducers } from './reducers/PollReducers';
+import { default as SchedulerByDateReducer } from './reducers/SchedulerByDateReducer';
 import { default as SchedulerReducer } from './reducers/SchedulerReducer';
 import { default as UserDetailsReducers } from './reducers/UserDetailsReducers';
 
@@ -24,6 +25,7 @@ const store = configureStore({
 		[StoreNames.POLL]: PollReducers,
 		[StoreNames.MERGE_GROUP]: MergeGroupReducers,
 		[StoreNames.API]: APIWebhookReducers,
+		[StoreNames.SCHEDULER_BY_DATE]: SchedulerByDateReducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({

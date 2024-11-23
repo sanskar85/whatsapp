@@ -16,6 +16,7 @@ import ContactCardService from '../../../services/contact-card.service';
 import GroupService from '../../../services/group.service';
 import LabelService from '../../../services/label.service';
 import MessageService from '../../../services/message.service';
+import { SchedulerByDateService } from '../../../services/scheduler-by-date.service';
 import ShortenerService from '../../../services/shortener.service';
 import UploadsService from '../../../services/uploads.service';
 import UserService from '../../../services/user.service';
@@ -33,6 +34,7 @@ import ConfirmationAlert, { ConfirmationAlertHandle } from '../../components/con
 import Navbar from '../../components/navbar';
 import NavigationDrawer from '../../components/navigation-drawer';
 import AddDeviceDialog, { AddDeviceDialogHandle } from '../settings/components/AddDeviceDialog';
+import { setAllRepetitiveSchedulers } from '../../../store/reducers/SchedulerByDateReducer';
 
 export default function Home() {
 	const outlet = useOutlet();
@@ -89,6 +91,7 @@ export default function Home() {
 				UserService.getUserPreferences(),
 				APIWebhookService.listKeys(),
 				APIWebhookService.listWebhooks(),
+				SchedulerByDateService.listAllSchedulers(),
 			];
 
 			const results = await Promise.all(promises);
@@ -111,6 +114,7 @@ export default function Home() {
 			dispatch(setUserPreferences(results[9]));
 			dispatch(setAPIList(results[10]));
 			dispatch(setWebhookList(results[11]));
+			dispatch(setAllRepetitiveSchedulers(results[12]));
 
 			AuthService.validateClientID().then((res) => {
 				if (res) {

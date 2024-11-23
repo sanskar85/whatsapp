@@ -1,33 +1,26 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { StoreNames } from '../config';
-import { ScheduledCampaign, SchedulerState } from '../types/SchedulerState';
+import { SchedulerByDateDetails, SchedulerByDateState } from '../types/ScheduleByDateState';
 
-const initialState: SchedulerState = {
-	all_campaigns: [] as ScheduledCampaign[],
+const initialState: SchedulerByDateState = {
 	all_schedulers: [],
 	details: {
-		message_scheduler_id: '',
-		type: 'NUMBERS',
-		numbers: [],
-		csv_file: '',
-		group_ids: [],
-		label_ids: [],
+		daily_count: '0',
+		id: '',
+		recipient_from: 'NUMBERS',
+		recipient_data: [],
 		message: '',
 		random_string: false,
-		variables: [],
 		shared_contact_cards: [],
 		attachments: [],
-		campaign_name: '',
-		min_delay: 1,
-		max_delay: 60,
-		startTime: '10:00',
-		endTime: '18:00',
-		batch_delay: 120,
-		batch_size: 1,
+		title: '',
+		start_time: '10:00',
+		end_time: '18:00',
 		polls: [],
-		startDate: new Date().toISOString().slice(0, 10),
 		description: '',
+		dates: [],
 	},
+	variables: [],
 	isRecipientsLoading: false,
 	isBusinessAccount: true,
 	recipients: [],
@@ -40,27 +33,27 @@ const initialState: SchedulerState = {
 		recipientsError: false,
 		apiError: '',
 		editingMessage: false,
-		minDelayError: false,
-		maxDelayError: false,
-		batchSizeError: false,
-		batchDelayError: false,
+		dateError: false,
+		dailyCountError: false,
 	},
 };
 
-const SchedulerSlice = createSlice({
-	name: StoreNames.SCHEDULER,
+const SchedulerByDateSlice = createSlice({
+	name: StoreNames.SCHEDULER_BY_DATE,
 	initialState,
 	reducers: {
 		reset: (state) => {
-			state.all_campaigns = initialState.all_campaigns;
 			state.details = initialState.details;
 			state.isRecipientsLoading = initialState.isRecipientsLoading;
 			state.isBusinessAccount = initialState.isBusinessAccount;
 			state.recipients = initialState.recipients;
 			state.ui = initialState.ui;
 		},
-		setAllCampaigns: (state, action: PayloadAction<typeof initialState.all_campaigns>) => {
-			state.all_campaigns = action.payload;
+		setAllRepetitiveSchedulers: (
+			state,
+			action: PayloadAction<typeof initialState.all_schedulers>
+		) => {
+			state.all_schedulers = action.payload;
 		},
 		editSelectedScheduler: (
 			state,
@@ -73,12 +66,9 @@ const SchedulerSlice = createSlice({
 				return scheduler;
 			});
 			state.ui.editingMessage = false;
+			state.details = initialState.details;
 		},
-		setAllSchedulers: (state, action: PayloadAction<typeof initialState.all_schedulers>) => {
-			console.log(action.payload);
-			state.all_schedulers = action.payload;
-		},
-		addScheduler: (state, action: PayloadAction<(typeof initialState.all_schedulers)[0]>) => {
+		addScheduler: (state, action: PayloadAction<SchedulerByDateDetails & { active: boolean }>) => {
 			state.all_schedulers.push(action.payload);
 			state.details = initialState.details;
 		},
@@ -87,26 +77,30 @@ const SchedulerSlice = createSlice({
 				(scheduler) => scheduler.id !== action.payload
 			);
 		},
+		resetSelectedScheduler: (state) => {
+			state.details = initialState.details;
+		},
 		setSelectedScheduler: (
 			state,
 			action: PayloadAction<(typeof initialState.all_schedulers)[0]>
 		) => {
-			state.details.message_scheduler_id = action.payload.id;
+			state.details.id = action.payload.id;
 			state.details.message = action.payload.message;
-			state.details.campaign_name = action.payload.title;
+			state.details.title = action.payload.title;
 			state.details.shared_contact_cards = action.payload.shared_contact_cards;
 			state.details.attachments = action.payload.attachments;
 			state.details.polls = action.payload.polls;
-			state.details.startTime = action.payload.start_from;
-			state.details.endTime = action.payload.end_at;
-			state.details.csv_file = action.payload.csv;
+			state.details.start_time = action.payload.start_time;
+			state.details.end_time = action.payload.end_time;
+			state.details.description = action.payload.description;
+			state.details.dates = action.payload.dates;
+			state.details.daily_count = action.payload.daily_count;
+			state.details.recipient_data = action.payload.recipient_data;
+			state.details.recipient_from = action.payload.recipient_from;
 			state.ui.editingMessage = true;
 		},
-		setCampaignName: (state, action: PayloadAction<typeof initialState.details.campaign_name>) => {
-			state.details.campaign_name = action.payload;
-		},
-		setRecipientsFrom: (state, action: PayloadAction<typeof initialState.details.type>) => {
-			state.details.type = action.payload;
+		setCampaignName: (state, action: PayloadAction<typeof initialState.details.title>) => {
+			state.details.title = action.payload;
 		},
 		setRecipientsLoading: (
 			state,
@@ -120,20 +114,18 @@ const SchedulerSlice = createSlice({
 		setRecipients: (state, action: PayloadAction<typeof initialState.recipients>) => {
 			state.recipients = action.payload;
 		},
-		setNumbers: (state, action: PayloadAction<typeof initialState.details.numbers>) => {
-			state.details.numbers = action.payload;
+		setVariables: (state, action: PayloadAction<typeof initialState.variables>) => {
+			state.variables = action.payload;
 		},
-		setCSVFile: (state, action: PayloadAction<typeof initialState.details.csv_file>) => {
-			state.details.csv_file = action.payload;
+		setRecipientsFrom: (
+			state,
+			action: PayloadAction<typeof initialState.details.recipient_from>
+		) => {
+			state.details.recipient_from = action.payload;
+			state.details.recipient_data = '';
 		},
-		setVariables: (state, action: PayloadAction<typeof initialState.details.variables>) => {
-			state.details.variables = action.payload;
-		},
-		setGroupRecipients: (state, action: PayloadAction<typeof initialState.details.group_ids>) => {
-			state.details.group_ids = action.payload;
-		},
-		setLabelRecipients: (state, action: PayloadAction<typeof initialState.details.label_ids>) => {
-			state.details.label_ids = action.payload;
+		setRecipientsData: (state, action: PayloadAction<string[] | string>) => {
+			state.details.recipient_data = action.payload;
 		},
 		setMessage: (state, action: PayloadAction<typeof initialState.details.message>) => {
 			state.details.message = action.payload;
@@ -150,32 +142,20 @@ const SchedulerSlice = createSlice({
 		) => {
 			state.details.shared_contact_cards = action.payload;
 		},
-		setMinDelay: (state, action: PayloadAction<typeof initialState.details.min_delay>) => {
-			state.details.min_delay = action.payload;
+		setStartTime: (state, action: PayloadAction<typeof initialState.details.start_time>) => {
+			state.details.start_time = action.payload;
 		},
-		setMaxDelay: (state, action: PayloadAction<typeof initialState.details.max_delay>) => {
-			state.details.max_delay = action.payload;
-		},
-		setBatchSize: (state, action: PayloadAction<typeof initialState.details.batch_size>) => {
-			state.details.batch_size = action.payload;
-		},
-		setBatchDelay: (state, action: PayloadAction<typeof initialState.details.batch_delay>) => {
-			state.details.batch_delay = action.payload;
-		},
-		setStateDate: (state, action: PayloadAction<typeof initialState.details.startDate>) => {
-			state.details.startDate = action.payload;
-		},
-		setStartTime: (state, action: PayloadAction<typeof initialState.details.startTime>) => {
-			state.details.startTime = action.payload;
-		},
-		setEndTime: (state, action: PayloadAction<typeof initialState.details.endTime>) => {
-			state.details.endTime = action.payload;
+		setEndTime: (state, action: PayloadAction<typeof initialState.details.end_time>) => {
+			state.details.end_time = action.payload;
 		},
 		setPolls: (state, action: PayloadAction<typeof initialState.details.polls>) => {
 			state.details.polls = action.payload;
 		},
 		setDescription: (state, action: PayloadAction<typeof initialState.details.description>) => {
 			state.details.description = action.payload;
+		},
+		setMessagesPerDay: (state, action: PayloadAction<typeof initialState.details.daily_count>) => {
+			state.details.daily_count = action.payload;
 		},
 		setCampaignLoading: (state, action: PayloadAction<boolean>) => {
 			state.ui.campaignLoading = action.payload;
@@ -186,6 +166,22 @@ const SchedulerSlice = createSlice({
 		setDeletingCampaign: (state, action: PayloadAction<boolean>) => {
 			state.ui.deletingCampaign = action.payload;
 		},
+		addBlankDate: (state) => {
+			state.details.dates.push('');
+			state.ui.dateError = false;
+		},
+		removeDate: (state, action: PayloadAction<number>) => {
+			state.details.dates.splice(action.payload, 1);
+			state.ui.dateError = false;
+		},
+		setDate: (state, action: PayloadAction<{ index: number; date: string }>) => {
+			state.details.dates[action.payload.index] = action.payload.date;
+			state.ui.dateError = false;
+		},
+		setDailyCount: (state, action: PayloadAction<string>) => {
+			state.details.daily_count = action.payload;
+			state.ui.dailyCountError = false;
+		},
 		setMessageError: (state, action: PayloadAction<boolean>) => {
 			state.ui.messageError = action.payload;
 		},
@@ -195,49 +191,41 @@ const SchedulerSlice = createSlice({
 		setRecipientsError: (state, action: PayloadAction<boolean>) => {
 			state.ui.recipientsError = action.payload;
 		},
-		setMinDelayError: (state, action: PayloadAction<boolean>) => {
-			state.ui.minDelayError = action.payload;
-		},
-		setBatchSizeError: (state, action: PayloadAction<boolean>) => {
-			state.ui.batchSizeError = action.payload;
-		},
-		setMaxDelayError: (state, action: PayloadAction<boolean>) => {
-			state.ui.maxDelayError = action.payload;
-		},
-		setBatchDelayError: (state, action: PayloadAction<boolean>) => {
-			state.ui.batchDelayError = action.payload;
+		setDateError: (state, action: PayloadAction<boolean>) => {
+			state.ui.dateError = action.payload;
 		},
 		setAPIError: (state, action: PayloadAction<string>) => {
 			state.ui.apiError = action.payload;
+		},
+		setDailyCountError: (state, action: PayloadAction<boolean>) => {
+			state.ui.dailyCountError = action.payload;
+		},
+		setEditingScheduler: (state, action: PayloadAction<boolean>) => {
+			if (!action.payload) {
+				state.details = initialState.details;
+			}
+			state.ui.editingMessage = action.payload;
 		},
 	},
 });
 
 export const {
 	reset,
-	setAllCampaigns,
+	setAllRepetitiveSchedulers,
 	editSelectedScheduler,
 	addScheduler,
 	deleteScheduler,
-	setAllSchedulers,
 	setSelectedScheduler,
 	setCampaignName,
 	setRecipientsFrom,
 	setBusinessAccount,
 	setRecipients,
-	setCSVFile,
 	setVariables,
-	setGroupRecipients,
-	setLabelRecipients,
 	setMessage,
 	toggleRandomString,
 	setAttachments,
 	setContactCards,
-	setMinDelay,
-	setMaxDelay,
-	setBatchSize,
-	setBatchDelay,
-	setStateDate,
+	setEditingScheduler,
 	setStartTime,
 	setEndTime,
 	setPolls,
@@ -245,16 +233,20 @@ export const {
 	setCampaignLoading,
 	setDeletingCampaign,
 	setExportingCampaign,
-	setNumbers,
 	setMessageError,
 	setCampaignNameError,
 	setRecipientsError,
 	setRecipientsLoading,
-	setMinDelayError,
 	setAPIError,
-	setBatchDelayError,
-	setMaxDelayError,
-	setBatchSizeError,
-} = SchedulerSlice.actions;
+	setDailyCountError,
+	addBlankDate,
+	removeDate,
+	setDate,
+	setDateError,
+	setMessagesPerDay,
+	setRecipientsData,
+	setDailyCount,
+	resetSelectedScheduler,
+} = SchedulerByDateSlice.actions;
 
-export default SchedulerSlice.reducer;
+export default SchedulerByDateSlice.reducer;

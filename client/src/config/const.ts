@@ -9,7 +9,7 @@ export const DATA_LOADED_DELAY = import.meta.env.VITE_DATA_LOADED_DELAY;
 export const NAVIGATION = {
 	WELCOME: '/welcome',
 	HOME: '/',
-	SCHEDULER: '/scheduler',
+	SCHEDULER: '/campaign',
 	BOT: '/bot',
 	SETTINGS: '/settings',
 	NETWORK_ERROR: '/network-error',
@@ -23,6 +23,7 @@ export const NAVIGATION = {
 	TASKS: '/pending-tasks',
 	OPEN: '/open',
 	API: '/api-keys',
+	SCHEDULER_BY_DATE: '/scheduler-by-date',
 };
 
 export enum CHROME_ACTION {

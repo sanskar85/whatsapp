@@ -82,6 +82,7 @@ export default function NavigationDrawer() {
 							<MenuButton icon={MdOutlineContactPhone} route={NAVIGATION.CONTACT} name='Contacts' />
 
 							<MenuButton icon={TbMessage2Minus} route={NAVIGATION.SCHEDULER} name='Messages' />
+							<MenuButton icon={TbMessage2Minus} route={NAVIGATION.SCHEDULER_BY_DATE} name='Scheduler' />
 							<MenuButton icon={SiProbot} route={NAVIGATION.BOT} name='Bot' />
 							<MenuButton
 								icon={MdOutlineAttachment}

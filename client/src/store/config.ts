@@ -10,4 +10,5 @@ export enum StoreNames {
 	MERGE_GROUP = 'merge_group',
 	PAYMENTS = 'payments',
 	API = 'api',
+	SCHEDULER_BY_DATE = 'scheduler_by_date',
 }
