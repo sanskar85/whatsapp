@@ -370,6 +370,7 @@ export default class RepetitiveSchedulerService extends UserService {
 					scheduler_id: scheduler._id,
 				}
 			);
+			scheduling_index++;
 		}
 		scheduling_index = target_index % scheduler.recipients.length;
 
