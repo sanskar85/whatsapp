@@ -54,8 +54,7 @@ export class SchedulerByDateService {
 	}
 
 	static async deleteScheduler(id: string) {
-		const { data } = await APIInstance.delete(`/repetitive-scheduler/${id}`);
-		return validateScheduler([data.scheduler])[0];
+		await APIInstance.delete(`/repetitive-scheduler/${id}`);
 	}
 
 	static async reschedule(id: string) {
