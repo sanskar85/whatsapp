@@ -16,6 +16,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BiTrash } from 'react-icons/bi';
 import { MdCampaign } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { NAVIGATION } from '../../../config/const';
 import { popFromNavbar, pushToNavbar } from '../../../hooks/useNavbar';
 import { useTheme } from '../../../hooks/useTheme';
@@ -53,6 +54,7 @@ export default function SchedulerByDate() {
 	const toast = useToast();
 	const dispatch = useDispatch();
 	const theme = useTheme();
+	const navigate = useNavigate();
 
 	const {
 		details,
@@ -369,6 +371,19 @@ export default function SchedulerByDate() {
 					)}
 					<Text textAlign={'center'} color={'red.400'} marginTop={'0.25rem'}>
 						Please ensure not to spam using this tool
+					</Text>
+					<Text textAlign={'center'} color={'red.400'} marginTop={'0.25rem'}>
+						All the changes made will take some time, please refer to
+						<Box as='span'
+							onClick={() => {
+								navigate(NAVIGATION.TASKS);
+							}}
+							ml={1}
+							className='hover:underline hover:cursor-pointer'
+						>
+							Task Page
+						</Box>{' '}
+						status, refresh the page to see the changes
 					</Text>
 				</Box>
 				<SchedulerList />
