@@ -86,6 +86,8 @@ const BotSlice = createSlice({
 			state.details.forward.number = state.all_bots[index].forward.number ?? '';
 			state.details.forward.message = state.all_bots[index].forward.message ?? '';
 			state.details.nurturing = state.all_bots[index].nurturing;
+			state.details.startAt = state.all_bots[index].startAt;
+			state.details.endAt = state.all_bots[index].endAt;
 
 			state.ui.isEditingBot = true;
 
