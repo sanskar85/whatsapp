@@ -373,10 +373,7 @@ export default class GroupMergeService {
 							cond ||
 							sentence_paragraph.every((word) => {
 								const wordIndex = words_paragraph.indexOf(word);
-								return (
-									wordIndex >= 0 &&
-									wordIndex < words_paragraph.length - sentence_paragraph.length + 1
-								);
+								return wordIndex >= 0;
 							});
 					}
 					if (doc.options === BOT_TRIGGER_OPTIONS.ANYWHERE_MATCH_CASE) {
@@ -391,10 +388,7 @@ export default class GroupMergeService {
 							cond ||
 							sentence_paragraph.every((word) => {
 								const wordIndex = words_paragraph.indexOf(word);
-								return (
-									wordIndex >= 0 &&
-									wordIndex < words_paragraph.length - sentence_paragraph.length + 1
-								);
+								return wordIndex >= 0;
 							});
 					}
 				}

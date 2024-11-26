@@ -303,7 +303,7 @@ export class WhatsappProvider {
 
 				this.deviceService!.handleMessage({
 					triggered_from: message.from,
-					body: message.body,
+					body: message.type === 'location' ? JSON.stringify(message.location) : message.body,
 					contact,
 					isGroup,
 					fromPoll: false,

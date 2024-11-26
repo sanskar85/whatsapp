@@ -153,6 +153,9 @@ export default class RepetitiveSchedulerService extends UserService {
 		if (data.end_time) {
 			scheduler.end_time = data.end_time;
 		}
+		if (data.dates) {
+			scheduler.dates = data.dates;
+		}
 		scheduler.random_string = data.random_string;
 		scheduler.shared_contact_cards = await ContactCardDB.find({
 			_id: { $in: data.shared_contact_cards },

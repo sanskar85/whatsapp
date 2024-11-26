@@ -158,7 +158,7 @@ export default class WhatsappUtils {
 			saved: saved_contacts,
 			non_saved: non_saved_contacts,
 			chat_contacts: chat_contacts,
-			groups,
+			groups: groups.filter((group) => !!group.name),
 		};
 	}
 
