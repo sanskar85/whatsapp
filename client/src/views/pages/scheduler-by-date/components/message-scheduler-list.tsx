@@ -7,6 +7,7 @@ import {
 	TableContainer,
 	Tbody,
 	Td,
+	Text,
 	Th,
 	Thead,
 	Tooltip,
@@ -111,26 +112,26 @@ const SchedulerList = () => {
 				<Tbody>
 					{all_schedulers.map((scheduler, index) => (
 						<Tr key={index}>
-							<Td>{scheduler.title}</Td>
+							<Td className='text-black dark:text-white'>{scheduler.title}</Td>
 							<Td>
 								{scheduler.message.split('\n').map((message, index) => (
-									<Box key={index} className='whitespace-break-spaces'>
+									<Text key={index} className='whitespace-break-spaces text-black dark:text-white'>
 										{message}
-									</Box>
+									</Text>
 								))}
 							</Td>
-							<Td>{scheduler.start_time}</Td>
-							<Td>{scheduler.end_time}</Td>
-							<Td>
+							<Td className='text-black dark:text-white'>{scheduler.start_time}</Td>
+							<Td className='text-black dark:text-white'>{scheduler.end_time}</Td>
+							<Td className='text-black dark:text-white'>
 								{scheduler.attachments.length}/{scheduler.shared_contact_cards.length}/
 								{scheduler.polls.length}
 							</Td>
-							<Td>
+							<Td className='text-black dark:text-white'>
 								{scheduler.dates.map((date, index) => (
 									<Box key={index}>{date}</Box>
 								))}
 							</Td>
-							<Td>
+							<Td className='text-black dark:text-white'>
 								<HStack>
 									<Tooltip label='Download Report' aria-label='Download Report'>
 										<IconButton

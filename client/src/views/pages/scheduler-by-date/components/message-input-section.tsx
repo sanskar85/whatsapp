@@ -252,6 +252,7 @@ export default function MessageSection(props: Props) {
 						size='md'
 						isChecked={details.random_string}
 						onChange={() => dispatch(toggleRandomString())}
+						className='text-black dark:text-white'
 					>
 						Append Random Text
 					</Checkbox>

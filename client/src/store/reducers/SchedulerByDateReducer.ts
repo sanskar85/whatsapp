@@ -34,7 +34,7 @@ const initialState: SchedulerByDateState = {
 		apiError: '',
 		editingMessage: false,
 		dateError: false,
-		dailyCountError: false,
+		dailyCountError: '',
 	},
 };
 
@@ -180,7 +180,7 @@ const SchedulerByDateSlice = createSlice({
 		},
 		setDailyCount: (state, action: PayloadAction<string>) => {
 			state.details.daily_count = action.payload;
-			state.ui.dailyCountError = false;
+			state.ui.dailyCountError = '';
 		},
 		setMessageError: (state, action: PayloadAction<boolean>) => {
 			state.ui.messageError = action.payload;
@@ -197,7 +197,7 @@ const SchedulerByDateSlice = createSlice({
 		setAPIError: (state, action: PayloadAction<string>) => {
 			state.ui.apiError = action.payload;
 		},
-		setDailyCountError: (state, action: PayloadAction<boolean>) => {
+		setDailyCountError: (state, action: PayloadAction<string>) => {
 			state.ui.dailyCountError = action.payload;
 		},
 		setEditingScheduler: (state, action: PayloadAction<boolean>) => {

@@ -4,6 +4,7 @@ import {
 	Button,
 	Flex,
 	FormControl,
+	FormErrorMessage,
 	HStack,
 	Heading,
 	IconButton,
@@ -145,7 +146,7 @@ export default function SchedulerByDate() {
 			details.daily_count === '0' ||
 			Number.isNaN(Number(details.daily_count))
 		) {
-			dispatch(setDailyCountError(true));
+			dispatch(setDailyCountError('Please enter a valid count'));
 
 			hasError = true;
 		}
@@ -162,6 +163,15 @@ export default function SchedulerByDate() {
 				dispatch(setDateError(true));
 				hasError = true;
 			}
+		}
+		const uniqueDates = new Set(details.dates);
+		if (uniqueDates.size !== details.dates.length) {
+			toast({
+				title: 'Duplicate Date',
+				description: 'Please select unique dates',
+				status: 'error',
+			});
+			hasError = true;
 		}
 		return !hasError;
 	};
@@ -267,10 +277,14 @@ export default function SchedulerByDate() {
 								fontWeight={'medium'}
 								marginTop={'1rem'}
 							>
-								Message Preference
+								Message Preference{' '}
 							</Text>
+							<Box color={'red.400'} marginTop={'0.25rem'}>
+								*If Daily Count is more than total numbers scheduled then messages will go multiple
+								times.
+							</Box>
 							<Flex gap={2}>
-								<FormControl flexGrow={1} isInvalid={dailyCountError}>
+								<FormControl flexGrow={1} isInvalid={!!dailyCountError}>
 									<Text fontSize='sm' className='text-gray-700 dark:text-white'>
 										Daily Message Count
 									</Text>
@@ -288,6 +302,7 @@ export default function SchedulerByDate() {
 										value={details.daily_count}
 										onChange={(e) => dispatch(setDailyCount(e.target.value))}
 									/>
+									<FormErrorMessage>{dailyCountError}</FormErrorMessage>
 								</FormControl>
 								<TimeInput
 									placeholder='Start At (in IST)'
@@ -429,6 +444,7 @@ function DateSelectors({ dates, error }: { dates: string[]; error: boolean }) {
 								type='date'
 								value={date}
 								onChange={(e) => onDateChange({ index, date: e.target.value })}
+								className='text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353]'
 							/>
 						</FormControl>
 						<IconButton

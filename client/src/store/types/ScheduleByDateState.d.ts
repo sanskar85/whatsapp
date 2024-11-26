@@ -20,7 +20,7 @@ export type SchedulerByDateState = {
 		apiError: string;
 		editingMessage: boolean;
 		dateError: boolean;
-		dailyCountError: boolean;
+		dailyCountError: string;
 	};
 };
 
