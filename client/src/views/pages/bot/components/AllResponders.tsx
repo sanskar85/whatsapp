@@ -87,7 +87,18 @@ export default function AllResponders() {
 					</Thead>
 					<Tbody>
 						{all_bots.map((bot, index) => (
-							<Tr key={index} color={theme === 'dark' ? 'white' : 'black'}>
+							<Tr
+								key={index}
+								color={
+									theme === 'dark'
+										? bot.isActive
+											? 'white'
+											: 'red'
+										: bot.isActive
+										? 'black'
+										: 'red'
+								}
+							>
 								<Td>
 									{bot.trigger.map((trigger, index) => (
 										<Box key={index}>
