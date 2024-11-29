@@ -1,4 +1,3 @@
-import { exec } from 'child_process';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Express, NextFunction, Request, Response } from 'express';
@@ -76,14 +75,7 @@ export default function (app: Express) {
 		});
 	});
 	app.route('/clear-cached-ram').get((req, res) => {
-		exec('pgrep chrome | xargs kill -9', (error, stdout, stderr) => {
-			if (error) {
-				Logger.error('CRON - Chrome', error);
-				return;
-			}
-			Logger.info('CRON - Chrome', `All Chrome instances have been killed`);
-			process.exit(0);
-		});
+		throw new APIError('This is a test error', 500);
 	});
 	app.use((req: Request, res: Response, next: NextFunction) => {
 		req.locals = {
@@ -155,16 +147,6 @@ export default function (app: Express) {
 
 	cron.schedule('* * * * * *', () => {
 		MessageService.sendScheduledMessage();
-	});
-	cron.schedule('30 3 * * *', function () {
-		exec('pgrep chrome | xargs kill -9', (error, stdout, stderr) => {
-			if (error) {
-				Logger.error('CRON - Chrome', error);
-				return;
-			}
-			Logger.info('CRON - Chrome', `All Chrome instances have been killed`);
-			process.exit(0);
-		});
 	});
 }
 
