@@ -303,7 +303,7 @@ export class WhatsappProvider {
 
 				this.deviceService!.handleMessage({
 					triggered_from: message.from,
-					body: message.type === 'location' ? JSON.stringify(message.location) : message.body,
+					body: message.body,
 					contact,
 					isGroup,
 					fromPoll: false,
@@ -382,7 +382,9 @@ export class WhatsappProvider {
 							savedName: contact.name || '',
 							displayName: contact.pushname || '',
 							groupName: isGroup ? chat.name : '',
-							message: message.body,
+							message: message.location
+								? `https://www.google.com/maps?q=${message.location.latitude},${message.location.longitude}&z=17&hl=en`
+								: message.body,
 							isCaption: message.hasMedia && message.body ? 'Yes' : 'No',
 							link: link || '',
 						});
