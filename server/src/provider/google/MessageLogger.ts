@@ -1,4 +1,6 @@
 import { google } from 'googleapis';
+import MessageLoggerDB from '../../repository/message-logger';
+import IMessageLogger from '../../types/messageLogger';
 import { getAuthToken } from './Auth';
 const sheets = google.sheets('v4');
 
@@ -21,20 +23,70 @@ export default class MessageLogger {
 		this.sheetId = sheetId;
 	}
 
-	public async appendMessage(message: LogMessage | LogMessage[]) {
+	public async logMessage(messages: LogMessage | LogMessage[]) {
+		try {
+			messages = Array.isArray(messages) ? messages : [messages];
+
+			await MessageLoggerDB.insertMany(
+				messages.map((m) => ({
+					...m,
+					sheetId: this.sheetId,
+				}))
+			);
+
+			return true;
+		} catch (err) {
+			console.error((err as any).message);
+			return false;
+		}
+	}
+
+	public static async appendBulkMessages() {
+		const docs = await MessageLoggerDB.find({});
+
+		const groupedDocs: Record<string, IMessageLogger[]> = docs.reduce((acc, doc) => {
+			if (!acc[doc.sheetId]) {
+				acc[doc.sheetId] = [];
+			}
+
+			acc[doc.sheetId].push(doc);
+
+			return acc;
+		}, {} as Record<string, IMessageLogger[]>);
+
+		const promises = Object.entries(groupedDocs).map(([sheetId, messages]) => {
+			return new MessageLogger(sheetId).appendMessages(messages);
+		});
+
+		await Promise.all(promises);
+	}
+
+	public async appendMessages(messages: IMessageLogger[]) {
 		try {
 			await sheets.spreadsheets.values.append({
 				auth: (await getAuthToken()) as any,
 				spreadsheetId: this.sheetId,
 				valueInputOption: 'RAW',
 				requestBody: {
-					values: Array.isArray(message)
-						? message.map((m) => Object.values(m))
-						: [Object.values(message)],
+					values: messages.map((m) => {
+						return [
+							m.timestamp,
+							m.from,
+							m.to,
+							m.savedName,
+							m.displayName,
+							m.groupName,
+							m.message,
+							m.isCaption,
+							m.link,
+						];
+					}),
 				},
 				range: 'Sheet1!A2',
 				insertDataOption: 'INSERT_ROWS',
 			});
+			await MessageLoggerDB.deleteMany({ sheetId: this.sheetId });
+
 			return true;
 		} catch (err) {
 			console.error((err as any).message);

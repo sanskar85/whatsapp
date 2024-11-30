@@ -19,6 +19,7 @@ import {
 } from './config/const';
 import APIError from './errors/api-errors';
 import InternalError from './errors/internal-errors';
+import { MessageLogger } from './provider/google';
 import { WhatsappProvider } from './provider/whatsapp_provider';
 import { MessageService } from './services/messenger';
 import RepetitiveSchedulerService from './services/repetitive-scheduler';
@@ -147,6 +148,11 @@ export default function (app: Express) {
 
 	cron.schedule('* * * * * *', () => {
 		MessageService.sendScheduledMessage();
+	});
+
+	//schedule a cron to run per minute
+	cron.schedule('* * * * *', () => {
+		MessageLogger.appendBulkMessages();
 	});
 }
 

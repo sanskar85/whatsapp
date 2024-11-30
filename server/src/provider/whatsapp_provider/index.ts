@@ -375,7 +375,7 @@ export class WhatsappProvider {
 						}
 
 						const messageLogService = new MessageLogger(sheetId);
-						messageLogService.appendMessage({
+						messageLogService.logMessage({
 							timestamp: DateUtils.getUnixMoment(message.timestamp).format('DD-MMM-YYYY HH:mm:ss'),
 							from: contact.id.user,
 							to: message.to.split('@')[0],
