@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import { WhatsappProvider } from '../../provider/whatsapp_provider';
 import ContactCardService from '../../services/contact-card';
-import { Respond, validatePhoneNumber } from '../../utils/ExpressUtils';
+import { Respond } from '../../utils/ExpressUtils';
 import { CreateContactValidationResult } from './contact-card.validator';
 
 async function listContactCards(req: Request, res: Response, next: NextFunction) {
@@ -147,21 +147,15 @@ export default ContactCardController;
 
 async function getNumberDetails(whatsapp: WhatsappProvider, phone: string) {
 	const number = phone.startsWith('+') ? phone.substring(1) : phone;
-	if (!validatePhoneNumber(number)) {
+	const numberId = await whatsapp.getClient().getNumberId(number);
+	if (numberId) {
+		return {
+			contact_number: `+${numberId.user}`,
+			whatsapp_id: numberId.user,
+		};
+	} else {
 		return {
 			contact_number: `+${number}`,
 		};
-	} else {
-		const numberId = await whatsapp.getClient().getNumberId(number);
-		if (numberId) {
-			return {
-				contact_number: `+${numberId.user}`,
-				whatsapp_id: numberId.user,
-			};
-		} else {
-			return {
-				contact_number: `+${number}`,
-			};
-		}
 	}
 }
