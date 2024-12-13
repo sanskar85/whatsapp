@@ -37,8 +37,7 @@ export default function LinkInputDialog({ isOpen, onClose }: Props) {
 		const res_links: string[] = [];
 		for (const line of lines) {
 			if (!line) continue;
-			const regex = /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]{22}$/;
-			if (regex.test(line)) {
+			if (line.startsWith('https://chat.whatsapp.com/')) {
 				res_links.push(line);
 				continue;
 			}
