@@ -81,6 +81,8 @@ export default class MessageLogger {
 							m.message,
 							m.isCaption,
 							m.link,
+							m.isForwarded ? 'Forwarded' : '',
+							m.isBroadcast ? 'Broadcast' : '',
 						];
 					}),
 				},
