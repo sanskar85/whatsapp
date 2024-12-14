@@ -13,6 +13,8 @@ const HEADERS = [
 	'Message',
 	'Is Caption',
 	'Link',
+	'Is Forwarded',
+	'Is Broadcast',
 ];
 
 export type HeaderType = typeof HEADERS;
