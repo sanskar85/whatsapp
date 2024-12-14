@@ -332,6 +332,9 @@ export default class BotService extends UserService {
 				whatsapp
 					.getClient()
 					.sendMessage(triggered_from, msg)
+					.then(async (_msg) => {
+						_msg.star();
+					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
 					});
@@ -351,6 +354,9 @@ export default class BotService extends UserService {
 					.sendMessage(triggered_from, media, {
 						caption: mediaObject.caption,
 					})
+					.then(async (_msg) => {
+						_msg.star();
+					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
 					});
@@ -360,6 +366,9 @@ export default class BotService extends UserService {
 				whatsapp
 					.getClient()
 					.sendMessage(triggered_from, card.vCardString)
+					.then(async (_msg) => {
+						_msg.star();
+					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
 					});
@@ -376,7 +385,8 @@ export default class BotService extends UserService {
 							allowMultipleAnswers: isMultiSelect,
 						})
 					)
-					.then(async () => {
+					.then(async (_msg) => {
+						_msg.star();
 						await whatsapp.getClient().interface.openChatWindow(triggered_from);
 					})
 					.catch((err) => {
@@ -413,6 +423,9 @@ export default class BotService extends UserService {
 				whatsapp
 					.getClient()
 					.sendMessage(bot.forward.number + '@c.us', vCardString)
+					.then(async (_msg) => {
+						_msg.star();
+					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
 					});
@@ -426,6 +439,9 @@ export default class BotService extends UserService {
 					whatsapp
 						.getClient()
 						.sendMessage(bot.forward.number + '@c.us', custom_message)
+						.then(async (_msg) => {
+							_msg.star();
+						})
 						.catch((err) => {
 							Logger.error('Error sending message:', err);
 						});

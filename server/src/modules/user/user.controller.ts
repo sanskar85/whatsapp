@@ -71,6 +71,7 @@ async function getPreferences(req: Request, res: Response, next: NextFunction) {
 		status: 200,
 		data: {
 			messageLoggerEnabled: userPrefService.isMessagesLogEnabled(),
+			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
 			...userPrefService.messagesLogPrefs(),
 		},
 	});
@@ -129,6 +130,32 @@ async function shareLogFile(req: Request, res: Response, next: NextFunction) {
 	});
 }
 
+async function enableMessageStar(req: Request, res: Response, next: NextFunction) {
+	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
+	await userPrefService.setMessageStarEnabled(true);
+
+	return Respond({
+		res,
+		status: 200,
+		data: {
+			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
+		},
+	});
+}
+
+async function disableMessageStar(req: Request, res: Response, next: NextFunction) {
+	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
+	await userPrefService.setMessageStarEnabled(false);
+
+	return Respond({
+		res,
+		status: 200,
+		data: {
+			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
+		},
+	});
+}
+
 async function paymentRemainder(req: Request, res: Response, next: NextFunction) {
 	// const adminService = new AdminService(req.locals.admin);
 
@@ -159,6 +186,8 @@ const Controller = {
 	disableMessageLogger,
 	shareLogFile,
 	getPreferences,
+	enableMessageStar,
+	disableMessageStar,
 };
 
 export default Controller;

@@ -14,6 +14,8 @@ export type LogMessage = {
 	message: string;
 	isCaption: string;
 	link: string;
+	isForwarded: boolean;
+	isBroadcast: boolean;
 };
 
 export default class MessageLogger {

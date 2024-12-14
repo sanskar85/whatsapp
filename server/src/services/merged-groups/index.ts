@@ -419,9 +419,14 @@ export default class GroupMergeService {
 					.setContactPhone(`+${contact.id.user}`, contact.id.user)
 					.build();
 
-				whatsapp.sendMessage(doc.forward.number + '@c.us', vCardString).catch((err) => {
-					Logger.error('Error sending message:', err);
-				});
+				whatsapp
+					.sendMessage(doc.forward.number + '@c.us', vCardString)
+					.then(async (_msg) => {
+						_msg.star();
+					})
+					.catch((err) => {
+						Logger.error('Error sending message:', err);
+					});
 
 				if (doc.forward.message) {
 					const _variable = '{{public_name}}';
@@ -429,9 +434,14 @@ export default class GroupMergeService {
 						new RegExp(_variable, 'g'),
 						(contact.pushname || contact.name) ?? ''
 					);
-					whatsapp.sendMessage(doc.forward.number + '@c.us', custom_message).catch((err) => {
-						Logger.error('Error sending message:', err);
-					});
+					whatsapp
+						.sendMessage(doc.forward.number + '@c.us', custom_message)
+						.then(async (_msg) => {
+							_msg.star();
+						})
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
 				}
 			}
 		});
@@ -575,10 +585,18 @@ export default class GroupMergeService {
 							.sendMessage(to, _reply_text, {
 								quotedMessageId: message.id._serialized,
 							})
+							.then(async (_msg) => {
+								_msg.star();
+							})
 							.catch(() => {
-								whatsapp.sendMessage(to, _reply_text).catch((err) => {
-									Logger.error('Error sending message:', err);
-								});
+								whatsapp
+									.sendMessage(to, _reply_text)
+									.then(async (_msg) => {
+										_msg.star();
+									})
+									.catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
 							});
 					}
 					shared_contact_cards?.forEach(async (id) => {
@@ -589,10 +607,18 @@ export default class GroupMergeService {
 							.sendMessage(to, contact.vCardString, {
 								quotedMessageId: message.id._serialized,
 							})
+							.then(async (_msg) => {
+								_msg.star();
+							})
 							.catch(() => {
-								whatsapp.sendMessage(to, contact.vCardString).catch((err) => {
-									Logger.error('Error sending message:', err);
-								});
+								whatsapp
+									.sendMessage(to, contact.vCardString)
+									.then(async (_msg) => {
+										_msg.star();
+									})
+									.catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
 							});
 					});
 
@@ -616,10 +642,16 @@ export default class GroupMergeService {
 								caption: caption,
 								quotedMessageId: message.id._serialized,
 							})
+							.then(async (_msg) => {
+								_msg.star();
+							})
 							.catch(() => {
 								whatsapp
 									.sendMessage(to, media, {
 										caption: caption,
+									})
+									.then(async (_msg) => {
+										_msg.star();
 									})
 									.catch((err) => {
 										Logger.error('Error sending message:', err);
@@ -640,7 +672,8 @@ export default class GroupMergeService {
 									quotedMessageId: message.id._serialized,
 								}
 							)
-							.then(async () => {
+							.then(async (_msg) => {
+								_msg.star();
 								await whatsapp.interface.openChatWindow(message.from);
 							})
 							.catch(() => {
@@ -652,7 +685,8 @@ export default class GroupMergeService {
 											allowMultipleAnswers: isMultiSelect,
 										})
 									)
-									.then(async () => {
+									.then(async (_msg) => {
+										_msg.star();
 										await whatsapp.interface.openChatWindow(message.from);
 									})
 									.catch((err) => {

@@ -20,6 +20,8 @@ const schema = new mongoose.Schema<IMessageLogger>({
 	message: String,
 	isCaption: String,
 	link: String,
+	isForwarded: Boolean,
+	isBroadcast: Boolean,
 });
 
 const MessageLoggerDB = mongoose.model<IMessageLogger>('MessageLogger', schema);

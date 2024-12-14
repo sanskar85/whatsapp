@@ -92,4 +92,13 @@ export default class UserPreferencesService {
 
 		await this.userPref.save();
 	}
+
+	isMessageStarEnabled() {
+		return this.userPref.isMessageStarEnabled;
+	}
+
+	async setMessageStarEnabled(enabled: boolean) {
+		this.userPref.isMessageStarEnabled = enabled;
+		await this.userPref.save();
+	}
 }

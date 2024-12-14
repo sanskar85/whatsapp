@@ -3,6 +3,7 @@ import Logger from 'n23-logger';
 import QRCode from 'qrcode';
 import { Socket } from 'socket.io';
 import WAWebJS, { BusinessContact, Client, GroupChat, LocalAuth } from 'whatsapp-web.js';
+import IAccount from '../../../mongo/types/account';
 import { CHROMIUM_PATH, MISC_PATH, SOCKET_RESPONSES } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import StorageDB from '../../repository/storage';
@@ -295,6 +296,10 @@ export class WhatsappProvider {
 			const chat = await message.getChat();
 			const isGroup = chat.isGroup;
 
+			if (!isGroup && this.userPrefService!.isMessageStarEnabled()) {
+				_message.star();
+			}
+
 			if (message.body) {
 				this.handledMessage.set(message.id._serialized, null);
 				if (!this.contact || contact.id._serialized === this.contact.id._serialized) {
@@ -387,6 +392,8 @@ export class WhatsappProvider {
 								: message.body,
 							isCaption: message.hasMedia && message.body ? 'Yes' : 'No',
 							link: link || '',
+							isForwarded: message.isForwarded,
+							isBroadcast: message.broadcast,
 						});
 					}
 				}
@@ -517,5 +524,13 @@ export class WhatsappProvider {
 			}
 		}
 		return null;
+	}
+
+	public static getClient(account: IAccount) {
+		const client_id = this.clientByUser(account._id.toString());
+		if (!client_id) {
+			return null;
+		}
+		return WhatsappProvider.clientByClientID(client_id);
 	}
 }

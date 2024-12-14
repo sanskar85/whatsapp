@@ -146,6 +146,9 @@ export default class MessageService {
 				whatsapp
 					.getClient()
 					.sendMessage(msg.receiver, message)
+					.then(async (_msg) => {
+						_msg.star();
+					})
 					.catch((err) => {
 						msg.status = MESSAGE_STATUS.FAILED;
 						msg.save();
@@ -157,6 +160,9 @@ export default class MessageService {
 				whatsapp
 					.getClient()
 					.sendMessage(msg.receiver, card.vCardString)
+					.then(async (_msg) => {
+						_msg.star();
+					})
 					.catch((err) => {
 						msg.status = MESSAGE_STATUS.FAILED;
 						msg.save();
@@ -180,6 +186,9 @@ export default class MessageService {
 					.sendMessage(msg.receiver, media, {
 						caption,
 					})
+					.then(async (_msg) => {
+						_msg.star();
+					})
 					.catch((err) => {
 						msg.status = MESSAGE_STATUS.FAILED;
 						msg.save();
@@ -198,7 +207,8 @@ export default class MessageService {
 							allowMultipleAnswers: isMultiSelect,
 						})
 					)
-					.then(async () => {
+					.then(async (_msg) => {
+						_msg.star();
 						await whatsapp.getClient().interface.openChatWindow(msg.receiver);
 					})
 					.catch((err) => {

@@ -23,6 +23,12 @@ router
 router.route('/:id/logout').all(VerifyAdmin, IDValidator).post(UserController.logoutUsers);
 
 router
+	.route('/enable-message-star')
+	.all(VerifyUser, UserPreferencesValidator)
+	.post(UserController.enableMessageStar);
+router.route('/disable-message-star').all(VerifyUser).post(UserController.disableMessageStar);
+
+router
 	.route('/enable-message-logger')
 	.all(VerifyUser, UserPreferencesValidator)
 	.post(UserController.enableMessageLogger);

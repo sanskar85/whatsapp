@@ -91,7 +91,8 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 		whatsapp
 			.getClient()
 			.sendMessage(recipient, message, opts)
-			.then(async () => {
+			.then(async (_msg) => {
+				_msg.star();
 				await whatsapp.getClient().interface.openChatWindow(recipient);
 			});
 

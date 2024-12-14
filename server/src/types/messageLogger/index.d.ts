@@ -14,4 +14,6 @@ export default interface IMessageLogger extends Document {
 	message: string;
 	isCaption: string;
 	link: string;
+	isForwarded: boolean;
+	isBroadcast: boolean;
 }

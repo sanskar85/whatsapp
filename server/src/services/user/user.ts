@@ -6,12 +6,21 @@ import StorageDB from '../../repository/storage';
 import { UserDB } from '../../repository/user';
 import { IUser } from '../../types/users';
 import { generateRandomText, idValidator } from '../../utils/ExpressUtils';
+import UserPreferencesService from './userPreferences';
 
 export default class UserService {
 	private user: IUser;
 
 	public constructor(user: IUser) {
 		this.user = user;
+	}
+
+	static async getServiceById(id: Types.ObjectId) {
+		const user = await UserDB.findById(id);
+		if (!user) {
+			throw new InternalError(INTERNAL_ERRORS.USER_ERRORS.NOT_FOUND);
+		}
+		return new UserService(user);
 	}
 
 	static async getServiceByCredentials(username: string, password: string) {
@@ -129,5 +138,9 @@ export default class UserService {
 
 	async logout(refreshToken: string) {
 		removeRefreshTokens(refreshToken);
+	}
+
+	async getUserPreferences() {
+		return UserPreferencesService.getService(this.getUserId());
 	}
 }
