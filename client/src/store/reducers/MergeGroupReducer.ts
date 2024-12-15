@@ -27,6 +27,7 @@ const initialState: MergeGroupState = {
 			number: '',
 			message: '',
 		},
+		allowed_country_codes: [],
 	},
 	uiDetails: {
 		isSaving: false,
@@ -101,6 +102,7 @@ const MergeGroupSlice = createSlice({
 				state.editSelectedGroup.multiple_responses = group.multiple_responses;
 				state.editSelectedGroup.triggers = group.triggers;
 				state.editSelectedGroup.options = group.options;
+				state.editSelectedGroup.allowed_country_codes = group.allowed_country_codes;
 			}
 		},
 		setActive: (
@@ -371,6 +373,12 @@ const MergeGroupSlice = createSlice({
 		setForwardMessage: (state, action: PayloadAction<string>) => {
 			state.editSelectedGroup.forward.message = action.payload;
 		},
+		setAllowedCountryCodes: (
+			state,
+			action: PayloadAction<typeof initialState.editSelectedGroup.allowed_country_codes>
+		) => {
+			state.editSelectedGroup.allowed_country_codes = action.payload;
+		},
 	},
 });
 
@@ -437,6 +445,7 @@ export const {
 	setTriggerAtIndex,
 	setForwardMessage,
 	setForwardTo,
+	setAllowedCountryCodes,
 } = MergeGroupSlice.actions;
 
 export default MergeGroupSlice.reducer;

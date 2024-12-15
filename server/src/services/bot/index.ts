@@ -19,6 +19,7 @@ import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import { Delay, randomMessageText, randomVector } from '../../utils/ExpressUtils';
 import VCardBuilder from '../../utils/VCardBuilder';
+import WhatsappUtils from '../../utils/WhatsappUtils';
 import { MessageService } from '../messenger';
 import TokenService from '../token';
 import UploadService from '../uploads';
@@ -77,6 +78,7 @@ export default class BotService extends UserService {
 			forward: bot.forward ?? { number: '', message: '' },
 			group_respond: bot.group_respond,
 			isActive: bot.active,
+			allowed_country_codes: bot.allowed_country_codes ?? [],
 		}));
 	}
 
@@ -122,6 +124,7 @@ export default class BotService extends UserService {
 			})),
 			shared_contact_cards: bot.shared_contact_cards ?? [],
 			isActive: bot.active,
+			allowed_country_codes: bot.allowed_country_codes ?? [],
 		};
 	}
 
@@ -166,106 +169,125 @@ export default class BotService extends UserService {
 			message_from
 		);
 
-		return bots.filter((bot) => {
-			const is_recipient =
-				bot.respond_to === BOT_TRIGGER_TO.ALL ||
-				(bot.respond_to === BOT_TRIGGER_TO.SAVED_CONTACTS && contact.isMyContact) ||
-				(bot.respond_to === BOT_TRIGGER_TO.NON_SAVED_CONTACTS && !contact.isMyContact);
+		let filtered_bots = await Promise.all(
+			bots.map(async (bot) => {
+				const country_code = await WhatsappUtils.getCountryCode(contact);
 
-			if (!is_recipient) {
-				return false;
-			}
-
-			if (!DateUtils.isTimeBetween(bot.startAt, bot.endAt, DateUtils.getMomentNow())) {
-				return false;
-			}
-
-			if (bot.trigger_gap_seconds > 0) {
-				const last_message_time = last_messages[bot.bot_id.toString()];
-				if (!isNaN(last_message_time) && last_message_time <= bot.trigger_gap_seconds) {
+				if (
+					bot.allowed_country_codes.length > 0 &&
+					!bot.allowed_country_codes.includes(country_code)
+				) {
+					return null;
+				}
+				return bot;
+			})
+		);
+		filtered_bots = await Promise.all(
+			filtered_bots.filter((bot) => {
+				if (!bot) {
 					return false;
 				}
-			}
-			if (bot.trigger.length === 0) {
-				return true;
-			}
+				const is_recipient =
+					bot.respond_to === BOT_TRIGGER_TO.ALL ||
+					(bot.respond_to === BOT_TRIGGER_TO.SAVED_CONTACTS && contact.isMyContact) ||
+					(bot.respond_to === BOT_TRIGGER_TO.NON_SAVED_CONTACTS && !contact.isMyContact);
 
-			let cond = false;
-
-			for (const trigger of bot.trigger) {
-				if (bot.options === BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE) {
-					cond = cond || message_body.toLowerCase() === trigger.toLowerCase();
-				}
-				if (bot.options === BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE) {
-					cond = cond || message_body === trigger;
+				if (!is_recipient) {
+					return false;
 				}
 
-				if (bot.options === BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE) {
-					const lowerCaseSentence = trigger.toLowerCase();
-					const lowerCaseParagraph = message_body.toLowerCase();
-
-					// Split the paragraph into words
-					const words_paragraph = lowerCaseParagraph.split(/\s+/);
-					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
-
-					cond =
-						cond ||
-						words_paragraph.some(
-							(_, index, arr) =>
-								arr.slice(index, index + sentence_paragraph.length).join() ===
-								sentence_paragraph.join()
-						);
+				if (!DateUtils.isTimeBetween(bot.startAt, bot.endAt, DateUtils.getMomentNow())) {
+					return false;
 				}
-				if (bot.options === BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE) {
-					const lowerCaseSentence = trigger;
-					const lowerCaseParagraph = message_body;
 
-					// Split the paragraph into words
-					const words_paragraph = lowerCaseParagraph.split(/\s+/);
-					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
-
-					cond =
-						cond ||
-						words_paragraph.some(
-							(_, index, arr) =>
-								arr.slice(index, index + sentence_paragraph.length).join() ===
-								sentence_paragraph.join()
-						);
+				if (bot.trigger_gap_seconds > 0) {
+					const last_message_time = last_messages[bot.bot_id.toString()];
+					if (!isNaN(last_message_time) && last_message_time <= bot.trigger_gap_seconds) {
+						return false;
+					}
 				}
-				if (bot.options === BOT_TRIGGER_OPTIONS.ANYWHERE_IGNORE_CASE) {
-					const lowerCaseSentence = trigger.toLowerCase();
-					const lowerCaseParagraph = message_body.toLowerCase();
-
-					// Split the paragraph into words
-					const words_paragraph = lowerCaseParagraph.split(/\s+/);
-					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
-
-					cond =
-						cond ||
-						sentence_paragraph.every((word) => {
-							const wordIndex = words_paragraph.indexOf(word);
-							return wordIndex >= 0;
-						});
+				if (bot.trigger.length === 0) {
+					return true;
 				}
-				if (bot.options === BOT_TRIGGER_OPTIONS.ANYWHERE_MATCH_CASE) {
-					const lowerCaseSentence = trigger;
-					const lowerCaseParagraph = message_body;
 
-					// Split the paragraph into words
-					const words_paragraph = lowerCaseParagraph.split(/\s+/);
-					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+				let cond = false;
 
-					cond =
-						cond ||
-						sentence_paragraph.every((word) => {
-							const wordIndex = words_paragraph.indexOf(word);
-							return wordIndex >= 0;
-						});
+				for (const trigger of bot.trigger) {
+					if (bot.options === BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE) {
+						cond = cond || message_body.toLowerCase() === trigger.toLowerCase();
+					}
+					if (bot.options === BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE) {
+						cond = cond || message_body === trigger;
+					}
+
+					if (bot.options === BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE) {
+						const lowerCaseSentence = trigger.toLowerCase();
+						const lowerCaseParagraph = message_body.toLowerCase();
+
+						// Split the paragraph into words
+						const words_paragraph = lowerCaseParagraph.split(/\s+/);
+						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+						cond =
+							cond ||
+							words_paragraph.some(
+								(_, index, arr) =>
+									arr.slice(index, index + sentence_paragraph.length).join() ===
+									sentence_paragraph.join()
+							);
+					}
+					if (bot.options === BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE) {
+						const lowerCaseSentence = trigger;
+						const lowerCaseParagraph = message_body;
+
+						// Split the paragraph into words
+						const words_paragraph = lowerCaseParagraph.split(/\s+/);
+						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+						cond =
+							cond ||
+							words_paragraph.some(
+								(_, index, arr) =>
+									arr.slice(index, index + sentence_paragraph.length).join() ===
+									sentence_paragraph.join()
+							);
+					}
+					if (bot.options === BOT_TRIGGER_OPTIONS.ANYWHERE_IGNORE_CASE) {
+						const lowerCaseSentence = trigger.toLowerCase();
+						const lowerCaseParagraph = message_body.toLowerCase();
+
+						// Split the paragraph into words
+						const words_paragraph = lowerCaseParagraph.split(/\s+/);
+						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+						cond =
+							cond ||
+							sentence_paragraph.every((word) => {
+								const wordIndex = words_paragraph.indexOf(word);
+								return wordIndex >= 0;
+							});
+					}
+					if (bot.options === BOT_TRIGGER_OPTIONS.ANYWHERE_MATCH_CASE) {
+						const lowerCaseSentence = trigger;
+						const lowerCaseParagraph = message_body;
+
+						// Split the paragraph into words
+						const words_paragraph = lowerCaseParagraph.split(/\s+/);
+						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+						cond =
+							cond ||
+							sentence_paragraph.every((word) => {
+								const wordIndex = words_paragraph.indexOf(word);
+								return wordIndex >= 0;
+							});
+					}
 				}
-			}
 
-			return cond;
-		});
+				return cond;
+			})
+		);
+		return filtered_bots.filter((bot) => bot !== null);
 	}
 
 	public async handleMessage(
@@ -303,6 +325,9 @@ export default class BotService extends UserService {
 		}
 
 		botsEngaged.forEach(async (bot) => {
+			if (!bot) {
+				return;
+			}
 			if (!bot.group_respond && (opts.isGroup || message_from.length > 12)) {
 				return;
 			} else if (this.handledBotPerUser.has(`${message_from}_${bot.bot_id.toString()}`)) {
@@ -569,6 +594,7 @@ export default class BotService extends UserService {
 				isMultiSelect: boolean;
 			}[];
 		}[];
+		allowed_country_codes: string[];
 	}) {
 		const bot = new BotDB({
 			...data,
@@ -597,6 +623,7 @@ export default class BotService extends UserService {
 			polls: bot.polls,
 			forward: bot.forward ?? { number: '', message: '' },
 			isActive: bot.active,
+			allowed_country_codes: bot.allowed_country_codes ?? [],
 		};
 	}
 
@@ -637,6 +664,7 @@ export default class BotService extends UserService {
 					isMultiSelect: boolean;
 				}[];
 			}[];
+			allowed_country_codes: string[];
 		}
 	) {
 		const bot = await BotDB.findById(id).populate('attachments shared_contact_cards');
@@ -680,6 +708,10 @@ export default class BotService extends UserService {
 		if (data.polls) {
 			bot.polls = data.polls;
 		}
+		if (data.allowed_country_codes !== undefined) {
+			bot.allowed_country_codes = data.allowed_country_codes;
+		}
+
 		bot.random_string = data.random_string;
 		if (data.nurturing) {
 			bot.nurturing = await Promise.all(
@@ -725,6 +757,7 @@ export default class BotService extends UserService {
 			forward: bot.forward ?? { number: '', message: '' },
 			isActive: bot.active,
 			group_respond: bot.group_respond,
+			allowed_country_codes: bot.allowed_country_codes ?? [],
 		};
 	}
 
@@ -757,6 +790,7 @@ export default class BotService extends UserService {
 			forward: bot.forward ?? { number: '', message: '' },
 			isActive: bot.active,
 			group_respond: bot.group_respond,
+			allowed_country_codes: bot.allowed_country_codes ?? [],
 		};
 	}
 

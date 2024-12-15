@@ -20,6 +20,7 @@ import {
 } from '../../utils/ExpressUtils';
 import { FileUtils } from '../../utils/files';
 import VCardBuilder from '../../utils/VCardBuilder';
+import WhatsappUtils from '../../utils/WhatsappUtils';
 import ContactCardService from '../contact-card';
 import TokenService from '../token';
 import UploadService from '../uploads';
@@ -46,6 +47,7 @@ const processGroup = (group: IMergedGroup) => {
 		triggers: group.triggers ?? [],
 		options: group.options ?? BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE,
 		forward: group.forward,
+		allowed_country_codes: group.allowed_country_codes ?? [],
 	};
 };
 
@@ -92,6 +94,7 @@ export default class GroupMergeService {
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
 			}[];
+			allowed_country_codes: string[];
 			restricted_numbers?: Types.ObjectId[];
 			reply_business_only: boolean;
 			random_string: boolean;
@@ -145,6 +148,7 @@ export default class GroupMergeService {
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
 			}[];
+			allowed_country_codes: string[];
 			restricted_numbers?: Types.ObjectId[];
 			reply_business_only?: boolean;
 			random_string?: boolean;
@@ -190,6 +194,9 @@ export default class GroupMergeService {
 					...(details.triggers && { triggers: details.triggers }),
 					...(details.options && { options: details.options }),
 					...(details.forward && { forward: details.forward }),
+					...(details.allowed_country_codes !== undefined && {
+						allowed_country_codes: details.allowed_country_codes,
+					}),
 				},
 			}
 		);
@@ -392,6 +399,15 @@ export default class GroupMergeService {
 							});
 					}
 				}
+			}
+
+			const country_code = await WhatsappUtils.getCountryCode(contact);
+
+			if (
+				doc.allowed_country_codes.length > 0 &&
+				!doc.allowed_country_codes.includes(country_code)
+			) {
+				return;
 			}
 
 			if (!cond) {

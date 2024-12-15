@@ -70,4 +70,5 @@ type MergedGroup = {
 		number: string;
 		message: string;
 	};
+	allowed_country_codes: string[];
 };

@@ -90,6 +90,11 @@ export const COUNTRIES: {
 	[country_code: string]: string;
 } = countries;
 
+export const COUNTRIES_OPTIONS = Object.entries(COUNTRIES).map(([code, name]) => ({
+	code,
+	name,
+}));
+
 export enum Colors {
 	ACCENT_LIGHT = '#E8F2ED',
 	ACCENT_DARK = '#4F966E',

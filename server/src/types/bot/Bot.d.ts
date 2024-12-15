@@ -32,6 +32,7 @@ export default interface IBot extends Document {
 		number: string;
 		message: string;
 	};
+	allowed_country_codes: string[];
 	group_respond: boolean;
 	nurturing: {
 		random_string: boolean;

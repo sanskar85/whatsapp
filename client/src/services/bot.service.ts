@@ -35,6 +35,7 @@ export default class BotService {
 				isMultiSelect: boolean;
 			}[];
 		}[];
+		allowed_country_codes: string[];
 	}) {
 		try {
 			const { data: response } = await APIInstance.post(`/whatsapp/bot`, data);
@@ -56,6 +57,7 @@ export default class BotService {
 				polls: res.polls ?? [],
 				forward: res.forward ?? { number: '', message: '' },
 				nurturing: res.nurturing ?? [],
+				allowed_country_codes: res.allowed_country_codes ?? [],
 			};
 		} catch (err) {
 			throw new Error('Error Saving Bot');
@@ -84,6 +86,7 @@ export default class BotService {
 				polls: res.polls ?? [],
 				forward: res.forward ?? { number: '', message: '' },
 				nurturing: res.nurturing ?? [],
+				allowed_country_codes: res.allowed_country_codes ?? [],
 			};
 		} catch (err) {
 			return null;
@@ -110,6 +113,7 @@ export default class BotService {
 				polls: res.polls || [],
 				forward: res.forward ?? { number: '', message: '' },
 				nurturing: res.nurturing ?? [],
+				allowed_country_codes: res.allowed_country_codes ?? [],
 			})) as Bot[];
 		} catch (err) {
 			return [];
@@ -159,6 +163,7 @@ export default class BotService {
 					isMultiSelect: boolean;
 				}[];
 			}[];
+			allowed_country_codes: string[];
 		}
 	) {
 		try {
@@ -196,6 +201,7 @@ export default class BotService {
 					start_from: string;
 					end_at: string;
 				}[];
+				allowed_country_codes: string[];
 			};
 
 			return {
@@ -231,6 +237,7 @@ export default class BotService {
 							end_at: nurturing.end_at ?? '',
 						};
 					}) ?? [],
+				allowed_country_codes: res.allowed_country_codes ?? [],
 			} as Bot;
 		} catch (err) {
 			throw new Error('Error Saving group');

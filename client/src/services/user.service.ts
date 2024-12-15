@@ -33,6 +33,7 @@ export default class UserService {
 			individual_media_message: data.individual_media_message as boolean,
 			group_text_message: data.group_text_message as boolean,
 			group_media_message: data.group_media_message as boolean,
+			isMessageStarEnabled: data.isMessageStarEnabled as boolean,
 		};
 	}
 
@@ -76,6 +77,24 @@ export default class UserService {
 		try {
 			await APIInstance.post(`/auth/logout`);
 			return true;
+		} catch (err) {
+			return false;
+		}
+	}
+
+	static async enableIndividualMessageStar() {
+		try {
+			const { data } = await APIInstance.post(`/users/enable-individual-message-star`);
+			return data.isMessageStarEnabled;
+		} catch (err) {
+			return false;
+		}
+	}
+
+	static async disableIndividualMessageStar() {
+		try {
+			const { data } = await APIInstance.post(`/users/disable-individual-message-star`);
+			return data.isMessageStarEnabled;
 		} catch (err) {
 			return false;
 		}

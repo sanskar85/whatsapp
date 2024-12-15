@@ -30,6 +30,10 @@ const schema = new Schema<IUserPreferences>({
 		type: Boolean,
 		default: false,
 	},
+	isMessageStarEnabled: {
+		type: Boolean,
+		default: false,
+	},
 });
 
 const UserPreferencesDB = mongoose.model<IUserPreferences>('UserPreferences', schema);

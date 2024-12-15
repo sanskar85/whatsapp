@@ -58,6 +58,7 @@ export type MergeGroupValidationResult = {
 		number: string;
 		message: string;
 	};
+	allowed_country_codes: string[];
 };
 
 export async function CreateGroupValidator(req: Request, res: Response, next: NextFunction) {
@@ -205,6 +206,7 @@ export async function MergeGroupValidator(req: Request, res: Response, next: Nex
 				.default([])
 				.refine((r) => !r.some((value) => !Types.ObjectId.isValid(value)))
 				.transform((r) => r.map((value) => new Types.ObjectId(value))),
+			allowed_country_codes: z.string().array().default([]),
 			reply_business_only: z.boolean().default(false),
 			multiple_responses: z.boolean().default(false),
 			random_string: z.boolean().default(false),

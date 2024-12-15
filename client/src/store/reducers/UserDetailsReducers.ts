@@ -13,6 +13,7 @@ const initialState: UserDetailsState = {
 	phone_number: '',
 
 	messageLoggerEnabled: false,
+	isMessageStarEnabled: false,
 
 	individual_text_message: false,
 	individual_media_message: false,
@@ -71,16 +72,16 @@ const UserDetailsSlice = createSlice({
 			if (action.payload.messageLoggerEnabled !== undefined) {
 				state.messageLoggerEnabled = action.payload.messageLoggerEnabled;
 			}
-			if(action.payload.individual_text_message !== undefined){
+			if (action.payload.individual_text_message !== undefined) {
 				state.individual_text_message = action.payload.individual_text_message;
 			}
-			if(action.payload.individual_media_message !== undefined){
+			if (action.payload.individual_media_message !== undefined) {
 				state.individual_media_message = action.payload.individual_media_message;
 			}
-			if(action.payload.group_text_message !== undefined){
+			if (action.payload.group_text_message !== undefined) {
 				state.group_text_message = action.payload.group_text_message;
 			}
-			if(action.payload.group_media_message !== undefined){
+			if (action.payload.group_media_message !== undefined) {
 				state.group_media_message = action.payload.group_media_message;
 			}
 
@@ -92,6 +93,9 @@ const UserDetailsSlice = createSlice({
 			}
 			if (action.payload.phone_number) {
 				state.phone_number = action.payload.phone_number;
+			}
+			if (action.payload.isMessageStarEnabled !== undefined) {
+				state.isMessageStarEnabled = action.payload.isMessageStarEnabled;
 			}
 		},
 
@@ -129,7 +133,10 @@ const UserDetailsSlice = createSlice({
 			if (action.payload.group_media_message !== undefined) {
 				state.group_media_message = action.payload.group_media_message;
 			}
-		}
+			if (action.payload.isMessageStarEnabled !== undefined) {
+				state.isMessageStarEnabled = action.payload.isMessageStarEnabled;
+			}
+		},
 	},
 });
 

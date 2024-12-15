@@ -21,6 +21,7 @@ function processMergedGroup(group: any) {
 		options: group.options,
 		triggers: group.triggers,
 		forward: group.forward,
+		allowed_country_codes: group.allowed_country_codes ?? [],
 	};
 }
 
@@ -142,6 +143,7 @@ export default class GroupService {
 			number: string;
 			message: string;
 		};
+		allowed_country_codes: string[];
 	}) {
 		try {
 			const { data } = await APIInstance.post(`/whatsapp/groups/merge`, {
@@ -161,6 +163,7 @@ export default class GroupService {
 				triggers: details.triggers,
 				options: details.options,
 				forward: details.forward,
+				allowed_country_codes: details.allowed_country_codes,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {
@@ -236,6 +239,7 @@ export default class GroupService {
 				number: string;
 				message: string;
 			};
+			allowed_country_codes: string[];
 		}
 	) {
 		try {
@@ -256,6 +260,7 @@ export default class GroupService {
 				triggers: details.triggers,
 				options: details.options,
 				forward: details.forward,
+				allowed_country_codes: details.allowed_country_codes,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {

@@ -82,6 +82,10 @@ const botSchema = new mongoose.Schema<IBot>({
 		type: Boolean,
 		default: true,
 	},
+	allowed_country_codes: {
+		type: [String],
+		default: [],
+	},
 });
 
 const BotDB = mongoose.model<IBot>('Bot', botSchema);

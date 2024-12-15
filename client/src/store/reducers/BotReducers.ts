@@ -24,6 +24,7 @@ const initialState: BotState = {
 			message: '',
 		},
 		nurturing: [],
+		allowed_country_codes: [],
 	},
 	ui: {
 		isAddingBot: false,
@@ -88,6 +89,7 @@ const BotSlice = createSlice({
 			state.details.nurturing = state.all_bots[index].nurturing;
 			state.details.startAt = state.all_bots[index].startAt;
 			state.details.endAt = state.all_bots[index].endAt;
+			state.details.allowed_country_codes = state.all_bots[index].allowed_country_codes;
 
 			state.ui.isEditingBot = true;
 
@@ -224,6 +226,9 @@ const BotSlice = createSlice({
 		setForwardMessage: (state, action: PayloadAction<string>) => {
 			state.details.forward.message = action.payload;
 		},
+		setAllowedCountryCodes: (state, action: PayloadAction<string[]>) => {
+			state.details.allowed_country_codes = action.payload;
+		},
 		setError: (
 			state,
 			action: PayloadAction<{
@@ -275,6 +280,7 @@ export const {
 	setForwardTo,
 	setEndAt,
 	setStartAt,
+	setAllowedCountryCodes,
 } = BotSlice.actions;
 
 export default BotSlice.reducer;

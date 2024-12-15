@@ -40,6 +40,7 @@ export type CreateBotValidationResult = {
 			isMultiSelect: boolean;
 		}[];
 	}[];
+	allowed_country_codes: string[];
 };
 
 export async function CreateBotValidator(req: Request, res: Response, next: NextFunction) {
@@ -125,6 +126,7 @@ export async function CreateBotValidator(req: Request, res: Response, next: Next
 			})
 			.array()
 			.default([]),
+		allowed_country_codes: z.string().array().default([]),
 	});
 
 	const reqValidatorResult = reqValidator.safeParse(req.body);

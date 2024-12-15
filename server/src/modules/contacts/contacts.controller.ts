@@ -191,7 +191,7 @@ export async function validate(req: Request, res: Response, next: NextFunction) 
 		let country_code = '',
 			country = '';
 		try {
-			country_code = await contact.getCountryCode();
+			country_code = await WhatsappUtils.getCountryCode(contact);
 			country = COUNTRIES[country_code as string];
 		} catch (e) {}
 		return {

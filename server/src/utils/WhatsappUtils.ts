@@ -418,6 +418,15 @@ export default class WhatsappUtils {
 		}
 	}
 
+	static async getCountryCode(contact: WAWebJS.Contact) {
+		try {
+			const country_code = (await contact.getFormattedNumber()).split(' ')[0];
+			return country_code.replace('+', '').toString();
+		} catch (error) {
+			return '';
+		}
+	}
+
 	static async removeUnwantedSessions() {
 		if (!IS_PRODUCTION) return;
 		const path = __basedir + '/.wwebjs_auth';

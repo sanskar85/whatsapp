@@ -2,11 +2,7 @@ import express from 'express';
 import { VerifyAdmin, VerifyUser } from '../../middleware';
 import { IDValidator } from '../../middleware/idValidator';
 import UserController from './user.controller';
-import {
-	EmailValidator,
-	PaymentRemainderValidator,
-	UserPreferencesValidator,
-} from './user.validator';
+import { EmailValidator, PaymentRemainderValidator } from './user.validator';
 
 const router = express.Router();
 
@@ -23,15 +19,14 @@ router
 router.route('/:id/logout').all(VerifyAdmin, IDValidator).post(UserController.logoutUsers);
 
 router
-	.route('/enable-message-star')
-	.all(VerifyUser, UserPreferencesValidator)
+	.route('/enable-individual-message-star')
+	.all(VerifyUser)
 	.post(UserController.enableMessageStar);
-router.route('/disable-message-star').all(VerifyUser).post(UserController.disableMessageStar);
-
 router
-	.route('/enable-message-logger')
-	.all(VerifyUser, UserPreferencesValidator)
-	.post(UserController.enableMessageLogger);
+	.route('/disable-individual-message-star')
+	.all(VerifyUser)
+	.post(UserController.disableMessageStar);
+
 router.route('/disable-message-logger').all(VerifyUser).post(UserController.disableMessageLogger);
 router.route('/preferences').all(VerifyUser).get(UserController.getPreferences);
 

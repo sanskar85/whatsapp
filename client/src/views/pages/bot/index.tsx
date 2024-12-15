@@ -19,11 +19,12 @@ import {
 	Textarea,
 	useToast,
 } from '@chakra-ui/react';
+import Multiselect from 'multiselect-react-dropdown';
 import { useEffect, useRef, useState } from 'react';
 import { BiTrash } from 'react-icons/bi';
 import { RiRobot2Line } from 'react-icons/ri';
 import { useDispatch, useSelector } from 'react-redux';
-import { NAVIGATION } from '../../../config/const';
+import { COUNTRIES_OPTIONS, NAVIGATION } from '../../../config/const';
 import { popFromNavbar, pushToNavbar } from '../../../hooks/useNavbar';
 import { useTheme } from '../../../hooks/useTheme';
 import BotService from '../../../services/bot.service';
@@ -35,6 +36,7 @@ import {
 	removeTrigger,
 	reset,
 	setAddingBot,
+	setAllowedCountryCodes,
 	setAttachments,
 	setContactCards,
 	setEndAt,
@@ -86,6 +88,7 @@ export default function Bot() {
 		response_delay_seconds,
 		trigger_gap_seconds,
 		forward,
+		allowed_country_codes,
 	} = details;
 	const { isAddingBot, isEditingBot } = ui;
 
@@ -409,6 +412,38 @@ export default function Bot() {
 								]}
 							/>
 							{ui.optionsError && <FormErrorMessage>{ui.optionsError}</FormErrorMessage>}
+						</FormControl>
+						<FormControl isInvalid={!!ui.optionsError} flexGrow={1}>
+							<Text className='text-gray-700 dark:text-gray-400'>Allowed Country Codes</Text>
+							<Multiselect
+								displayValue='name'
+								placeholder='Select Country'
+								onRemove={(selectedList) =>
+									dispatch(
+										setAllowedCountryCodes(
+											selectedList.map((country: { code: string }) => country.code)
+										)
+									)
+								}
+								onSelect={(selectedList) => {
+									dispatch(
+										setAllowedCountryCodes(
+											selectedList.map((country: { code: string }) => country.code)
+										)
+									);
+								}}
+								showCheckbox={true}
+								selectedValues={COUNTRIES_OPTIONS.filter(({ code }) =>
+									allowed_country_codes.includes(code)
+								)}
+								options={COUNTRIES_OPTIONS}
+								style={{
+									searchBox: {
+										border: 'none',
+									},
+								}}
+								className='text-black !bg-[#ECECEC]  rounded-md border-none '
+							/>
 						</FormControl>
 					</Flex>
 

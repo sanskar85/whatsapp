@@ -11,11 +11,11 @@ export type UserDetailsState = {
 	phone_number: string;
 
 	messageLoggerEnabled: boolean;
-
-	individual_text_message:boolean;
-	individual_media_message:boolean;
-	group_text_message:boolean;
-	group_media_message:boolean;
+	isMessageStarEnabled: boolean;
+	individual_text_message: boolean;
+	individual_media_message: boolean;
+	group_text_message: boolean;
+	group_media_message: boolean;
 
 	groups: {
 		id: string;

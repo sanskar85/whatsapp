@@ -58,4 +58,5 @@ export type Bot = {
 		polls: Poll[];
 		random_string: boolean;
 	}[];
+	allowed_country_codes: string[];
 };

@@ -128,6 +128,10 @@ const mergedGroupSchema = new mongoose.Schema<IMergedGroup>({
 		number: String,
 		message: String,
 	},
+	allowed_country_codes: {
+		type: [String],
+		default: [],
+	},
 });
 
 const MergedGroupDB = mongoose.model<IMergedGroup>('MergedGroup', mergedGroupSchema);

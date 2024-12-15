@@ -68,6 +68,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 		isSubscribed,
 		userType,
 		messageLoggerEnabled,
+		isMessageStarEnabled: starIndividualMessage,
 		session_expires_at,
 		isWhatsappReady,
 		phone_number,
@@ -147,6 +148,16 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 				group_media_message: !!value,
 			});
 			dispatch(setUserDetails(data));
+		}
+
+		if (action === 'star-individual-message') {
+			if (value) {
+				const data = await UserService.enableIndividualMessageStar();
+				dispatch(setUserDetails({ isMessageStarEnabled: data }));
+			} else {
+				const data = await UserService.disableIndividualMessageStar();
+				dispatch(setUserDetails({ isMessageStarEnabled: data }));
+			}
 		}
 	};
 
@@ -343,6 +354,20 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 							</section>
 
 							<section className='mt-6'>
+								<FormControl display='flex' alignItems='center'>
+									<FormLabel
+										htmlFor='message-logger'
+										mb='0'
+										color={theme === 'dark' ? 'white' : 'black'}
+									>
+										Star Individual Message?
+									</FormLabel>
+									<Switch
+										id='star-individual-message'
+										isChecked={starIndividualMessage}
+										onChange={(e) => handleUserPref('star-individual-message', e.target.checked)}
+									/>
+								</FormControl>
 								<FormControl display='flex' alignItems='center'>
 									<FormLabel
 										htmlFor='message-logger'
