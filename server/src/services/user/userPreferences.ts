@@ -1,19 +1,14 @@
 import { Types } from 'mongoose';
-import { DRIVE_SHARE_LINK } from '../../config/const';
-import { UserLogPrefs } from '../../modules/user/user.validator';
-import { addHeader, createSpreadSheet, shareToDrive } from '../../provider/google/SheetAuth';
 import UserPreferencesDB from '../../repository/user/UserPreferences';
 import { IUserPreferences } from '../../types/users';
 
 export default class UserPreferencesService {
 	private userPref: IUserPreferences;
-	private username: string;
 
 	private static instances = new Map<string, UserPreferencesService>();
 
 	private constructor(userPref: IUserPreferences) {
 		this.userPref = userPref;
-		this.username = userPref.user.username;
 
 		UserPreferencesService.instances.set(userPref.user._id.toHexString(), this);
 	}
@@ -33,72 +28,56 @@ export default class UserPreferencesService {
 		return new UserPreferencesService(userPref);
 	}
 
-	isMessagesLogEnabled() {
-		return this.userPref.isMessagesLogEnabled;
+	isLoggerEnabled() {
+		return this.userPref.isLoggerEnabled;
 	}
 
-	async setMessagesLogEnabled(enabled: boolean) {
-		this.userPref.isMessagesLogEnabled = enabled;
+	async setLoggerEnabled(enabled: boolean) {
+		this.userPref.isLoggerEnabled = enabled;
+		await this.userPref.save();
+	}
 
-		if (enabled && !this.getMessageLogSheetId()) {
-			const sheetId = await createSpreadSheet(`Message Log @ ${this.username}`);
-			addHeader(sheetId);
-			shareToDrive(sheetId, DRIVE_SHARE_LINK);
-			this.userPref.messageLogSheetId = sheetId;
+	getMessageLogRules() {
+		return this.userPref.messageLogRules;
+	}
+
+	async addMessageLogRule(
+		rules: {
+			id: string;
+			name: string;
+			include: string[];
+			exclude: string[];
+			loggers: string[];
+		}[]
+	) {
+		for (const rule of rules) {
+			this.userPref.messageLogRules[rule.id] = rule;
 		}
+		await this.userPref.save();
+	}
 
+	async updateMessageLogRule(rule: {
+		id: string;
+		include: string[];
+		exclude: string[];
+		loggers: string[];
+	}) {
+		this.userPref.messageLogRules[rule.id] = {
+			id: rule.id,
+			name: this.userPref.messageLogRules[rule.id].name,
+			include: rule.include,
+			exclude: rule.exclude,
+			loggers: rule.loggers,
+		};
+		await this.userPref.save();
+	}
+
+	async deleteMessageLogRule(id: string) {
+		delete this.userPref.messageLogRules[id];
 		await this.userPref.save();
 	}
 
 	getMessageLogSheetId() {
 		return this.userPref.messageLogSheetId;
-	}
-
-	messagesLogPrefs() {
-		return {
-			individual_text_message: this.userPref.individual_text_message,
-			individual_media_message: this.userPref.individual_media_message,
-			group_text_message: this.userPref.group_text_message,
-			group_media_message: this.userPref.group_media_message,
-		};
-	}
-
-	async setMessageLogSheetId(sheetId: string | null) {
-		this.userPref.messageLogSheetId = sheetId || '';
-		await this.userPref.save();
-	}
-
-	async setMessagesLogPrefs(data: UserLogPrefs) {
-		if (data.individual_text_message !== undefined) {
-			this.userPref.individual_text_message = data.individual_text_message;
-		}
-		if (data.individual_media_message !== undefined) {
-			this.userPref.individual_media_message = data.individual_media_message;
-		}
-		if (data.group_text_message !== undefined) {
-			this.userPref.group_text_message = data.group_text_message;
-		}
-		if (data.group_media_message !== undefined) {
-			this.userPref.group_media_message = data.group_media_message;
-		}
-		if (
-			!this.userPref.individual_text_message &&
-			!this.userPref.individual_media_message &&
-			!this.userPref.group_text_message &&
-			!this.userPref.group_media_message
-		) {
-			this.userPref.isMessagesLogEnabled = false;
-		}
-
-		await this.userPref.save();
-	}
-
-	isMessageStarEnabled() {
-		return this.userPref.isMessageStarEnabled;
-	}
-
-	async setMessageStarEnabled(enabled: boolean) {
-		this.userPref.isMessageStarEnabled = enabled;
-		await this.userPref.save();
 	}
 }

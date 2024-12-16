@@ -89,7 +89,7 @@ function getExt(mime_type: string) {
 	return mime.getExtension(mime_type);
 }
 
-async function createImageFile(base64WithoutHeader: string, path: string) {
+async function createFileFromBase64(base64WithoutHeader: string, path: string) {
 	return new Promise<void>((resolve, reject) => {
 		fs.writeFile(path, base64WithoutHeader, 'base64', function (err) {
 			if (err) {
@@ -154,6 +154,6 @@ export default {
 	writeFile,
 	getExt,
 	getMimeType,
-	createImageFile,
+	createFileFromBase64,
 	downloadFile,
 };

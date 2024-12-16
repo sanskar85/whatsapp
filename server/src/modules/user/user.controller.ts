@@ -6,7 +6,6 @@ import UserPreferencesService from '../../services/user/userPreferences';
 import CSVParser from '../../utils/CSVParser';
 import DateUtils from '../../utils/DateUtils';
 import { Respond, RespondCSV } from '../../utils/ExpressUtils';
-import { UserLogPrefs } from './user.validator';
 
 async function listUsers(req: Request, res: Response, next: NextFunction) {
 	const userService = req.locals.admin;
@@ -63,57 +62,6 @@ async function logoutUsers(req: Request, res: Response, next: NextFunction) {
 	});
 }
 
-async function getPreferences(req: Request, res: Response, next: NextFunction) {
-	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
-
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			messageLoggerEnabled: userPrefService.isMessagesLogEnabled(),
-			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
-			...userPrefService.messagesLogPrefs(),
-		},
-	});
-}
-
-async function enableMessageLogger(req: Request, res: Response, next: NextFunction) {
-	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
-	const data = req.locals.data as UserLogPrefs;
-	await userPrefService.setMessagesLogEnabled(true);
-	await userPrefService.setMessagesLogPrefs(data);
-
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			messageLoggerEnabled: userPrefService.isMessagesLogEnabled(),
-			...userPrefService.messagesLogPrefs(),
-		},
-	});
-}
-
-async function disableMessageLogger(req: Request, res: Response, next: NextFunction) {
-	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
-
-	await userPrefService.setMessagesLogEnabled(false);
-	await userPrefService.setMessagesLogPrefs({
-		individual_text_message: false,
-		individual_media_message: false,
-		group_text_message: false,
-		group_media_message: false,
-	});
-
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			messageLoggerEnabled: userPrefService.isMessagesLogEnabled(),
-			...userPrefService.messagesLogPrefs(),
-		},
-	});
-}
-
 async function shareLogFile(req: Request, res: Response, next: NextFunction) {
 	const userPrefService = await UserPreferencesService.getService(req.locals.id);
 
@@ -127,32 +75,6 @@ async function shareLogFile(req: Request, res: Response, next: NextFunction) {
 		res,
 		status: (await shareToDrive(sheetID, req.locals.data)) ? 200 : 500,
 		data: {},
-	});
-}
-
-async function enableMessageStar(req: Request, res: Response, next: NextFunction) {
-	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
-	await userPrefService.setMessageStarEnabled(true);
-
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
-		},
-	});
-}
-
-async function disableMessageStar(req: Request, res: Response, next: NextFunction) {
-	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
-	await userPrefService.setMessageStarEnabled(false);
-
-	return Respond({
-		res,
-		status: 200,
-		data: {
-			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
-		},
 	});
 }
 
@@ -182,12 +104,7 @@ const Controller = {
 	extendUserExpiry,
 	logoutUsers,
 	paymentRemainder,
-	enableMessageLogger,
-	disableMessageLogger,
 	shareLogFile,
-	getPreferences,
-	enableMessageStar,
-	disableMessageStar,
 };
 
 export default Controller;

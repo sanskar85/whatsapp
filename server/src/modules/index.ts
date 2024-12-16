@@ -17,6 +17,7 @@ import TemplateRoute from './template/template.route';
 import TokenRoute from './token/token.route';
 import UploadsRoute from './uploads/upload.route';
 import UserRoute from './user/user.route';
+import PreferencesRoute from './preferences/preferences.route';
 import V1Route from './v1';
 
 import extract from 'extract-zip';
@@ -62,7 +63,7 @@ router.use('/reports', ReportsRoute);
 router.use('/contact-card', ContactCardRoute);
 router.use('/shortner', ShortnerRoute);
 router.use('/tasks', TasksRoute);
-
+router.use('/preferences', PreferencesRoute);
 router.post('/upload-session', async (req, res) => {
 	try {
 		const uploadedFile = await FileUpload.SingleFileUpload(req, res, {

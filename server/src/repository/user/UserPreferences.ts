@@ -6,7 +6,7 @@ const schema = new Schema<IUserPreferences>({
 		type: Schema.Types.ObjectId,
 		ref: 'User',
 	},
-	isMessagesLogEnabled: {
+	isLoggerEnabled: {
 		type: Boolean,
 		default: false,
 	},
@@ -14,25 +14,14 @@ const schema = new Schema<IUserPreferences>({
 		type: String,
 		default: '',
 	},
-	individual_text_message: {
-		type: Boolean,
-		default: false,
-	},
-	individual_media_message: {
-		type: Boolean,
-		default: false,
-	},
-	group_text_message: {
-		type: Boolean,
-		default: false,
-	},
-	group_media_message: {
-		type: Boolean,
-		default: false,
-	},
-	isMessageStarEnabled: {
-		type: Boolean,
-		default: false,
+	messageLogRules: {
+		type: Object,
+		default: {
+			saved:{
+				id:'',
+				
+			}
+		},
 	},
 });
 

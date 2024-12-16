@@ -4,13 +4,24 @@ import IUser from './User';
 export default interface IUserPreferences extends Document {
 	user: IUser;
 
-	isMessagesLogEnabled: boolean;
+	isLoggerEnabled: boolean;
+
 	messageLogSheetId: string;
 
-	individual_text_message: boolean;
-	individual_media_message: boolean;
-	group_text_message: boolean;
-	group_media_message: boolean;
+	messageLogRules: {
+		[key: string]: {
+			id: string;
+			name: string;
+			include: string[];
+			exclude: string[];
+			loggers: string[];
+		};
+	};
 
-	isMessageStarEnabled: boolean;
+	// individual_text_message: boolean;
+	// individual_media_message: boolean;
+	// group_text_message: boolean;
+	// group_media_message: boolean;
+
+	// isMessageStarEnabled: boolean;
 }
