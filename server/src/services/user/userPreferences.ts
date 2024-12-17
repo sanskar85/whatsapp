@@ -63,6 +63,8 @@ export default class UserPreferencesService {
 
 	async updateMessageLogRule(rule: {
 		id: string;
+		saved: boolean;
+		unsaved: boolean;
 		include: string[];
 		exclude: string[];
 		loggers: string[];
@@ -70,8 +72,8 @@ export default class UserPreferencesService {
 		this.userPref.messageLogRules[rule.id] = {
 			id: rule.id,
 			name: this.userPref.messageLogRules[rule.id].name,
-			saved: this.userPref.messageLogRules[rule.id].saved,
-			unsaved: this.userPref.messageLogRules[rule.id].unsaved,
+			saved: rule.saved,
+			unsaved: rule.unsaved,
 			include: rule.include,
 			exclude: rule.exclude,
 			loggers: rule.loggers,
