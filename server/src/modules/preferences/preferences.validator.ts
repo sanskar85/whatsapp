@@ -20,6 +20,13 @@ export type UpdateMessageLogRule = {
 	exclude: string[];
 };
 
+export type UpdateMessageStar = {
+	individual_outgoing_messages: boolean;
+	individual_incoming_messages: boolean;
+	group_outgoing_messages: boolean;
+	group_incoming_messages: boolean;
+};
+
 export async function CreateMessageLogRuleValidator(
 	req: Request,
 	res: Response,
@@ -68,6 +75,39 @@ export async function UpdateMessageLogRuleValidator(
 		include: z.string().array().default([]),
 		exclude: z.string().array().default([]),
 	});
+	const reqValidatorResult = reqValidator.safeParse(req.body);
+
+	if (reqValidatorResult.success) {
+		req.locals.data = reqValidatorResult.data;
+		return next();
+	}
+	const message = reqValidatorResult.error.issues
+		.map((err) => err.path)
+		.flat()
+		.filter((item, pos, arr) => arr.indexOf(item) == pos)
+		.join(', ');
+
+	return next(
+		new APIError({
+			STATUS: 400,
+			TITLE: 'INVALID_FIELDS',
+			MESSAGE: message,
+		})
+	);
+}
+
+export async function UpdateMessageStarRulesValidator(
+	req: Request,
+	res: Response,
+	next: NextFunction
+) {
+	const reqValidator = z.object({
+		individual_outgoing_messages: z.boolean().default(false),
+		individual_incoming_messages: z.boolean().default(false),
+		group_outgoing_messages: z.boolean().default(false),
+		group_incoming_messages: z.boolean().default(false),
+	});
+
 	const reqValidatorResult = reqValidator.safeParse(req.body);
 
 	if (reqValidatorResult.success) {

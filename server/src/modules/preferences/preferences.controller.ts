@@ -7,7 +7,11 @@ import GroupMergeService from '../../services/merged-groups';
 import UserPreferencesService from '../../services/user/userPreferences';
 import { Respond } from '../../utils/ExpressUtils';
 import WhatsappUtils from '../../utils/WhatsappUtils';
-import { CreateMessageLogRule, UpdateMessageLogRule } from './preferences.validator';
+import {
+	CreateMessageLogRule,
+	UpdateMessageLogRule,
+	UpdateMessageStar,
+} from './preferences.validator';
 
 async function getPreferences(req: Request, res: Response, next: NextFunction) {
 	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
@@ -18,9 +22,8 @@ async function getPreferences(req: Request, res: Response, next: NextFunction) {
 		data: {
 			isLoggerEnabled: userPrefService.isLoggerEnabled(),
 			loggerRules: userPrefService.getMessageLogRules(),
-			// messageLoggerEnabled: userPrefService.isMessagesLogEnabled(),
-			// isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
-			// ...userPrefService.messagesLogPrefs(),
+			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
+			messageStarRules: userPrefService.getMessageStarRules(),
 		},
 	});
 }
@@ -146,31 +149,15 @@ async function updateMessageLogRule(req: Request, res: Response, next: NextFunct
 	}
 }
 
-// async function enableMessageStar(req: Request, res: Response, next: NextFunction) {
-// 	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
-// 	await userPrefService.setMessageStarEnabled(true);
+async function updateMessageStarRules(req: Request, res: Response, next: NextFunction) {
+	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
+	await userPrefService.setMessageStarRules(req.locals.data as UpdateMessageStar);
 
-// 	return Respond({
-// 		res,
-// 		status: 200,
-// 		data: {
-// 			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
-// 		},
-// 	});
-// }
-
-// async function disableMessageStar(req: Request, res: Response, next: NextFunction) {
-// 	const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
-// 	await userPrefService.setMessageStarEnabled(false);
-
-// 	return Respond({
-// 		res,
-// 		status: 200,
-// 		data: {
-// 			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
-// 		},
-// 	});
-// }
+	return Respond({
+		res,
+		status: 200,
+	});
+}
 
 const Controller = {
 	getPreferences,
@@ -180,6 +167,7 @@ const Controller = {
 	addMessageLogRule,
 	deleteMessageLogRule,
 	updateMessageLogRule,
+	updateMessageStarRules,
 };
 
 export default Controller;

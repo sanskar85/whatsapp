@@ -37,6 +37,15 @@ const schema = new Schema<IUserPreferences>({
 			},
 		},
 	},
+	messageStarRules: {
+		type: Object,
+		default: {
+			individual_outgoing_messages: false,
+			individual_incoming_messages: false,
+			group_outgoing_messages: false,
+			group_incoming_messages: false,
+		},
+	},
 });
 
 const UserPreferencesDB = mongoose.model<IUserPreferences>('UserPreferences', schema);

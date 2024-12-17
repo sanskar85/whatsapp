@@ -20,10 +20,10 @@ export default interface IUserPreferences extends Document {
 		};
 	};
 
-	// individual_text_message: boolean;
-	// individual_media_message: boolean;
-	// group_text_message: boolean;
-	// group_media_message: boolean;
-
-	// isMessageStarEnabled: boolean;
+	messageStarRules: {
+		individual_outgoing_messages: boolean;
+		individual_incoming_messages: boolean;
+		group_outgoing_messages: boolean;
+		group_incoming_messages: boolean;
+	};
 }

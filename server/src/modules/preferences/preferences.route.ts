@@ -4,6 +4,7 @@ import UserController from './preferences.controller';
 import {
 	CreateMessageLogRuleValidator,
 	UpdateMessageLogRuleValidator,
+	UpdateMessageStarRulesValidator,
 } from './preferences.validator';
 
 const router = express.Router();
@@ -21,6 +22,10 @@ router
 	.post(CreateMessageLogRuleValidator, VerifyClientID, UserController.addMessageLogRule)
 	.patch(UpdateMessageLogRuleValidator, UserController.updateMessageLogRule);
 
-router.route('/').all(VerifyUser).get(UserController.getPreferences);
+router
+	.route('/message-star-rules')
+	.all(VerifyUser)
+	.post(UpdateMessageStarRulesValidator, UserController.updateMessageStarRules);
 
+router.route('/').all(VerifyUser).get(UserController.getPreferences);
 export default router;

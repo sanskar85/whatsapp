@@ -95,4 +95,30 @@ export default class UserPreferencesService {
 	getMessageLogSheetId() {
 		return this.userPref.messageLogSheetId;
 	}
+
+	isMessageStarEnabled() {
+		return (
+			this.userPref.messageStarRules.individual_outgoing_messages ||
+			this.userPref.messageStarRules.individual_incoming_messages ||
+			this.userPref.messageStarRules.group_outgoing_messages ||
+			this.userPref.messageStarRules.group_incoming_messages
+		);
+	}
+
+	getMessageStarRules() {
+		return this.userPref.messageStarRules;
+	}
+
+	async setMessageStarRules(rules: {
+		individual_outgoing_messages: boolean;
+		individual_incoming_messages: boolean;
+		group_outgoing_messages: boolean;
+		group_incoming_messages: boolean;
+	}) {
+		this.userPref.messageStarRules = rules;
+		await UserPreferencesDB.updateOne(
+			{ user: this.userPref.user },
+			{ $set: { messageStarRules: this.userPref.messageStarRules } }
+		);
+	}
 }
