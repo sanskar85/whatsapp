@@ -60,7 +60,12 @@ async function groups(req: Request, res: Response, next: NextFunction) {
 			res,
 			status: 200,
 			data: {
-				groups: [...groups, ...merged_groups.map((group) => ({ ...group, groups: undefined }))],
+				groups: [
+					...groups.sort((a, b) => a.name.localeCompare(b.name)),
+					...merged_groups
+						.map((group) => ({ ...group, groups: undefined }))
+						.sort((a, b) => a.name.localeCompare(b.name)),
+				],
 			},
 		});
 	} catch (err) {
