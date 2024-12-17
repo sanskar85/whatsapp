@@ -53,7 +53,10 @@ export default class UserPreferencesService {
 		for (const rule of rules) {
 			this.userPref.messageLogRules[rule.id] = rule;
 		}
-		await this.userPref.save();
+		await UserPreferencesDB.updateOne(
+			{ user: this.userPref.user },
+			{ $set: { messageLogRules: this.userPref.messageLogRules } }
+		);
 	}
 
 	async updateMessageLogRule(rule: {
@@ -69,12 +72,18 @@ export default class UserPreferencesService {
 			exclude: rule.exclude,
 			loggers: rule.loggers,
 		};
-		await this.userPref.save();
+		await UserPreferencesDB.updateOne(
+			{ user: this.userPref.user },
+			{ $set: { messageLogRules: this.userPref.messageLogRules } }
+		);
 	}
 
 	async deleteMessageLogRule(id: string) {
 		delete this.userPref.messageLogRules[id];
-		await this.userPref.save();
+		await UserPreferencesDB.updateOne(
+			{ user: this.userPref.user },
+			{ $set: { messageLogRules: this.userPref.messageLogRules } }
+		);
 	}
 
 	getMessageLogSheetId() {
