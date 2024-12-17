@@ -12,6 +12,8 @@ export default interface IUserPreferences extends Document {
 		[key: string]: {
 			id: string;
 			name: string;
+			saved: boolean;
+			unsaved: boolean;
 			include: string[];
 			exclude: string[];
 			loggers: string[];

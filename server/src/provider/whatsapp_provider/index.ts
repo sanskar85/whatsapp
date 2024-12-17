@@ -153,6 +153,20 @@ export class WhatsappProvider {
 		});
 
 		this.client.on('ready', async () => {
+			/**
+			 * 7032439268
+7639621000
+9836573777
+9892050530
+9669002600
+			 */
+
+			// this.client.
+
+			// const _contact = await this.client.getContactById('7639621000@c.us');
+			// const _chat = await this.contact?.getChat();
+			// Logger.debug(_contact);
+
 			try {
 				Logger.info(`Client Ready`, `${this.userService.getUser().username} - ${this.client_id}`);
 				this.number = this.client.info.wid.user;

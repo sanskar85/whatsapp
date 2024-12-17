@@ -17,16 +17,20 @@ const schema = new Schema<IUserPreferences>({
 	messageLogRules: {
 		type: Object,
 		default: {
-			saved: {
-				id: 'saved',
-				name: 'Saved',
+			individual_text: {
+				id: 'individual_text',
+				name: 'Text',
+				saved: false,
+				unsaved: false,
 				exclude: [],
 				include: [],
 				loggers: [],
 			},
-			unsaved: {
-				id: 'unsaved',
-				name: 'Unsaved',
+			individual_media: {
+				id: 'individual_media',
+				name: 'Media',
+				saved: false,
+				unsaved: false,
 				exclude: [],
 				include: [],
 				loggers: [],

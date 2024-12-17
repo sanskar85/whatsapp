@@ -102,6 +102,8 @@ async function addMessageLogRule(req: Request, res: Response, next: NextFunction
 				include: data.include,
 				exclude: data.exclude,
 				loggers: data.loggers,
+				saved: data.saved,
+				unsaved: data.unsaved,
 			};
 		});
 

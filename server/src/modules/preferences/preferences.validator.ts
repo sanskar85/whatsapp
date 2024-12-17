@@ -4,6 +4,8 @@ import APIError from '../../errors/api-errors';
 
 export type CreateMessageLogRule = {
 	group_id: string[];
+	saved: boolean;
+	unsaved: boolean;
 	loggers: string[];
 	include: string[];
 	exclude: string[];
@@ -11,6 +13,8 @@ export type CreateMessageLogRule = {
 
 export type UpdateMessageLogRule = {
 	id: string;
+	saved: boolean;
+	unsaved: boolean;
 	loggers: string[];
 	include: string[];
 	exclude: string[];
@@ -23,6 +27,8 @@ export async function CreateMessageLogRuleValidator(
 ) {
 	const reqValidator = z.object({
 		group_id: z.string().array().default([]),
+		saved: z.boolean().default(true),
+		unsaved: z.boolean().default(true),
 		loggers: z.string().array().default([]),
 		include: z.string().array().default([]),
 		exclude: z.string().array().default([]),
@@ -56,6 +62,8 @@ export async function UpdateMessageLogRuleValidator(
 ) {
 	const reqValidator = z.object({
 		id: z.string(),
+		saved: z.boolean().default(true),
+		unsaved: z.boolean().default(true),
 		loggers: z.string().array().default([]),
 		include: z.string().array().default([]),
 		exclude: z.string().array().default([]),

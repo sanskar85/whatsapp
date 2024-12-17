@@ -64,64 +64,106 @@ export class MessageLoggerService {
 		};
 
 		const isSaved = !chat.isGroup && !!contact.name;
+		const isMedia = message.hasMedia;
 
 		let canLog = false;
 		let pref;
 
 		if (!chat.isGroup) {
-			pref = this.messageLoggerRules[isSaved ? 'saved' : 'unsaved'];
-			if (pref.exclude.includes(contact.id.user)) {
-				return;
-			}
-
-			if (pref.include.length > 0 && !pref.include.includes(contact.id.user)) {
-				return;
-			}
+			pref = this.messageLoggerRules[message.hasMedia ? 'individual_media' : 'individual_text'];
 		} else {
 			pref = this.messageLoggerRules[chat.id._serialized];
 		}
 
-		//<SenderNumber_> Whatsleads->UserNumber->Group/Individual->File Extension
-		if (message.hasMedia) {
-			let saveMediaFile = false;
+		if (!pref) {
+			Logger.info('No pref found for message logger', `${this.number} - ${contact.id.user}`);
+			return;
+		}
+
+		let saveMediaFile = false;
+		let media;
+
+		if (isMedia) {
 			try {
-				const media = await message.downloadMedia();
-
-				if (pref.loggers.includes('image') && media.mimetype.includes('image')) {
-					saveMediaFile = true;
-				} else if (pref.loggers.includes('video') && media.mimetype.includes('video')) {
-					saveMediaFile = true;
-				} else if (pref.loggers.includes(media.mimetype)) {
-					saveMediaFile = true;
-				} else {
-					canLog = false;
-				}
-
-				if (!media) {
-					link = 'Unable to generate link';
-				} else if (saveMediaFile) {
-					const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
-					const dest = __basedir + MISC_PATH + filename;
-					await FileUtils.createFileFromBase64(media.data, dest);
-					const folder_path = [
-						this.number!,
-						chat.isGroup ? 'Group' : 'Individual',
-						FileUtils.getExt(media.mimetype)!,
-					];
-					link = await uploadSingleFile(filename, folder_path, dest);
-				}
+				media = await message.downloadMedia();
 			} catch (err) {
+				Logger.error('Error while saving media message', err as Error);
 				canLog = true;
 				link = 'Unable to generate link';
-				Logger.error('Error while saving image message', err as Error);
 			}
+		}
 
-			loggedObj.link = link;
+		if (!chat.isGroup) {
+			if (isSaved && !pref.saved) {
+				return;
+			} else if (!isSaved && !pref.unsaved) {
+				return;
+			} else if (pref.exclude.length > 0 && pref.exclude.includes(contact.id.user)) {
+				return;
+			} else if (pref.include.length > 0 && !pref.include.includes(contact.id.user)) {
+				return;
+			}
+			if (isMedia) {
+				if (media) {
+					if (pref.loggers.includes('image') && media.mimetype.includes('image')) {
+						saveMediaFile = true;
+						canLog = true;
+					} else if (pref.loggers.includes('video') && media.mimetype.includes('video')) {
+						saveMediaFile = true;
+						canLog = true;
+					} else if (pref.loggers.includes(media.mimetype)) {
+						saveMediaFile = true;
+						canLog = true;
+					} else {
+						canLog = false;
+					}
+				} else {
+					canLog = true;
+					link = 'Unable to generate link';
+				}
+			} else {
+				canLog = true;
+			}
 		} else {
-			if (pref.loggers.includes('text') && message.body.length > 0) {
+			if (isMedia) {
+				if (media) {
+					if (pref.loggers.includes('image') && media.mimetype.includes('image')) {
+						saveMediaFile = true;
+						canLog = true;
+					} else if (pref.loggers.includes('video') && media.mimetype.includes('video')) {
+						saveMediaFile = true;
+						canLog = true;
+					} else if (pref.loggers.includes(media.mimetype)) {
+						saveMediaFile = true;
+						canLog = true;
+					} else {
+						canLog = false;
+					}
+				} else {
+					canLog = true;
+					link = 'Unable to generate link';
+				}
+			} else if (pref.loggers.includes('text') && message.body.length > 0) {
 				canLog = true;
 			}
 		}
+		try {
+			if (saveMediaFile && media) {
+				const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
+				const dest = __basedir + MISC_PATH + filename;
+				await FileUtils.createFileFromBase64(media.data, dest);
+				const folder_path = [
+					this.number!,
+					chat.isGroup ? 'Group' : 'Individual',
+					FileUtils.getExt(media.mimetype)!,
+				];
+				link = await uploadSingleFile(filename, folder_path, dest);
+			}
+		} catch (err) {
+			Logger.error('Error while saving image message', err as Error);
+			link = 'Unable to generate link';
+		}
+		loggedObj.link = link;
 
 		if (canLog) {
 			this.logMessageToDB(loggedObj);
