@@ -122,7 +122,6 @@ export default function Logger() {
 											aria-label='settings'
 											colorScheme='blue'
 											onClick={onOpenStarMessageRulesDialog}
-											isDisabled={!message_logger}
 										>
 											<PiGear />
 										</IconButton>
