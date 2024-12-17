@@ -4,6 +4,7 @@ import WAWebJS, { MessageMedia, Poll } from 'whatsapp-web.js';
 import { MISC_PATH } from '../../../config/const';
 import APIError, { API_ERRORS } from '../../../errors/api-errors';
 import { WhatsappProvider } from '../../../provider/whatsapp_provider';
+import UserPreferencesService from '../../../services/user/userPreferences';
 import { randomVector, Respond } from '../../../utils/ExpressUtils';
 import { FileUtils } from '../../../utils/files';
 import VCardBuilder from '../../../utils/VCardBuilder';
@@ -92,7 +93,10 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 			.getClient()
 			.sendMessage(recipient, message, opts)
 			.then(async (_msg) => {
-				_msg.star();
+				const userPrefService = await UserPreferencesService.getService(user.getUserId());
+				if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+					_msg.star();
+				}
 				await whatsapp.getClient().interface.openChatWindow(recipient);
 			});
 

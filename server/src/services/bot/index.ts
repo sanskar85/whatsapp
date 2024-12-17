@@ -24,6 +24,7 @@ import { MessageService } from '../messenger';
 import TokenService from '../token';
 import UploadService from '../uploads';
 import UserService from '../user/user';
+import UserPreferencesService from '../user/userPreferences';
 
 export default class BotService extends UserService {
 	private messageSchedulerService: MessageService;
@@ -345,6 +346,7 @@ export default class BotService extends UserService {
 					bot_id: bot.bot_id,
 				})
 			);
+			const userPrefService = await UserPreferencesService.getService(this.getUserId());
 
 			let msg = bot.message;
 			if (msg) {
@@ -358,7 +360,9 @@ export default class BotService extends UserService {
 					.getClient()
 					.sendMessage(triggered_from, msg)
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
@@ -380,7 +384,9 @@ export default class BotService extends UserService {
 						caption: mediaObject.caption,
 					})
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
@@ -392,7 +398,9 @@ export default class BotService extends UserService {
 					.getClient()
 					.sendMessage(triggered_from, card.vCardString)
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
@@ -411,7 +419,9 @@ export default class BotService extends UserService {
 						})
 					)
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 						await whatsapp.getClient().interface.openChatWindow(triggered_from);
 					})
 					.catch((err) => {
@@ -449,7 +459,9 @@ export default class BotService extends UserService {
 					.getClient()
 					.sendMessage(bot.forward.number + '@c.us', vCardString)
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
@@ -465,7 +477,9 @@ export default class BotService extends UserService {
 						.getClient()
 						.sendMessage(bot.forward.number + '@c.us', custom_message)
 						.then(async (_msg) => {
-							_msg.star();
+							if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+								_msg.star();
+							}
 						})
 						.catch((err) => {
 							Logger.error('Error sending message:', err);

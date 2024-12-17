@@ -12,6 +12,7 @@ import { IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
 import { randomVector } from '../../utils/ExpressUtils';
 import TokenService from '../token';
+import UserPreferencesService from '../user/userPreferences';
 
 export type Message = {
 	receiver: string;
@@ -141,13 +142,16 @@ export default class MessageService {
 			msg.status = MESSAGE_STATUS.SENT;
 			msg.sendAt = DateUtils.getMomentNow().toDate();
 			await msg.save();
+			const userPrefService = await UserPreferencesService.getService(msg.sender._id.toString());
 
 			if (message) {
 				whatsapp
 					.getClient()
 					.sendMessage(msg.receiver, message)
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 					})
 					.catch((err) => {
 						msg.status = MESSAGE_STATUS.FAILED;
@@ -161,7 +165,9 @@ export default class MessageService {
 					.getClient()
 					.sendMessage(msg.receiver, card.vCardString)
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 					})
 					.catch((err) => {
 						msg.status = MESSAGE_STATUS.FAILED;
@@ -187,7 +193,9 @@ export default class MessageService {
 						caption,
 					})
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 					})
 					.catch((err) => {
 						msg.status = MESSAGE_STATUS.FAILED;
@@ -208,7 +216,9 @@ export default class MessageService {
 						})
 					)
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 						await whatsapp.getClient().interface.openChatWindow(msg.receiver);
 					})
 					.catch((err) => {

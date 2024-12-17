@@ -25,6 +25,7 @@ import ContactCardService from '../contact-card';
 import TokenService from '../token';
 import UploadService from '../uploads';
 import { DeviceService } from '../user';
+import UserPreferencesService from '../user/userPreferences';
 
 const processGroup = (group: IMergedGroup) => {
 	return {
@@ -429,6 +430,8 @@ export default class GroupMergeService {
 			sendGroupReply(doc, groupReply);
 			sendPrivateReply(doc, privateReply);
 
+			const userPrefService = await UserPreferencesService.getService(this.user._id.toString());
+
 			if (doc.forward.number) {
 				const vCardString = new VCardBuilder({})
 					.setFirstName(contact.name ?? contact.pushname)
@@ -438,7 +441,9 @@ export default class GroupMergeService {
 				whatsapp
 					.sendMessage(doc.forward.number + '@c.us', vCardString)
 					.then(async (_msg) => {
-						_msg.star();
+						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+							_msg.star();
+						}
 					})
 					.catch((err) => {
 						Logger.error('Error sending message:', err);
@@ -453,7 +458,9 @@ export default class GroupMergeService {
 					whatsapp
 						.sendMessage(doc.forward.number + '@c.us', custom_message)
 						.then(async (_msg) => {
-							_msg.star();
+							if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+								_msg.star();
+							}
 						})
 						.catch((err) => {
 							Logger.error('Error sending message:', err);
@@ -472,6 +479,9 @@ export default class GroupMergeService {
 			}[]
 		) {
 			if (!doc) return;
+
+			const userPrefService = await UserPreferencesService.getService(user._id.toString());
+
 			try {
 				await GroupReplyDB.create({
 					...createDocData,
@@ -501,14 +511,22 @@ export default class GroupMergeService {
 						_reply_text += randomMessageText();
 					}
 					if (_reply_text.length > 0) {
-						message.reply(_reply_text);
+						message.reply(_reply_text).then(async (_msg) => {
+							if (userPrefService.getMessageStarRules().group_outgoing_messages) {
+								_msg.star();
+							}
+						});
 					}
 
 					shared_contact_cards?.forEach(async (id) => {
 						const contact_service = new ContactCardService(user);
 						const contact = await contact_service.getContact(id as unknown as Types.ObjectId);
 						if (!contact) return;
-						message.reply(contact.vCardString);
+						message.reply(contact.vCardString).then(async (_msg) => {
+							if (userPrefService.getMessageStarRules().group_outgoing_messages) {
+								_msg.star();
+							}
+						});
 					});
 
 					attachments?.forEach(async (id) => {
@@ -526,7 +544,11 @@ export default class GroupMergeService {
 						if (name) {
 							media.filename = name + path.substring(path.lastIndexOf('.'));
 						}
-						message.reply(media, undefined, { caption: caption });
+						message.reply(media, undefined, { caption: caption }).then(async (_msg) => {
+							if (userPrefService.getMessageStarRules().group_outgoing_messages) {
+								_msg.star();
+							}
+						});
 					});
 
 					polls?.forEach(async (poll) => {
@@ -538,7 +560,10 @@ export default class GroupMergeService {
 									allowMultipleAnswers: isMultiSelect,
 								})
 							)
-							.then(async () => {
+							.then(async (_msg) => {
+								if (userPrefService.getMessageStarRules().group_outgoing_messages) {
+									_msg.star();
+								}
 								await whatsapp.interface.openChatWindow(message.from);
 							});
 					});
@@ -566,6 +591,9 @@ export default class GroupMergeService {
 			}[]
 		) {
 			if (!doc) return;
+
+
+			const userPrefService = await UserPreferencesService.getService(user._id.toString());
 			try {
 				await GroupPrivateReplyDB.create({
 					...createDocData,
@@ -602,13 +630,17 @@ export default class GroupMergeService {
 								quotedMessageId: message.id._serialized,
 							})
 							.then(async (_msg) => {
-								_msg.star();
+								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+									_msg.star();
+								}
 							})
 							.catch(() => {
 								whatsapp
 									.sendMessage(to, _reply_text)
 									.then(async (_msg) => {
-										_msg.star();
+										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+											_msg.star();
+										}
 									})
 									.catch((err) => {
 										Logger.error('Error sending message:', err);
@@ -624,13 +656,17 @@ export default class GroupMergeService {
 								quotedMessageId: message.id._serialized,
 							})
 							.then(async (_msg) => {
-								_msg.star();
+								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+									_msg.star();
+								}
 							})
 							.catch(() => {
 								whatsapp
 									.sendMessage(to, contact.vCardString)
 									.then(async (_msg) => {
-										_msg.star();
+										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+											_msg.star();
+										}
 									})
 									.catch((err) => {
 										Logger.error('Error sending message:', err);
@@ -659,7 +695,9 @@ export default class GroupMergeService {
 								quotedMessageId: message.id._serialized,
 							})
 							.then(async (_msg) => {
-								_msg.star();
+								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+									_msg.star();
+								}
 							})
 							.catch(() => {
 								whatsapp
@@ -667,7 +705,9 @@ export default class GroupMergeService {
 										caption: caption,
 									})
 									.then(async (_msg) => {
-										_msg.star();
+										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+											_msg.star();
+										}
 									})
 									.catch((err) => {
 										Logger.error('Error sending message:', err);
@@ -689,7 +729,9 @@ export default class GroupMergeService {
 								}
 							)
 							.then(async (_msg) => {
-								_msg.star();
+								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+									_msg.star();
+								}
 								await whatsapp.interface.openChatWindow(message.from);
 							})
 							.catch(() => {
@@ -702,7 +744,9 @@ export default class GroupMergeService {
 										})
 									)
 									.then(async (_msg) => {
-										_msg.star();
+										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+											_msg.star();
+										}
 										await whatsapp.interface.openChatWindow(message.from);
 									})
 									.catch((err) => {
