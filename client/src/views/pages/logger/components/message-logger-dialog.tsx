@@ -20,7 +20,7 @@ import {
 	useDisclosure,
 	useToast,
 } from '@chakra-ui/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { BiTrash } from 'react-icons/bi';
 import { useDispatch, useSelector } from 'react-redux';
 import EnhancementService from '../../../../services/enhancements.service';
@@ -40,6 +40,7 @@ import {
 	updateLoggerPrefs,
 } from '../../../../store/reducers/EnhancementsReducers';
 import CheckButton from '../../../components/check-button';
+import DeleteAlert, { DeleteAlertHandle } from '../../../components/delete-alert';
 import NumberInputDialog from '../../../components/number-input-dialog';
 import MimeSelector from './mime-type-selector';
 import GroupsRuleDialog from './rule-dialog';
@@ -52,10 +53,11 @@ type MessageLoggingDialogProps = {
 const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) => {
 	const toast = useToast();
 
+	const deleteRef = useRef<DeleteAlertHandle>(null);
+
 	const { logger_prefs, updated_values } = useSelector(
 		(state: StoreState) => state[StoreNames.ENHANCEMENT]
 	);
-	console.log(Object.keys(updated_values));
 	const dispatch = useDispatch();
 
 	const [group_id, setGroupId] = useState<string[]>([]);
@@ -108,8 +110,6 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 	const updatePreferences = () => {
 		const promises = Object.keys(updated_values).map((key) => {
 			const group = logger_prefs[key];
-			console.log(groups)
-			console.log(logger_prefs,key);
 			return EnhancementService.updateMessageLoggerPreferences({
 				id: group.id,
 				exclude: group.exclude,
@@ -119,7 +119,6 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 				unsaved: group.unsaved,
 			});
 		});
-
 
 		toast.promise(Promise.all(promises), {
 			loading: {
@@ -239,6 +238,7 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 				});
 
 				onClose();
+				setGroupId([]);
 				return {
 					title: 'Selected rules deleted',
 					duration: 3000,
@@ -253,7 +253,7 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 
 	return (
 		<>
-			<Modal isOpen={isOpen} onClose={onClose} size={'6xl'} scrollBehavior='inside'>
+			<Modal isOpen={isOpen} isCentered onClose={onClose} size={'6xl'} scrollBehavior='inside'>
 				<ModalOverlay />
 				<ModalContent minHeight={'50vh'}>
 					<ModalHeader>Message logging rules</ModalHeader>
@@ -377,45 +377,17 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 									/>
 								</Box>
 							</Flex>
+							<Divider my={4} />
+							<Box pb={2}>
+								<Text fontWeight={'medium'} fontSize={'lg'}>
+									Group Message
+								</Text>
+							</Box>
 							<Box>
 								<Box>
 									<Text>Select Group Range</Text>
 								</Box>
-								<Flex gap={2}>
-									<Box flex={1}>
-										<Input
-											onChange={(e) =>
-												setRange((prev) => {
-													return {
-														...prev,
-														start: e.target.value,
-													};
-												})
-											}
-											value={range.start}
-											type='number'
-											placeholder='Start Range'
-										/>
-									</Box>
-									<Box flex={1}>
-										<Input
-											onChange={(e) =>
-												setRange((prev) => {
-													return {
-														...prev,
-														end: e.target.value,
-													};
-												})
-											}
-											value={range.end}
-											type='number'
-											placeholder='End Range'
-										/>
-									</Box>
-									<Button flex={1} colorScheme='green' onClick={handleSelectRange}>
-										Select range
-									</Button>
-								</Flex>
+
 								<Flex flexDirection={'column'}>
 									<HStack borderBottomWidth={1} p={4} alignItems={'center'}>
 										<Box width={'2%'} className='inline-flex items-center gap-2'>
@@ -430,8 +402,44 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 												alignItems={'center'}
 												justifyContent={'space-between'}
 												direction={'row'}
+												gap={4}
 											>
 												<Text mr={'auto'}>Name</Text>
+												<Flex gap={2} justifyContent={'flex-end'} >
+													<Box width={'150px'}>
+														<Input size={'sm'}
+															onChange={(e) =>
+																setRange((prev) => {
+																	return {
+																		...prev,
+																		start: e.target.value,
+																	};
+																})
+															}
+															value={range.start}
+															type='number'
+															placeholder='Start Range'
+														/>
+													</Box>
+													<Box width={'150px'}>
+														<Input size={'sm'}
+															onChange={(e) =>
+																setRange((prev) => {
+																	return {
+																		...prev,
+																		end: e.target.value,
+																	};
+																})
+															}
+															value={range.end}
+															type='number'
+															placeholder='End Range'
+														/>
+													</Box>
+													<Button size={'sm'} colorScheme='green' onClick={handleSelectRange}>
+														Select range
+													</Button>
+												</Flex>
 												<InputGroup size='sm' variant={'outline'} width={'250px'}>
 													<InputLeftElement pointerEvents='none'>
 														<SearchIcon color='gray.300' />
@@ -451,7 +459,7 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 													size={'sm'}
 													ml={2}
 													hidden={group_id.length === 0}
-													onClick={handleDeleteRule}
+													onClick={() => deleteRef.current?.open()}
 												/>
 											</Flex>
 										</Box>
@@ -510,6 +518,7 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 						</HStack>
 					</ModalFooter>
 					<GroupsRuleDialog isOpen={isNewRuleOpen} onClose={closeNewRuleInput} />
+					<DeleteAlert ref={deleteRef} type='Rule' onConfirm={handleDeleteRule} />
 				</ModalContent>
 			</Modal>
 		</>

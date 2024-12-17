@@ -120,12 +120,14 @@ const EnhancementsSlice = createSlice({
 			state.newRuleDetails.exclude = action.payload;
 		},
 		updateLoggerPrefs: (state, action: PayloadAction<LoggerRule>) => {
-			console.log(Object.keys(action.payload)[0]);
 			state.updated_values[action.payload.id] = true;
 			state.logger_prefs = { ...state.logger_prefs, [action.payload.id]: action.payload };
 		},
 		resetUpdatedValues: (state) => {
 			state.updated_values = {};
+		},
+		resetNewRuleDetails: (state) => {
+			state.newRuleDetails = initState.newRuleDetails;
 		},
 	},
 });
@@ -150,6 +152,7 @@ export const {
 	setUnsavedMedia,
 	setMediaExclude,
 	setMediaInclude,
+	resetNewRuleDetails,
 } = EnhancementsSlice.actions;
 
 export default EnhancementsSlice.reducer;
