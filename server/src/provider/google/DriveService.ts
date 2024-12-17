@@ -24,8 +24,8 @@ export async function getDrive() {
 	return google.drive({ version: 'v3', auth });
 }
 
-export async function uploadSingleFile(fileName: string, folder_name: string, filePath: string) {
-	const folder_id = await createOrGetFolder(folder_name);
+export async function uploadSingleFile(fileName: string, folder_path: string[], filePath: string) {
+	const folder_id = await createNestedFolders(folder_path);
 	if (!folder_id) {
 		console.error('Folder not found');
 		return;
@@ -46,7 +46,22 @@ export async function uploadSingleFile(fileName: string, folder_name: string, fi
 	return `https://drive.google.com/file/d/${data.id}/view`;
 }
 
-export async function createOrGetFolder(folderName: string) {
+export async function createNestedFolders(folder_path: string[]) {
+	let folder_id = DRIVE_FOLDER_ID;
+	for (const folder of folder_path) {
+		const id = await createOrGetFolder(folder, folder_id);
+		if (!id) {
+			return null;
+		}
+		folder_id = id;
+	}
+	return folder_id;
+}
+
+export async function createOrGetFolder(
+	folderName: string,
+	parent_folder_id: string = DRIVE_FOLDER_ID
+) {
 	const { data } = await (
 		await getDrive()
 	).files.list({
@@ -62,7 +77,7 @@ export async function createOrGetFolder(folderName: string) {
 		requestBody: {
 			name: folderName,
 			mimeType: 'application/vnd.google-apps.folder',
-			parents: [DRIVE_FOLDER_ID],
+			parents: [parent_folder_id],
 		},
 		fields: 'id',
 	});

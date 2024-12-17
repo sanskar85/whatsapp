@@ -81,6 +81,7 @@ export class MessageLoggerService {
 			pref = this.messageLoggerRules[chat.id._serialized];
 		}
 
+		//<SenderNumber_> Whatsleads->UserNumber->Group/Individual->File Extension
 		if (message.hasMedia) {
 			let saveMediaFile = false;
 			try {
@@ -102,7 +103,12 @@ export class MessageLoggerService {
 					const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
 					const dest = __basedir + MISC_PATH + filename;
 					await FileUtils.createFileFromBase64(media.data, dest);
-					link = await uploadSingleFile(filename, this.number!, dest);
+					const folder_path = [
+						this.number!,
+						chat.isGroup ? 'Group' : 'Individual',
+						FileUtils.getExt(media.mimetype)!,
+					];
+					link = await uploadSingleFile(filename, folder_path, dest);
 				}
 			} catch (err) {
 				canLog = true;
