@@ -86,7 +86,6 @@ export class MessageLoggerService {
 		if (isMedia) {
 			try {
 				media = await message.downloadMedia();
-				console.log(media.mimetype);
 			} catch (err) {
 				Logger.error('Error while saving media message', err as Error);
 				canLog = true;
@@ -153,7 +152,7 @@ export class MessageLoggerService {
 		if (!canLog) {
 			return;
 		}
-		
+
 		try {
 			if (saveMediaFile && media) {
 				const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
