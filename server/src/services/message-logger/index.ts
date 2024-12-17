@@ -86,6 +86,7 @@ export class MessageLoggerService {
 		if (isMedia) {
 			try {
 				media = await message.downloadMedia();
+				console.log(media.mimetype);
 			} catch (err) {
 				Logger.error('Error while saving media message', err as Error);
 				canLog = true;
@@ -103,6 +104,7 @@ export class MessageLoggerService {
 			} else if (pref.include.length > 0 && !pref.include.includes(contact.id.user)) {
 				return;
 			}
+
 			if (isMedia) {
 				if (media) {
 					if (pref.loggers.includes('image') && media.mimetype.includes('image')) {
@@ -147,6 +149,11 @@ export class MessageLoggerService {
 				canLog = true;
 			}
 		}
+
+		if (!canLog) {
+			return;
+		}
+		
 		try {
 			if (saveMediaFile && media) {
 				const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
@@ -165,9 +172,7 @@ export class MessageLoggerService {
 		}
 		loggedObj.link = link;
 
-		if (canLog) {
-			this.logMessageToDB(loggedObj);
-		}
+		this.logMessageToDB(loggedObj);
 	}
 
 	private async logMessageToDB(messages: LogMessage | LogMessage[]) {
