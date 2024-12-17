@@ -121,7 +121,7 @@ async function addMessageLogRule(req: Request, res: Response, next: NextFunction
 async function deleteMessageLogRule(req: Request, res: Response, next: NextFunction) {
 	try {
 		const userPrefService = await UserPreferencesService.getService(req.locals.user.getUserId());
-		await userPrefService.deleteMessageLogRule(req.query.id as string);
+		await userPrefService.deleteMessageLogRule(req.params.id as string);
 
 		return Respond({
 			res,
