@@ -202,14 +202,23 @@ async function exportGroups(req: Request, res: Response, next: NextFunction) {
 
 		const participants = (
 			await Promise.all(
-				groups.map((groupChat) =>
-					whatsappUtils.getGroupContacts(groupChat, {
+				groups.map(async (groupChat) => {
+					const participants = await whatsappUtils.getGroupContacts(groupChat, {
 						saved: options.saved,
 						unsaved: options.unsaved,
 						business_details: options.business_contacts_only,
 						mapped_contacts: saved_contacts,
-					})
-				)
+					});
+
+					participants.forEach((participant) => {
+						if (participant.user_type === 'ADMIN' || participant.user_type === 'CREATOR') {
+							participant.description = groupChat.description;
+							participant.participants = groupChat.participants.length;
+						}
+					});
+
+					return participants;
+				})
 			)
 		).flat();
 

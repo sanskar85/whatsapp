@@ -147,6 +147,14 @@ export default class CSVParser {
 				field: 'country',
 				title: 'Country',
 			},
+			{
+				field: 'participants',
+				title: 'Participants',
+			},
+			{
+				field: 'description',
+				title: 'Description',
+			},
 		];
 
 		const csv = json2csv(contacts, {
@@ -212,6 +220,14 @@ export default class CSVParser {
 			{
 				field: 'websites',
 				title: 'Websites',
+			},
+			{
+				field: 'participants',
+				title: 'Participants',
+			},
+			{
+				field: 'description',
+				title: 'Description',
 			},
 		];
 
