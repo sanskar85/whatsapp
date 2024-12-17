@@ -6,6 +6,7 @@ import { default as AttachmentReducers } from './reducers/AttachmentReducers';
 import { default as BotReducers } from './reducers/BotReducers';
 import { default as CSVFileReducers } from './reducers/CSVFileReducers';
 import { default as ContactCardReducers } from './reducers/ContactCardReducers';
+import { default as EnhancementReducers } from './reducers/EnhancementsReducers';
 import { default as LinkShortenerReducer } from './reducers/LinkShortnerReducers';
 import { default as MergeGroupReducers } from './reducers/MergeGroupReducer';
 import { default as PollReducers } from './reducers/PollReducers';
@@ -26,6 +27,7 @@ const store = configureStore({
 		[StoreNames.MERGE_GROUP]: MergeGroupReducers,
 		[StoreNames.API]: APIWebhookReducers,
 		[StoreNames.SCHEDULER_BY_DATE]: SchedulerByDateReducer,
+		[StoreNames.ENHANCEMENT]: EnhancementReducers,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({

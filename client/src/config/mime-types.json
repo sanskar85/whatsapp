@@ -1,0 +1,90 @@
+[
+	{
+		"name": "Text Messages",
+		"value": "text"
+	},
+	{
+		"name": "All Images",
+		"value": "image"
+	},
+	{
+		"name": "heic (Image)",
+		"value": "image/heif"
+	},
+	{
+		"name": "jpg, jpeg (Image)",
+		"value": "image/jpeg"
+	},
+	{
+		"name": "png (Image)",
+		"value": "image/png"
+	},
+	{
+		"name": "gif (Image)",
+		"value": "image/gif"
+	},
+	{
+		"name": "webp (Image)",
+		"value": "image/webp"
+	},
+	{
+		"name": "All videos",
+		"value": "video"
+	},
+	{
+		"name": "mp4, m4v (Video)",
+		"value": "video/mp4"
+	},
+	{
+		"name": "mkv (Video)",
+		"value": "video/x-matroska"
+	},
+	{
+		"name": "webm (Video)",
+		"value": "video/webm"
+	},
+	{
+		"name": "mpeg, mpg (Video)",
+		"value": "video/mpeg"
+	},
+	{
+		"name": "doc (Microsoft Word)",
+		"value": "application/msword"
+	},
+	{
+		"name": "docx (Microsoft Word)",
+		"value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+	},
+	{
+		"name": "pdf",
+		"value": "application/pdf"
+	},
+	{
+		"name": "txt (Plain Text)",
+		"value": "text/plain"
+	},
+	{
+		"name": "xlsx (Microsoft Excel)",
+		"value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	},
+	{
+		"name": "xls (Microsoft Excel)",
+		"value": "application/vnd.ms-excel"
+	},
+	{
+		"name": "csv (Comma-Separated Values)",
+		"value": "text/csv"
+	},
+	{
+		"name": "zip (ZIP Archive)",
+		"value": "application/zip"
+	},
+	{
+		"name": "mp3 (MPEG Audio)",
+		"value": "audio/mpeg"
+	},
+	{
+		"name": "Other files",
+		"value": ""
+	}
+]

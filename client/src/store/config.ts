@@ -11,4 +11,5 @@ export enum StoreNames {
 	PAYMENTS = 'payments',
 	API = 'api',
 	SCHEDULER_BY_DATE = 'scheduler_by_date',
+	ENHANCEMENT = 'enhancement',
 }

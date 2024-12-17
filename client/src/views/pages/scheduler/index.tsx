@@ -655,6 +655,7 @@ export default function Scheduler() {
 											placeholder='End At (in IST)'
 											onChange={(text) => dispatch(setEndTime(text))}
 											value={details.endTime}
+											min={details.startTime}
 										/>
 									</Flex>
 									<AddOns
@@ -765,8 +766,10 @@ function TimeInput({
 	onChange,
 	placeholder,
 	value,
+	min,
 }: {
 	placeholder: string;
+	min?: string;
 	value: string;
 	onChange: (text: string) => void;
 }) {
@@ -788,6 +791,7 @@ function TimeInput({
 				}}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
+				min={min}
 			/>
 		</FormControl>
 	);

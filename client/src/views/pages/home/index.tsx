@@ -13,28 +13,29 @@ import AttachmentService from '../../../services/attachment.service';
 import AuthService from '../../../services/auth.service';
 import BotService from '../../../services/bot.service';
 import ContactCardService from '../../../services/contact-card.service';
+import EnhancementService from '../../../services/enhancements.service';
 import GroupService from '../../../services/group.service';
 import LabelService from '../../../services/label.service';
 import MessageService from '../../../services/message.service';
 import { SchedulerByDateService } from '../../../services/scheduler-by-date.service';
 import ShortenerService from '../../../services/shortener.service';
 import UploadsService from '../../../services/uploads.service';
-import UserService from '../../../services/user.service';
 import { StoreNames, StoreState, store } from '../../../store';
 import { setAPIList, setWebhookList } from '../../../store/reducers/APIWebhookReducer';
 import { setAttachments } from '../../../store/reducers/AttachmentReducers';
 import { setBots } from '../../../store/reducers/BotReducers';
 import { setCSVFileList } from '../../../store/reducers/CSVFileReducers';
 import { setContactList } from '../../../store/reducers/ContactCardReducers';
+import { setMessageLoggerSettings } from '../../../store/reducers/EnhancementsReducers';
 import { setLinksList } from '../../../store/reducers/LinkShortnerReducers';
 import { setMergedGroupList } from '../../../store/reducers/MergeGroupReducer';
+import { setAllRepetitiveSchedulers } from '../../../store/reducers/SchedulerByDateReducer';
 import { setAllSchedulers } from '../../../store/reducers/SchedulerReducer';
-import { setUserDetails, setUserPreferences } from '../../../store/reducers/UserDetailsReducers';
+import { setUserDetails } from '../../../store/reducers/UserDetailsReducers';
 import ConfirmationAlert, { ConfirmationAlertHandle } from '../../components/confirmation-alert';
 import Navbar from '../../components/navbar';
 import NavigationDrawer from '../../components/navigation-drawer';
 import AddDeviceDialog, { AddDeviceDialogHandle } from '../settings/components/AddDeviceDialog';
-import { setAllRepetitiveSchedulers } from '../../../store/reducers/SchedulerByDateReducer';
 
 export default function Home() {
 	const outlet = useOutlet();
@@ -88,10 +89,11 @@ export default function Home() {
 				ShortenerService.listAll(),
 				GroupService.mergedGroups(),
 				MessageService.getScheduledMessages(),
-				UserService.getUserPreferences(),
+				// UserService.getUserPreferences(),
 				APIWebhookService.listKeys(),
 				APIWebhookService.listWebhooks(),
 				SchedulerByDateService.listAllSchedulers(),
+				EnhancementService.getEnhancements(),
 			];
 
 			const results = await Promise.all(promises);
@@ -111,10 +113,10 @@ export default function Home() {
 			dispatch(setLinksList(results[6]));
 			dispatch(setMergedGroupList(results[7]));
 			dispatch(setAllSchedulers(results[8]));
-			dispatch(setUserPreferences(results[9]));
-			dispatch(setAPIList(results[10]));
-			dispatch(setWebhookList(results[11]));
-			dispatch(setAllRepetitiveSchedulers(results[12]));
+			dispatch(setAPIList(results[9]));
+			dispatch(setWebhookList(results[10]));
+			dispatch(setAllRepetitiveSchedulers(results[11]));
+			dispatch(setMessageLoggerSettings(results[12]));
 
 			AuthService.validateClientID().then((res) => {
 				if (res) {

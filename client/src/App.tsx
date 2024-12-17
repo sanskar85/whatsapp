@@ -24,6 +24,7 @@ const GroupMergePage = lazy(() => import('./views/pages/merge-group'));
 const NetworkError = lazy(() => import('./views/pages/network-error'));
 const APIPage = lazy(() => import('./views/pages/api-webhook'));
 const SchedulerByDate = lazy(() => import('./views/pages/scheduler-by-date'));
+const Logger = lazy(() => import('./views/pages/logger'));
 
 function App() {
 	useTheme();
@@ -48,6 +49,7 @@ function App() {
 							<Route path={NAVIGATION.GROUP_MERGE} element={<GroupMergePage />} />
 							<Route path={NAVIGATION.TASKS} element={<Tasks />} />
 							<Route path={NAVIGATION.API} element={<APIPage />} />
+							<Route path={NAVIGATION.ENHANCEMENT} element={<Logger />} />
 						</Route>
 						<Route path={NAVIGATION.NETWORK_ERROR} element={<NetworkError />} />
 						<Route path='*' element={<Navigate to={NAVIGATION.WELCOME} />} />

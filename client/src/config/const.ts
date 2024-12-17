@@ -1,4 +1,5 @@
 import countries from './countries.json';
+import mime_types from './mime-types.json';
 
 export const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 export const WEBPAGE_URL = import.meta.env.VITE_WEBPAGE_URL;
@@ -24,6 +25,7 @@ export const NAVIGATION = {
 	OPEN: '/open',
 	API: '/api-keys',
 	SCHEDULER_BY_DATE: '/scheduler-by-date',
+	ENHANCEMENT: '/enhancements',
 };
 
 export enum CHROME_ACTION {
@@ -92,6 +94,16 @@ export const COUNTRIES: {
 
 export const COUNTRIES_OPTIONS = Object.entries(COUNTRIES).map(([code, name]) => ({
 	code,
+	name,
+}));
+
+export const MIME_TYPES: {
+	value: string;
+	name: string;
+}[] = mime_types;
+
+export const MIME_TYPES_OPTIONS = Object.entries(MIME_TYPES).map(([value, name]) => ({
+	value,
 	name,
 }));
 

@@ -6,7 +6,7 @@ import { FiBarChart2, FiLink2 } from 'react-icons/fi';
 import { GrTasks } from 'react-icons/gr';
 import { MdGroups3, MdOutlineAttachment, MdOutlineContactPhone } from 'react-icons/md';
 import { SiProbot } from 'react-icons/si';
-import { TbCsv, TbLogout2, TbMessage2Minus } from 'react-icons/tb';
+import { TbCsv, TbGraph, TbLogout2, TbMessage2Minus } from 'react-icons/tb';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { LOGO } from '../../../assets/Images';
@@ -98,6 +98,7 @@ export default function NavigationDrawer() {
 							<MenuButton icon={FiBarChart2} route={NAVIGATION.REPORTS} name='Reports' />
 							<MenuButton icon={TbCsv} route={NAVIGATION.CSV} name='CSV ' />
 							<MenuButton icon={MdGroups3} route={NAVIGATION.GROUP_MERGE} name='Groups' />
+							<MenuButton icon={TbGraph} route={NAVIGATION.ENHANCEMENT} name='Enhancements' />
 							<MenuButton icon={GrTasks} route={NAVIGATION.TASKS} name='Tasks' />
 							<MenuButton icon={BiCode} route={NAVIGATION.API} name='API Keys' />
 						</Flex>
