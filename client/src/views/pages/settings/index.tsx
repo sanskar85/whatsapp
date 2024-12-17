@@ -9,11 +9,8 @@ import {
 	DrawerHeader,
 	DrawerOverlay,
 	Flex,
-	FormControl,
-	FormLabel,
 	HStack,
 	IconButton,
-	Switch,
 	Table,
 	TableContainer,
 	Tbody,
@@ -30,7 +27,6 @@ import { startAuth, useAuth } from '../../../hooks/useAuth';
 import { useTheme } from '../../../hooks/useTheme';
 import AuthService from '../../../services/auth.service';
 import PaymentService from '../../../services/payment.service';
-import UserService from '../../../services/user.service';
 import { StoreNames, StoreState } from '../../../store';
 import { setUserDetails } from '../../../store/reducers/UserDetailsReducers';
 import AddDeviceDialog, { AddDeviceDialogHandle } from './components/AddDeviceDialog';
@@ -64,20 +60,8 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 
 	const { isAuthenticating, qrCode, isSocketInitialized, isAuthenticated, qrGenerated } = useAuth();
 
-	const {
-		isSubscribed,
-		userType,
-		messageLoggerEnabled,
-		isMessageStarEnabled: starIndividualMessage,
-		session_expires_at,
-		isWhatsappReady,
-		phone_number,
-		name,
-		group_media_message,
-		group_text_message,
-		individual_media_message,
-		individual_text_message,
-	} = useSelector((state: StoreState) => state[StoreNames.USER]);
+	const { isSubscribed, userType, session_expires_at, isWhatsappReady, phone_number, name } =
+		useSelector((state: StoreState) => state[StoreNames.USER]);
 
 	const [PAYMENT_RECORDS, setPaymentRecords] = useState<(Payment | Subscription)[]>([]);
 
@@ -104,61 +88,6 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 		setTimeout(() => {
 			window.location.reload();
 		}, 1000);
-	};
-
-	const handleUserPref = async (action: string, value: string | boolean) => {
-		if (action === 'message-logger') {
-			if (value) {
-				const data = await UserService.enableMessageLogging({
-					individual_text_message: true,
-					individual_media_message: true,
-					group_text_message: true,
-					group_media_message: true,
-				});
-				dispatch(setUserDetails(data));
-			} else {
-				const data = await UserService.disableMessageLogging();
-				dispatch(setUserDetails(data));
-			}
-		}
-
-		if (action === 'individual-text-message') {
-			const data = await UserService.enableMessageLogging({
-				individual_text_message: !!value,
-			});
-			dispatch(setUserDetails(data));
-		}
-
-		if (action === 'individual-media-message') {
-			const data = await UserService.enableMessageLogging({
-				individual_media_message: !!value,
-			});
-			dispatch(setUserDetails(data));
-		}
-
-		if (action === 'groups-text-message') {
-			const data = await UserService.enableMessageLogging({
-				group_text_message: !!value,
-			});
-			dispatch(setUserDetails(data));
-		}
-
-		if (action === 'groups-media-message') {
-			const data = await UserService.enableMessageLogging({
-				group_media_message: !!value,
-			});
-			dispatch(setUserDetails(data));
-		}
-
-		if (action === 'star-individual-message') {
-			if (value) {
-				const data = await UserService.enableIndividualMessageStar();
-				dispatch(setUserDetails({ isMessageStarEnabled: data }));
-			} else {
-				const data = await UserService.disableIndividualMessageStar();
-				dispatch(setUserDetails({ isMessageStarEnabled: data }));
-			}
-		}
 	};
 
 	return (
@@ -351,102 +280,6 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 										</Table>
 									</TableContainer>
 								</VStack>
-							</section>
-
-							<section className='mt-6'>
-								<FormControl display='flex' alignItems='center'>
-									<FormLabel
-										htmlFor='message-logger'
-										mb='0'
-										color={theme === 'dark' ? 'white' : 'black'}
-									>
-										Star Individual Message?
-									</FormLabel>
-									<Switch
-										id='star-individual-message'
-										isChecked={starIndividualMessage}
-										onChange={(e) => handleUserPref('star-individual-message', e.target.checked)}
-									/>
-								</FormControl>
-								<FormControl display='flex' alignItems='center'>
-									<FormLabel
-										htmlFor='message-logger'
-										mb='0'
-										color={theme === 'dark' ? 'white' : 'black'}
-									>
-										Enable Message Logging?
-									</FormLabel>
-									<Switch
-										id='message-logger'
-										isChecked={messageLoggerEnabled}
-										onChange={(e) => handleUserPref('message-logger', e.target.checked)}
-									/>
-								</FormControl>
-								<Flex
-									color={theme === 'dark' ? 'lightgray' : 'darkgray'}
-									alignItems={'center'}
-									hidden={!messageLoggerEnabled}
-									gap={'0.5rem'}
-								>
-									<InfoOutlineIcon />
-									Ask to admin to access the Google Sheet File.
-								</Flex>
-								<FormControl display='flex' alignItems='center' hidden={!messageLoggerEnabled}>
-									<FormLabel
-										htmlFor='individual-text-message'
-										mb='0'
-										color={theme === 'dark' ? 'white' : 'black'}
-									>
-										Individual Text Message?
-									</FormLabel>
-									<Switch
-										id='individual-text-message'
-										isChecked={individual_text_message}
-										onChange={(e) => handleUserPref('individual-text-message', e.target.checked)}
-									/>
-								</FormControl>
-								<FormControl display='flex' alignItems='center' hidden={!messageLoggerEnabled}>
-									<FormLabel
-										htmlFor='individual-media-message'
-										mb='0'
-										color={theme === 'dark' ? 'white' : 'black'}
-									>
-										Individual Media Message?
-									</FormLabel>
-									<Switch
-										id='individual-media-message'
-										isChecked={individual_media_message}
-										onChange={(e) => handleUserPref('individual-media-message', e.target.checked)}
-									/>
-								</FormControl>
-								<FormControl display='flex' alignItems='center' hidden={!messageLoggerEnabled}>
-									<FormLabel
-										htmlFor='groups-text-message'
-										mb='0'
-										color={theme === 'dark' ? 'white' : 'black'}
-									>
-										Groups Text Message?
-									</FormLabel>
-									<Switch
-										id='groups-text-message'
-										isChecked={group_text_message}
-										onChange={(e) => handleUserPref('groups-text-message', e.target.checked)}
-									/>
-								</FormControl>
-								<FormControl display='flex' alignItems='center' hidden={!messageLoggerEnabled}>
-									<FormLabel
-										htmlFor='groups-media-message'
-										mb='0'
-										color={theme === 'dark' ? 'white' : 'black'}
-									>
-										Groups Media Message?
-									</FormLabel>
-									<Switch
-										id='groups-media-message'
-										isChecked={group_media_message}
-										onChange={(e) => handleUserPref('groups-media-message', e.target.checked)}
-									/>
-								</FormControl>
 							</section>
 
 							<section className=' flex flex-col justify-end flex-1'>

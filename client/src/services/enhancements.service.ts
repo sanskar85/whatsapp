@@ -21,12 +21,26 @@ export default class EnhancementService {
 					individual_text: LoggerRule;
 					individual_media: LoggerRule;
 				} & { [key: string]: LoggerRule },
+				isMessageStarEnabled: data.isMessageStarEnabled ?? false,
+				messageStarRules: {
+					individual_outgoing_messages: data.messageStarRules.individual_outgoing_messages ?? false,
+					individual_incoming_messages: data.messageStarRules.individual_incoming_messages ?? false,
+					group_outgoing_messages: data.messageStarRules.group_outgoing_messages ?? false,
+					group_incoming_messages: data.messageStarRules.group_incoming_messages ?? false,
+				},
 			} as {
 				isLoggerEnabled: boolean;
 				loggerRules: {
 					individual_text: LoggerRule;
 					individual_media: LoggerRule;
 				} & { [key: string]: LoggerRule };
+				isMessageStarEnabled: boolean;
+				messageStarRules: {
+					individual_outgoing_messages: boolean;
+					individual_incoming_messages: boolean;
+					group_outgoing_messages: boolean;
+					group_incoming_messages: boolean;
+				};
 			};
 		} catch (error) {
 			//ignore
@@ -96,6 +110,35 @@ export default class EnhancementService {
 			return data.success as boolean;
 		} catch (error) {
 			return false;
+		}
+	}
+
+	static async updateStarMessagesPreferences(details: {
+		individual_outgoing_messages: boolean;
+		individual_incoming_messages: boolean;
+		group_outgoing_messages: boolean;
+		group_incoming_messages: boolean;
+	}) {
+		try {
+			const { data } = await APIInstance.post('/preferences/message-star-rules', {
+				individual_outgoing_messages: details.individual_outgoing_messages,
+				individual_incoming_messages: details.individual_incoming_messages,
+				group_outgoing_messages: details.group_outgoing_messages,
+				group_incoming_messages: details.group_incoming_messages,
+			});
+			return data as {
+				individual_outgoing_messages: boolean;
+				individual_incoming_messages: boolean;
+				group_outgoing_messages: boolean;
+				group_incoming_messages: boolean;
+			};
+		} catch (error) {
+			return {
+				individual_outgoing_messages: false,
+				individual_incoming_messages: false,
+				group_outgoing_messages: false,
+				group_incoming_messages: false,
+			};
 		}
 	}
 }

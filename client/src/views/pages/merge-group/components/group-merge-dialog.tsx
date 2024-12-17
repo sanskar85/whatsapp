@@ -41,7 +41,7 @@ import Multiselect from 'multiselect-react-dropdown';
 import { useMemo, useRef, useState } from 'react';
 import { BiRefresh, BiTrash } from 'react-icons/bi';
 import { useDispatch, useSelector } from 'react-redux';
-import { COUNTRIES_OPTIONS } from '../../../../config/const';
+import { COUNTRIES_OPTIONS as COUNTRIES_OPTIONS_RAW } from '../../../../config/const';
 import GroupService from '../../../../services/group.service';
 import { StoreNames, StoreState } from '../../../../store';
 import {
@@ -100,6 +100,11 @@ type GroupMergeProps = {
 	onClose: () => void;
 	isOpen: boolean;
 };
+
+const COUNTRIES_OPTIONS = COUNTRIES_OPTIONS_RAW.map((country) => ({
+	...country,
+	name: country.name + ' (+' + country.code + ')',
+})).sort((a, b) => a.name.localeCompare(b.name));
 
 const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 	const dispatch = useDispatch();

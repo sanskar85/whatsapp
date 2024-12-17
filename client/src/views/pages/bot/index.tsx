@@ -24,7 +24,7 @@ import { useEffect, useRef, useState } from 'react';
 import { BiTrash } from 'react-icons/bi';
 import { RiRobot2Line } from 'react-icons/ri';
 import { useDispatch, useSelector } from 'react-redux';
-import { COUNTRIES_OPTIONS, NAVIGATION } from '../../../config/const';
+import { COUNTRIES_OPTIONS as COUNTRIES_OPTIONS_RAW, NAVIGATION } from '../../../config/const';
 import { popFromNavbar, pushToNavbar } from '../../../hooks/useNavbar';
 import { useTheme } from '../../../hooks/useTheme';
 import BotService from '../../../services/bot.service';
@@ -62,6 +62,11 @@ import Info from '../../components/info';
 import { AddDevicePopup, SubscriptionPopup } from '../../components/subscription-alert';
 import AllResponders from './components/AllResponders';
 import { NumberInput, SelectElement, TextAreaElement, TextInput } from './components/Inputs';
+
+const COUNTRIES_OPTIONS = COUNTRIES_OPTIONS_RAW.map((country) => ({
+	...country,
+	name: country.name + ' (+' + country.code + ')',
+})).sort((a, b) => a.name.localeCompare(b.name));
 
 export default function Bot() {
 	const dispatch = useDispatch();

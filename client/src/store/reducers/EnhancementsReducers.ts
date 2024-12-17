@@ -31,6 +31,13 @@ const initState: EnhancementState = {
 		exclude: [],
 	},
 	updated_values: {},
+	isMessageStarEnabled: false,
+	messageStarRules: {
+		individual_outgoing_messages: false,
+		individual_incoming_messages: false,
+		group_outgoing_messages: false,
+		group_incoming_messages: false,
+	},
 };
 
 const EnhancementsSlice = createSlice({
@@ -91,10 +98,19 @@ const EnhancementsSlice = createSlice({
 					individual_text: LoggerRule;
 					individual_media: LoggerRule;
 				} & { [key: string]: LoggerRule };
+				isMessageStarEnabled: boolean;
+				messageStarRules: {
+					individual_outgoing_messages: boolean;
+					individual_incoming_messages: boolean;
+					group_outgoing_messages: boolean;
+					group_incoming_messages: boolean;
+				};
 			}>
 		) => {
 			state.logger_prefs = action.payload.loggerRules;
 			state.message_logger = action.payload.isLoggerEnabled;
+			state.isMessageStarEnabled = action.payload.isMessageStarEnabled;
+			state.messageStarRules = action.payload.messageStarRules;
 		},
 		setNewRuleDetails: (
 			state,
@@ -122,6 +138,33 @@ const EnhancementsSlice = createSlice({
 		updateLoggerPrefs: (state, action: PayloadAction<LoggerRule>) => {
 			state.updated_values[action.payload.id] = true;
 			state.logger_prefs = { ...state.logger_prefs, [action.payload.id]: action.payload };
+		},
+		updateStarMessages: (
+			state,
+			action: PayloadAction<Partial<typeof initState.messageStarRules>>
+		) => {
+			if (action.payload.group_incoming_messages !== undefined) {
+				state.messageStarRules.group_incoming_messages = action.payload.group_incoming_messages;
+			}
+			if (action.payload.group_outgoing_messages !== undefined) {
+				state.messageStarRules.group_outgoing_messages = action.payload.group_outgoing_messages;
+			}
+			if (action.payload.individual_incoming_messages !== undefined) {
+				state.messageStarRules.individual_incoming_messages =
+					action.payload.individual_incoming_messages;
+			}
+			if (action.payload.individual_outgoing_messages !== undefined) {
+				state.messageStarRules.individual_outgoing_messages =
+					action.payload.individual_outgoing_messages;
+			}
+			if (
+				!state.messageStarRules.group_incoming_messages &&
+				!state.messageStarRules.group_outgoing_messages &&
+				!state.messageStarRules.individual_incoming_messages &&
+				!state.messageStarRules.individual_outgoing_messages
+			) {
+				state.isMessageStarEnabled = false;
+			}
 		},
 		resetUpdatedValues: (state) => {
 			state.updated_values = {};
@@ -153,6 +196,7 @@ export const {
 	setMediaExclude,
 	setMediaInclude,
 	resetNewRuleDetails,
+	updateStarMessages,
 } = EnhancementsSlice.actions;
 
 export default EnhancementsSlice.reducer;

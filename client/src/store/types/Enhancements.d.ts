@@ -15,4 +15,11 @@ export type EnhancementState = {
 	updated_values: {
 		[key: string]: boolean;
 	};
+	isMessageStarEnabled: boolean;
+	messageStarRules: {
+		individual_outgoing_messages: boolean;
+		individual_incoming_messages: boolean;
+		group_outgoing_messages: boolean;
+		group_incoming_messages: boolean;
+	};
 };

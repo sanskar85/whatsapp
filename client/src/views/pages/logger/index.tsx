@@ -23,6 +23,7 @@ import EnhancementService from '../../../services/enhancements.service';
 import { StoreNames, StoreState } from '../../../store';
 import { setMessageLogger } from '../../../store/reducers/EnhancementsReducers';
 import MessageLoggingDialog from './components/message-logger-dialog';
+import StarMessageRulesDialog from './components/star-message-rules-dialog';
 
 export default function Logger() {
 	const dispatch = useDispatch();
@@ -34,6 +35,12 @@ export default function Logger() {
 		isOpen: isOpenMessageLoggingDialog,
 		onClose: onCloseMessageLoggingDialog,
 		onOpen: onOpenMessageLoggingDialog,
+	} = useDisclosure();
+
+	const {
+		isOpen: isOpenStarMessageRulesDialog,
+		onClose: onCloseStarMessageRulesDialog,
+		onOpen: onOpenStarMessageRulesDialog,
 	} = useDisclosure();
 
 	useEffect(() => {
@@ -74,6 +81,7 @@ export default function Logger() {
 			});
 		}
 	};
+
 	return (
 		<Box>
 			<Box>
@@ -89,7 +97,7 @@ export default function Logger() {
 							<Tr>
 								<Td className='text-black dark:text-white'>Message logger</Td>
 								<Td>
-									<Flex gap={4} alignItems={'center'}>
+									<Flex gap={4} alignItems={'center'} justifyContent={'flex-end'} px={8}>
 										<Switch
 											colorScheme='green'
 											isChecked={message_logger}
@@ -106,6 +114,21 @@ export default function Logger() {
 									</Flex>
 								</Td>
 							</Tr>
+							<Tr>
+								<Td className='text-black dark:text-white'>Star Messages</Td>
+								<Td>
+									<Flex gap={4} alignItems={'center'} justifyContent={'flex-end'} px={8}>
+										<IconButton
+											aria-label='settings'
+											colorScheme='blue'
+											onClick={onOpenStarMessageRulesDialog}
+											isDisabled={!message_logger}
+										>
+											<PiGear />
+										</IconButton>
+									</Flex>
+								</Td>
+							</Tr>
 						</Tbody>
 					</Table>
 				</TableContainer>
@@ -113,6 +136,10 @@ export default function Logger() {
 			<MessageLoggingDialog
 				isOpen={isOpenMessageLoggingDialog}
 				onClose={onCloseMessageLoggingDialog}
+			/>
+			<StarMessageRulesDialog
+				isOpen={isOpenStarMessageRulesDialog}
+				onClose={onCloseStarMessageRulesDialog}
 			/>
 		</Box>
 	);
