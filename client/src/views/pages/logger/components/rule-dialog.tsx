@@ -29,6 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import EnhancementService from '../../../../services/enhancements.service';
 import { StoreNames, StoreState } from '../../../../store';
 import {
+	resetNewRuleDetails,
 	setMessageLoggerSettings,
 	setNewRuleGroup,
 	setNewRuleLoggers,
@@ -61,7 +62,7 @@ export default function GroupsRuleDialog({
 	const filteredGroups = groups.filter((group) => !Object.keys(logger_prefs).includes(group.id));
 
 	const filtered = filteredGroups.filter((group) =>
-		group.name?.toLowerCase().startsWith(searchText.toLowerCase())
+		group.name?.toLowerCase().includes(searchText.toLowerCase())
 	);
 
 	const allChecked = useMemo(() => {
@@ -154,6 +155,7 @@ export default function GroupsRuleDialog({
 							dispatch(setMessageLoggerSettings(res));
 						}
 					});
+					dispatch(resetNewRuleDetails());
 					onClose();
 					return {
 						title: ' Rule saved',
@@ -181,41 +183,7 @@ export default function GroupsRuleDialog({
 						<Box>
 							<Text>Select Group Range</Text>
 						</Box>
-						<Flex gap={2}>
-							<Box flex={1}>
-								<Input
-									onChange={(e) =>
-										setRange((prev) => {
-											return {
-												...prev,
-												start: e.target.value,
-											};
-										})
-									}
-									value={range.start}
-									type='number'
-									placeholder='Start Range'
-								/>
-							</Box>
-							<Box flex={1}>
-								<Input
-									onChange={(e) =>
-										setRange((prev) => {
-											return {
-												...prev,
-												end: e.target.value,
-											};
-										})
-									}
-									value={range.end}
-									type='number'
-									placeholder='End Range'
-								/>
-							</Box>
-							<Button flex={1} colorScheme='green' onClick={handleSelectRange}>
-								Select range
-							</Button>
-						</Flex>
+
 						<TableContainer>
 							<Table>
 								<Thead>
@@ -228,45 +196,79 @@ export default function GroupsRuleDialog({
 											/>
 										</Th>
 										<Th>
-											<Flex
-												alignItems={'center'}
-												justifyContent={'space-between'}
-												direction={'row'}
-											>
-												<Text>Name</Text>
-												<InputGroup size='sm' variant={'outline'} width={'250px'}>
-													<InputLeftElement pointerEvents='none'>
-														<SearchIcon color='gray.300' />
-													</InputLeftElement>
-													<Input
-														placeholder='Search here...'
-														value={searchText}
-														onChange={(e) => setSearchText(e.target.value)}
-														borderRadius={'5px'}
-														focusBorderColor='gray.300'
-													/>
-												</InputGroup>
+											<Flex alignItems={'center'} justifyContent={'space-between'} direction={'row'}>
+												<Box>
+													<Text>Name</Text>
+												</Box>
+												<Flex gap={2}>
+													<Flex gap={2} justifyContent={'flex-end'}>
+														<Box width={'120px'}>
+															<Input
+																size={'sm'}
+																onChange={(e) =>
+																	setRange((prev) => {
+																		return {
+																			...prev,
+																			start: e.target.value,
+																		};
+																	})
+																}
+																value={range.start}
+																type='number'
+																placeholder='Start Range'
+															/>
+														</Box>
+														<Box width={'120px'}>
+															<Input
+																size={'sm'}
+																onChange={(e) =>
+																	setRange((prev) => {
+																		return {
+																			...prev,
+																			end: e.target.value,
+																		};
+																	})
+																}
+																value={range.end}
+																type='number'
+																placeholder='End Range'
+															/>
+														</Box>
+														<Button size={'sm'} colorScheme='green' onClick={handleSelectRange}>
+															Select range
+														</Button>
+													</Flex>
+													<InputGroup size='sm' variant={'outline'} width={'250px'}>
+														<InputLeftElement pointerEvents='none'>
+															<SearchIcon color='gray.300' />
+														</InputLeftElement>
+														<Input
+															placeholder='Search here...'
+															value={searchText}
+															onChange={(e) => setSearchText(e.target.value)}
+															borderRadius={'5px'}
+															focusBorderColor='gray.300'
+														/>
+													</InputGroup>
+												</Flex>
 											</Flex>
 										</Th>
 									</Tr>
 								</Thead>
 								<Tbody>
-									{filtered.map((group, index) => {
-										if (!group.isMergedGroup)
-											return (
-												<Tr key={index}>
-													<Td>
-														<Checkbox
-															isChecked={group_id.includes(group.id)}
-															onChange={() => handleSelectGroup(group.id)}
-															mr={'0.5rem'}
-														/>
-														{index + 1}
-													</Td>
-													<Td>{group.name}</Td>
-												</Tr>
-											);
-									})}
+									{filtered.map((group, index) => (
+										<Tr key={index}>
+											<Td>
+												<Checkbox
+													isChecked={group_id.includes(group.id)}
+													onChange={() => handleSelectGroup(group.id)}
+													mr={'0.5rem'}
+												/>
+												{index + 1}
+											</Td>
+											<Td>{group.name}</Td>
+										</Tr>
+									))}
 								</Tbody>
 							</Table>
 						</TableContainer>
@@ -276,7 +278,11 @@ export default function GroupsRuleDialog({
 					<Button colorScheme='blue' mr={3} onClick={onClose}>
 						Close
 					</Button>
-					<Button colorScheme='green' onClick={handleSave}>
+					<Button
+						colorScheme='green'
+						onClick={handleSave}
+						isDisabled={group_id.length === 0 || loggers.length === 0}
+					>
 						Save
 					</Button>
 				</ModalFooter>
