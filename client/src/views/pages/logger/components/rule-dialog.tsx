@@ -48,6 +48,7 @@ export default function GroupsRuleDialog({
 	const { groups } = useSelector((store: StoreState) => store[StoreNames.USER]);
 	const {
 		newRuleDetails: { group_id, exclude, include, loggers },
+		logger_prefs,
 	} = useSelector((store: StoreState) => store[StoreNames.ENHANCEMENT]);
 
 	const [range, setRange] = useState<{ start: string; end: string }>({
@@ -57,7 +58,9 @@ export default function GroupsRuleDialog({
 
 	const [searchText, setSearchText] = useState<string>('');
 
-	const filtered = groups.filter((group) =>
+	const filteredGroups = groups.filter((group) => !Object.keys(logger_prefs).includes(group.id));
+
+	const filtered = filteredGroups.filter((group) =>
 		group.name?.toLowerCase().startsWith(searchText.toLowerCase())
 	);
 

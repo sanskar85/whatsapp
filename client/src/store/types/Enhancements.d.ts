@@ -3,8 +3,8 @@ import { LoggerRule } from '../../services/enhancements.service';
 export type EnhancementState = {
 	message_logger: boolean;
 	logger_prefs: {
-		saved: LoggerRule;
-		unsaved: LoggerRule;
+		individual_text: LoggerRule;
+		individual_media: LoggerRule;
 	} & { [key: string]: LoggerRule };
 	newRuleDetails: {
 		group_id: string[];
@@ -12,5 +12,7 @@ export type EnhancementState = {
 		include: string[];
 		exclude: string[];
 	};
-	updated_values: Set<string>;
+	updated_values: {
+		[key: string]: boolean;
+	};
 };

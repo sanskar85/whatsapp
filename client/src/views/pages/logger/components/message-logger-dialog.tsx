@@ -6,6 +6,7 @@ import {
 	Divider,
 	Flex,
 	HStack,
+	IconButton,
 	Input,
 	InputGroup,
 	InputLeftElement,
@@ -15,29 +16,30 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalOverlay,
-	Table,
-	TableContainer,
-	Tbody,
-	Td,
 	Text,
-	Th,
-	Thead,
-	Tr,
 	useDisclosure,
 	useToast,
 } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
+import { BiTrash } from 'react-icons/bi';
 import { useDispatch, useSelector } from 'react-redux';
 import EnhancementService from '../../../../services/enhancements.service';
 import { StoreNames, StoreState } from '../../../../store';
 import {
-	setSavedMimeType,
-	setSavedNumberExclude,
-	setSavedNumberInclude,
-	setUnsavedMimeType,
-	setUnsavedNumberExclude,
-	setUnsavedNumberInclude,
+	resetUpdatedValues,
+	setIndividualMediaLoggers,
+	setMediaExclude,
+	setMediaInclude,
+	setMessageLoggerSettings,
+	setSavedMedia,
+	setSavedText,
+	setTextExclude,
+	setTextInclude,
+	setUnsavedMedia,
+	setUnsavedText,
+	updateLoggerPrefs,
 } from '../../../../store/reducers/EnhancementsReducers';
+import CheckButton from '../../../components/check-button';
 import NumberInputDialog from '../../../components/number-input-dialog';
 import MimeSelector from './mime-type-selector';
 import GroupsRuleDialog from './rule-dialog';
@@ -50,8 +52,10 @@ type MessageLoggingDialogProps = {
 const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) => {
 	const toast = useToast();
 
-	const { logger_prefs } = useSelector((state: StoreState) => state[StoreNames.ENHANCEMENT]);
-
+	const { logger_prefs, updated_values } = useSelector(
+		(state: StoreState) => state[StoreNames.ENHANCEMENT]
+	);
+	console.log(Object.keys(updated_values));
 	const dispatch = useDispatch();
 
 	const [group_id, setGroupId] = useState<string[]>([]);
@@ -94,7 +98,7 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 	} = useDisclosure();
 
 	const groups = Object.values(logger_prefs).filter(
-		(group) => group.id !== 'saved' && group.id !== 'unsaved'
+		(group) => group.id !== 'individual_text' && group.id !== 'individual_media'
 	);
 
 	const filteredGroups = groups.filter((group) =>
@@ -102,35 +106,50 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 	);
 
 	const updatePreferences = () => {
-		toast.promise(
-			EnhancementService.updateMessageLoggerPreferences({
-				id: 'saved',
-				include: logger_prefs.saved.include,
-				exclude: logger_prefs.saved.exclude,
-				loggers: logger_prefs.saved.loggers,
-			}),
-			{
-				loading: {
-					title: 'Updating saved preferences',
-				},
-				success: (res) => {
-					if (!res) {
-						return {
-							title: 'Error updating saved preferences',
-							duration: 3000,
-						};
-					}
+		const promises = Object.keys(updated_values).map((key) => {
+			const group = logger_prefs[key];
+			console.log(groups)
+			console.log(logger_prefs,key);
+			return EnhancementService.updateMessageLoggerPreferences({
+				id: group.id,
+				exclude: group.exclude,
+				include: group.include,
+				loggers: group.loggers,
+				saved: group.saved,
+				unsaved: group.unsaved,
+			});
+		});
+
+
+		toast.promise(Promise.all(promises), {
+			loading: {
+				title: 'Updating saved preferences',
+			},
+			success: (res) => {
+				if (!res) {
 					return {
-						title: 'Saved preferences updated',
+						title: 'Error updating saved preferences',
 						duration: 3000,
 					};
-				},
-				error: {
-					title: 'Error updating saved preferences',
+				}
+				EnhancementService.getEnhancements().then((res) => {
+					if (res) {
+						dispatch(setMessageLoggerSettings(res));
+					}
+				});
+
+				onClose();
+				dispatch(resetUpdatedValues());
+				return {
+					title: 'Saved preferences updated',
 					duration: 3000,
-				},
-			}
-		);
+				};
+			},
+			error: {
+				title: 'Error updating saved preferences',
+				duration: 3000,
+			},
+		});
 	};
 
 	const handleSelectRange = () => {
@@ -197,6 +216,41 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 		}
 	};
 
+	const handleDeleteRule = () => {
+		const promises = group_id.map((id) => {
+			return EnhancementService.deleteLoggerRule(id);
+		});
+
+		toast.promise(Promise.all(promises), {
+			loading: {
+				title: 'Deleting selected rules',
+			},
+			success: (res) => {
+				if (!res) {
+					return {
+						title: 'Error deleting selected rules',
+						duration: 3000,
+					};
+				}
+				EnhancementService.getEnhancements().then((res) => {
+					if (res) {
+						dispatch(setMessageLoggerSettings(res));
+					}
+				});
+
+				onClose();
+				return {
+					title: 'Selected rules deleted',
+					duration: 3000,
+				};
+			},
+			error: {
+				title: 'Error deleting selected rules',
+				duration: 3000,
+			},
+		});
+	};
+
 	return (
 		<>
 			<Modal isOpen={isOpen} onClose={onClose} size={'6xl'} scrollBehavior='inside'>
@@ -205,66 +259,121 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 					<ModalHeader>Message logging rules</ModalHeader>
 					<ModalBody>
 						<Box>
-							<Flex width={'full'} alignItems={'start'} justifyContent={'space-between'} gap={4}>
-								<Text flex={1}>Saved Contacts</Text>
-								<Box flex={1}>
-									<MimeSelector
-										onChange={(value) => {
-											dispatch(setSavedMimeType(value));
-										}}
-										selectedValue={logger_prefs.saved.loggers}
-									/>
+							<Box>
+								<Text fontWeight={'medium'} fontSize={'lg'}>
+									Individual Text Message
+								</Text>
+							</Box>
+							<Flex width={'full'} alignItems={'center'} justifyContent={'flex-end'} gap={4}>
+								<Box mr={'auto'}>
+									<Text fontWeight={'medium'} color={'gray'}>
+										Rules:-
+									</Text>
 								</Box>
-								<Box flex={1}>
-									<Button width={'full'} mb={4} onClick={openSavedIncludeNumberInput}>
-										Include Numbers({logger_prefs.saved.include.length})
+								<Flex className='gap-2'>
+									<CheckButton
+										gap={2}
+										label='Saved'
+										name='Saved'
+										onChange={({ value }) => dispatch(setSavedText(value))}
+										value={logger_prefs.individual_text.saved}
+									/>
+								</Flex>
+								<Flex className='gap-2'>
+									<CheckButton
+										gap={2}
+										label='Unsaved'
+										name='Unsaved'
+										onChange={({ value }) => dispatch(setUnsavedText(value))}
+										value={logger_prefs.individual_text.unsaved}
+									/>
+								</Flex>
+								<Flex gap={2}>
+									<Button
+										fontWeight={'normal'}
+										width={'full'}
+										onClick={openSavedIncludeNumberInput}
+									>
+										Include ({logger_prefs.individual_text.include.length})
 									</Button>
 									<NumberInputDialog
-										numbers={logger_prefs.saved.include}
-										onConfirm={(numbers) => dispatch(setSavedNumberInclude(numbers))}
+										numbers={logger_prefs.individual_text.include}
+										onConfirm={(numbers) => dispatch(setTextInclude(numbers))}
 										isOpen={isSavedIncludeNumberInputOpen}
 										onClose={closeSavedIncludeNumberInput}
 									/>
-									<Button width={'full'} mb={4} onClick={openSavedExcludeNumberInput}>
-										Exclude Numbers({logger_prefs.saved.exclude.length})
+									<Button
+										fontWeight={'normal'}
+										width={'full'}
+										onClick={openSavedExcludeNumberInput}
+									>
+										Exclude ({logger_prefs.individual_text.exclude.length})
 									</Button>
 									<NumberInputDialog
-										numbers={logger_prefs.saved.exclude}
-										onConfirm={(numbers) => dispatch(setSavedNumberExclude(numbers))}
+										numbers={logger_prefs.individual_text.exclude}
+										onConfirm={(numbers) => dispatch(setTextExclude(numbers))}
 										isOpen={isSavedExcludeNumberInputOpen}
 										onClose={closeSavedExcludeNumberInput}
 									/>
-								</Box>
+								</Flex>
 							</Flex>
 							<Divider my={4} />
-							<Flex width={'full'} alignItems={'start'} justifyContent={'space-between'} gap={4}>
-								<Text flex={1}>Unsaved Contacts</Text>
-								<Box flex={1}>
-									<MimeSelector
-										onChange={(value) => {
-											dispatch(setUnsavedMimeType(value));
-										}}
-										selectedValue={logger_prefs.unsaved.loggers}
-									/>
+							<Box>
+								<Text fontWeight={'medium'} fontSize={'lg'}>
+									Individual Media Message
+								</Text>
+							</Box>
+							<Flex width={'full'} alignItems={'center'} justifyContent={'space-between'} gap={4}>
+								<Box mr={'auto'}>
+									<Text fontWeight={'medium'} color={'gray'}>
+										Rules:-
+									</Text>
 								</Box>
-								<Box flex={1}>
-									<Button width={'full'} mb={4} onClick={openUnsavedIncludeNumberInput}>
-										Include Numbers({logger_prefs.unsaved.include.length})
+								<Flex className='gap-2'>
+									<CheckButton
+										gap={2}
+										label='Saved'
+										name='Saved'
+										onChange={({ value }) => dispatch(setSavedMedia(value))}
+										value={logger_prefs.individual_media.saved}
+									/>
+								</Flex>
+								<Flex className='gap-2'>
+									<CheckButton
+										gap={2}
+										label='Unsaved'
+										name='Unsaved'
+										onChange={({ value }) => dispatch(setUnsavedMedia(value))}
+										value={logger_prefs.individual_media.unsaved}
+									/>
+								</Flex>
+
+								<Flex gap={2}>
+									<Button fontWeight={'normal'} onClick={openUnsavedIncludeNumberInput}>
+										Include({logger_prefs.individual_media.include.length})
 									</Button>
 									<NumberInputDialog
-										numbers={logger_prefs.unsaved.exclude}
-										onConfirm={(numbers) => dispatch(setUnsavedNumberInclude(numbers))}
+										numbers={logger_prefs.individual_media.include}
+										onConfirm={(numbers) => dispatch(setMediaInclude(numbers))}
 										isOpen={isUnsavedIncludeNumberInputOpen}
 										onClose={closeUnsavedIncludeNumberInput}
 									/>
-									<Button width={'full'} mb={4} onClick={openUnsavedExcludeNumberInput}>
-										Exclude Numbers({logger_prefs.unsaved.exclude.length})
+									<Button fontWeight={'normal'} onClick={openUnsavedExcludeNumberInput}>
+										Exclude({logger_prefs.individual_media.exclude.length})
 									</Button>
 									<NumberInputDialog
-										numbers={logger_prefs.unsaved.exclude}
-										onConfirm={(numbers) => dispatch(setUnsavedNumberExclude(numbers))}
+										numbers={logger_prefs.individual_text.exclude}
+										onConfirm={(numbers) => dispatch(setMediaExclude(numbers))}
 										isOpen={isUnsavedExcludeNumberInputOpen}
 										onClose={closeUnsavedExcludeNumberInput}
+									/>
+								</Flex>
+								<Box>
+									<MimeSelector
+										onChange={(value) => {
+											dispatch(setIndividualMediaLoggers(value));
+										}}
+										selectedValue={logger_prefs.individual_media.loggers}
 									/>
 								</Box>
 							</Flex>
@@ -307,63 +416,77 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 										Select range
 									</Button>
 								</Flex>
-								<TableContainer>
-									<Table>
-										<Thead>
-											<Tr>
-												<Th width={'2%'}>
-													<Checkbox
-														isChecked={allChecked}
-														isIndeterminate={isIndeterminate && !allChecked}
-														onChange={(e) => handleSelectAll(e.target.checked)}
+								<Flex flexDirection={'column'}>
+									<HStack borderBottomWidth={1} p={4} alignItems={'center'}>
+										<Box width={'2%'} className='inline-flex items-center gap-2'>
+											<Checkbox
+												isChecked={allChecked}
+												isIndeterminate={isIndeterminate && !allChecked}
+												onChange={(e) => handleSelectAll(e.target.checked)}
+											/>
+										</Box>
+										<Box width={'full'}>
+											<Flex
+												alignItems={'center'}
+												justifyContent={'space-between'}
+												direction={'row'}
+											>
+												<Text mr={'auto'}>Name</Text>
+												<InputGroup size='sm' variant={'outline'} width={'250px'}>
+													<InputLeftElement pointerEvents='none'>
+														<SearchIcon color='gray.300' />
+													</InputLeftElement>
+													<Input
+														placeholder='Search here...'
+														value={searchText}
+														onChange={(e) => setSearchText(e.target.value)}
+														borderRadius={'5px'}
+														focusBorderColor='gray.300'
 													/>
-												</Th>
-												<Th>
-													<Flex
-														alignItems={'center'}
-														justifyContent={'space-between'}
-														direction={'row'}
-													>
-														<Text>Name</Text>
-														<InputGroup size='sm' variant={'outline'} width={'250px'}>
-															<InputLeftElement pointerEvents='none'>
-																<SearchIcon color='gray.300' />
-															</InputLeftElement>
-															<Input
-																placeholder='Search here...'
-																value={searchText}
-																onChange={(e) => setSearchText(e.target.value)}
-																borderRadius={'5px'}
-																focusBorderColor='gray.300'
+												</InputGroup>
+												<IconButton
+													aria-label='delete rules'
+													icon={<BiTrash />}
+													colorScheme='red'
+													size={'sm'}
+													ml={2}
+													hidden={group_id.length === 0}
+													onClick={handleDeleteRule}
+												/>
+											</Flex>
+										</Box>
+									</HStack>
+									{filteredGroups.map((group, index) => {
+										if (filteredGroups.length)
+											return (
+												<HStack key={index} p={4} borderBottomWidth={1}>
+													<Box className='inline-flex items-center gap-2'>
+														<Checkbox
+															isChecked={group_id.includes(group.id)}
+															onChange={() => handleSelectGroup(group.id)}
+														/>
+														{index + 1}
+													</Box>
+													<Box width={'450px'}>{group.name}</Box>
+													<Box>
+														<Box width={'450px'}>
+															<MimeSelector
+																selectedValue={group.loggers}
+																onChange={(value) => {
+																	dispatch(
+																		updateLoggerPrefs({
+																			...group,
+																			loggers: value,
+																		})
+																	);
+																}}
 															/>
-														</InputGroup>
-													</Flex>
-												</Th>
-											</Tr>
-										</Thead>
-										<Tbody>
-											{filteredGroups.map((group, index) => {
-												if (filteredGroups.length)
-													return (
-														<Tr key={index}>
-															<Td>
-																<Checkbox
-																	isChecked={group_id.includes(group.id)}
-																	onChange={() => handleSelectGroup(group.id)}
-																	mr={'0.5rem'}
-																/>
-																{index + 1}
-															</Td>
-															<Td>{group.name}</Td>
-															<Td>
-																
-															</Td>
-														</Tr>
-													);
-											})}
-										</Tbody>
-									</Table>
-								</TableContainer>
+														</Box>
+													</Box>
+												</HStack>
+											);
+									})}
+								</Flex>
 							</Box>
 						</Box>
 					</ModalBody>
@@ -374,7 +497,11 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 							</Button>
 						</Box>
 						<HStack>
-							<Button colorScheme='green' onClick={updatePreferences}>
+							<Button
+								isDisabled={Object.keys(updated_values).length === 0}
+								colorScheme='green'
+								onClick={updatePreferences}
+							>
 								Save
 							</Button>
 							<Button colorScheme='red' onClick={onClose}>

@@ -3,6 +3,8 @@ import APIInstance from '../config/APIInstance';
 export type LoggerRule = {
 	id: string;
 	name: string;
+	saved: boolean;
+	unsaved: boolean;
 	include: string[];
 	exclude: string[];
 	loggers: string[];
@@ -16,14 +18,14 @@ export default class EnhancementService {
 			return {
 				isLoggerEnabled: data.isLoggerEnabled ?? false,
 				loggerRules: data.loggerRules as {
-					saved: LoggerRule;
-					unsaved: LoggerRule;
+					individual_text: LoggerRule;
+					individual_media: LoggerRule;
 				} & { [key: string]: LoggerRule },
 			} as {
 				isLoggerEnabled: boolean;
 				loggerRules: {
-					saved: LoggerRule;
-					unsaved: LoggerRule;
+					individual_text: LoggerRule;
+					individual_media: LoggerRule;
 				} & { [key: string]: LoggerRule };
 			};
 		} catch (error) {
@@ -36,6 +38,8 @@ export default class EnhancementService {
 		loggers: string[];
 		include?: string[];
 		exclude?: string[];
+		saved: boolean;
+		unsaved: boolean;
 	}) {
 		try {
 			const { data } = await APIInstance.patch('/preferences/message-logger/rules', {
@@ -43,6 +47,8 @@ export default class EnhancementService {
 				loggers: details.loggers,
 				include: details.include,
 				exclude: details.exclude,
+				saved: details.saved,
+				unsaved: details.unsaved,
 			});
 
 			return data.success as boolean;
@@ -78,6 +84,15 @@ export default class EnhancementService {
 		try {
 			const { data } = await APIInstance.post('/preferences/message-logger/rules', details);
 
+			return data.success as boolean;
+		} catch (error) {
+			return false;
+		}
+	}
+
+	static async deleteLoggerRule(id: string) {
+		try {
+			const { data } = await APIInstance.delete(`/preferences/message-logger/rules/${id}`);
 			return data.success as boolean;
 		} catch (error) {
 			return false;

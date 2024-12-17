@@ -5,18 +5,22 @@ import { EnhancementState } from '../types/Enhancements';
 const initState: EnhancementState = {
 	message_logger: false,
 	logger_prefs: {
-		saved: {
+		individual_text: {
+			saved: false,
+			unsaved: false,
 			exclude: [],
 			include: [],
-			id: 'saved',
-			name: 'Saved',
+			id: 'individual_text',
+			name: 'Text',
 			loggers: [],
 		},
-		unsaved: {
+		individual_media: {
+			saved: false,
+			unsaved: false,
 			exclude: [],
 			include: [],
-			id: 'unsaved',
-			name: 'Unsaved',
+			id: 'individual_media',
+			name: 'Media',
 			loggers: [],
 		},
 	},
@@ -26,7 +30,7 @@ const initState: EnhancementState = {
 		include: [],
 		exclude: [],
 	},
-	updated_values: new Set(),
+	updated_values: {},
 };
 
 const EnhancementsSlice = createSlice({
@@ -40,34 +44,52 @@ const EnhancementsSlice = createSlice({
 		setMessageLogger: (state, action: PayloadAction<boolean>) => {
 			state.message_logger = action.payload;
 		},
-		setSavedNumberInclude: (state, action: PayloadAction<string[]>) => {
-			state.logger_prefs.saved.include = action.payload;
+		setSavedText: (state, action: PayloadAction<boolean>) => {
+			state.updated_values.individual_text = true;
+			state.logger_prefs.individual_text.saved = action.payload;
 		},
-		setSavedNumberExclude: (state, action: PayloadAction<string[]>) => {
-			state.logger_prefs.saved.exclude = action.payload;
+		setUnsavedText: (state, action: PayloadAction<boolean>) => {
+			state.updated_values.individual_text = true;
+			state.logger_prefs.individual_text.unsaved = action.payload;
 		},
-		setUnsavedNumberInclude: (state, action: PayloadAction<string[]>) => {
-			state.logger_prefs.unsaved.include = action.payload;
+		setSavedMedia: (state, action: PayloadAction<boolean>) => {
+			state.updated_values.individual_media = true;
+			state.logger_prefs.individual_media.saved = action.payload;
 		},
-		setUnsavedNumberExclude: (state, action: PayloadAction<string[]>) => {
-			state.logger_prefs.unsaved.exclude = action.payload;
+		setUnsavedMedia: (state, action: PayloadAction<boolean>) => {
+			state.updated_values.individual_media = true;
+			state.logger_prefs.individual_media.unsaved = action.payload;
 		},
-		setSavedMimeType: (state, action: PayloadAction<typeof state.logger_prefs.saved.loggers>) => {
-			state.logger_prefs.saved.loggers = action.payload;
+		setTextInclude: (state, action: PayloadAction<string[]>) => {
+			state.updated_values.individual_text = true;
+			state.logger_prefs.individual_text.include = action.payload;
 		},
-		setUnsavedMimeType: (
+		setTextExclude: (state, action: PayloadAction<string[]>) => {
+			state.updated_values.individual_text = true;
+			state.logger_prefs.individual_text.exclude = action.payload;
+		},
+		setMediaInclude: (state, action: PayloadAction<string[]>) => {
+			state.updated_values.individual_media = true;
+			state.logger_prefs.individual_media.include = action.payload;
+		},
+		setMediaExclude: (state, action: PayloadAction<string[]>) => {
+			state.updated_values.individual_media = true;
+			state.logger_prefs.individual_media.exclude = action.payload;
+		},
+		setIndividualMediaLoggers: (
 			state,
-			action: PayloadAction<typeof state.logger_prefs.unsaved.loggers>
+			action: PayloadAction<typeof state.logger_prefs.individual_media.loggers>
 		) => {
-			state.logger_prefs.unsaved.loggers = action.payload;
+			state.updated_values.media = true;
+			state.logger_prefs.individual_media.loggers = action.payload;
 		},
 		setMessageLoggerSettings: (
 			state,
 			action: PayloadAction<{
 				isLoggerEnabled: boolean;
 				loggerRules: {
-					saved: LoggerRule;
-					unsaved: LoggerRule;
+					individual_text: LoggerRule;
+					individual_media: LoggerRule;
 				} & { [key: string]: LoggerRule };
 			}>
 		) => {
@@ -97,14 +119,13 @@ const EnhancementsSlice = createSlice({
 		setNewRuleExclude: (state, action: PayloadAction<string[]>) => {
 			state.newRuleDetails.exclude = action.payload;
 		},
-		updateLoggerPrefs: (
-			state,
-			action: PayloadAction<{
-				[key: string]: LoggerRule;
-			}>
-		) => {
-			state.updated_values.add(Object.keys(action.payload)[0]);
-			state.logger_prefs = { ...state.logger_prefs, ...action.payload };
+		updateLoggerPrefs: (state, action: PayloadAction<LoggerRule>) => {
+			console.log(Object.keys(action.payload)[0]);
+			state.updated_values[action.payload.id] = true;
+			state.logger_prefs = { ...state.logger_prefs, [action.payload.id]: action.payload };
+		},
+		resetUpdatedValues: (state) => {
+			state.updated_values = {};
 		},
 	},
 });
@@ -112,18 +133,23 @@ const EnhancementsSlice = createSlice({
 export const {
 	reset,
 	setMessageLogger,
-	setSavedNumberExclude,
-	setSavedNumberInclude,
-	setUnsavedNumberExclude,
-	setUnsavedNumberInclude,
-	setSavedMimeType,
-	setUnsavedMimeType,
+	setTextExclude,
+	setTextInclude,
+	setIndividualMediaLoggers,
 	setMessageLoggerSettings,
 	setNewRuleDetails,
 	setNewRuleExclude,
 	setNewRuleGroup,
 	setNewRuleInclude,
 	setNewRuleLoggers,
+	updateLoggerPrefs,
+	resetUpdatedValues,
+	setSavedText,
+	setUnsavedText,
+	setSavedMedia,
+	setUnsavedMedia,
+	setMediaExclude,
+	setMediaInclude,
 } = EnhancementsSlice.actions;
 
 export default EnhancementsSlice.reducer;
