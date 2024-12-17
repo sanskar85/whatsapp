@@ -156,6 +156,10 @@ async function updateMessageStarRules(req: Request, res: Response, next: NextFun
 	return Respond({
 		res,
 		status: 200,
+		data: {
+			isMessageStarEnabled: userPrefService.isMessageStarEnabled(),
+			messageStarRules: userPrefService.getMessageStarRules(),
+		},
 	});
 }
 
