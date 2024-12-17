@@ -26,6 +26,8 @@ type ContactGroupDetails = {
 	group_id: string;
 	group_name: string;
 	user_type: 'CREATOR' | 'ADMIN' | 'USER';
+	description?: string;
+	participants?: number;
 };
 type LabelDetails = {
 	group_name: string;
