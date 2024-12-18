@@ -161,7 +161,7 @@ export class MessageLoggerService {
 				const folder_path = [
 					this.number!,
 					chat.isGroup ? 'Group' : 'Individual',
-					FileUtils.getExt(media.mimetype)!,
+					`${chat.isGroup ? 'Group' : 'Individual'}-${FileUtils.getExt(media.mimetype)!}`,
 				];
 				link = await uploadSingleFile(filename, folder_path, dest);
 			}

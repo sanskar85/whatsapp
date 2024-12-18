@@ -62,18 +62,16 @@ export async function createOrGetFolder(
 	folderName: string,
 	parent_folder_id: string = DRIVE_FOLDER_ID
 ) {
-	const { data } = await (
-		await getDrive()
-	).files.list({
-		q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}'`,
+	const drive = await getDrive();
+	const { data } = await drive.files.list({
+		q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}`,
 		fields: 'files(id, name)',
 	});
 	if (data.files?.length) {
+		console.log('Folder already exists', data.files);
 		return data.files[0].id;
 	}
-	const { data: newFolder } = await (
-		await getDrive()
-	).files.create({
+	const { data: newFolder } = await drive.files.create({
 		requestBody: {
 			name: folderName,
 			mimeType: 'application/vnd.google-apps.folder',
@@ -81,6 +79,7 @@ export async function createOrGetFolder(
 		},
 		fields: 'id',
 	});
+
 	return newFolder.id;
 }
 
