@@ -214,6 +214,8 @@ async function exportGroups(req: Request, res: Response, next: NextFunction) {
 						if (participant.user_type === 'ADMIN' || participant.user_type === 'CREATOR') {
 							participant.description = groupChat.description;
 							participant.participants = groupChat.participants.length;
+							participant.canAddParticipants =
+								groupChat.memberAddMode === 'all_member_add' ? 'Allowed' : 'Not Allowed';
 						}
 					});
 
