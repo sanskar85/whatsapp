@@ -63,7 +63,7 @@ const ConfirmationDialog = forwardRef<ConfirmationDialogHandle, Props>(
 							<Input
 								mt={'1rem'}
 								variant='outline'
-								placeholder={`Delete ${type}`}
+								placeholder={`${type.includes('Logout') ? '' : 'Delete'} ${type}`}
 								value={confirm}
 								onChange={(e) => setConfirm(e.target.value)}
 							/>
