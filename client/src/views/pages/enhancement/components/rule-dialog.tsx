@@ -77,7 +77,7 @@ export default function GroupsRuleDialog({
 
 	const handleSelectAll = (allSelected: boolean) => {
 		if (allSelected) {
-			dispatch(setNewRuleGroup(groups.map((g) => g.id)));
+			dispatch(setNewRuleGroup(filteredGroups.map((g) => g.id)));
 		} else {
 			dispatch(setNewRuleGroup([]));
 		}
