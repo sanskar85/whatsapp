@@ -55,7 +55,7 @@ const ConfirmationDialog = forwardRef<ConfirmationDialogHandle, Props>(
 						textColor={theme === 'dark' ? 'white' : 'black'}
 					>
 						<AlertDialogHeader fontSize='lg' fontWeight='bold'>
-							Delete {type}
+							{type.includes('Logout') ? '' : 'Delete'} {type}
 						</AlertDialogHeader>
 
 						<AlertDialogBody>
