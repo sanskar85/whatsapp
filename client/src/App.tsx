@@ -24,7 +24,7 @@ const GroupMergePage = lazy(() => import('./views/pages/merge-group'));
 const NetworkError = lazy(() => import('./views/pages/network-error'));
 const APIPage = lazy(() => import('./views/pages/api-webhook'));
 const SchedulerByDate = lazy(() => import('./views/pages/scheduler-by-date'));
-const Logger = lazy(() => import('./views/pages/logger'));
+const Logger = lazy(() => import('./views/pages/enhancement'));
 
 function App() {
 	useTheme();

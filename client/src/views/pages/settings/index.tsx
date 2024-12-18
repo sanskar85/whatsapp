@@ -121,13 +121,13 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
 									</Flex>
 									<Box
 										marginTop={'0.25rem'}
-										className='bg-[#C6E3FF] dark:bg-[#234768]'
+										className='bg-[#C6E3FF] dark:bg-[#234768] group'
 										paddingX={'1rem'}
 										paddingY={'0.5rem'}
 										width={'max-content'}
 										rounded={'md'}
 									>
-										<Text className='text-[#158FFF] dark:text-[#158FFF]'>
+										<Text className='text-[#158FFF] dark:text-[#158FFF] blur group-hover:blur-0'>
 											{phone_number ? `+${phone_number}` : ''}
 										</Text>
 									</Box>

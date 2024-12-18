@@ -4,9 +4,10 @@ import { MIME_TYPES } from '../../../../config/const';
 type MimeSelectorDialogProps = {
 	onChange: (selectedList: string[]) => void;
 	selectedValue: string[];
+	exclude_options?: string;
 };
 
-const MimeSelector = ({ onChange, selectedValue }: MimeSelectorDialogProps) => {
+const MimeSelector = ({ onChange, selectedValue, exclude_options }: MimeSelectorDialogProps) => {
 	return (
 		<Multiselect
 			displayValue='name'
@@ -21,7 +22,9 @@ const MimeSelector = ({ onChange, selectedValue }: MimeSelectorDialogProps) => {
 			selectedValues={(selectedValue ?? []).map((value) => {
 				return MIME_TYPES.find((item) => item.value === value);
 			})}
-			options={MIME_TYPES}
+			options={
+				exclude_options ? MIME_TYPES.filter((item) => item.value !== exclude_options) : MIME_TYPES
+			}
 			style={{
 				searchBox: {
 					border: 'none',

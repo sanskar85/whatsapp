@@ -374,6 +374,7 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 											dispatch(setIndividualMediaLoggers(value));
 										}}
 										selectedValue={logger_prefs.individual_media.loggers}
+										exclude_options='text'
 									/>
 								</Box>
 							</Flex>
@@ -405,9 +406,10 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 												gap={4}
 											>
 												<Text mr={'auto'}>Name</Text>
-												<Flex gap={2} justifyContent={'flex-end'} >
+												<Flex gap={2} justifyContent={'flex-end'}>
 													<Box width={'150px'}>
-														<Input size={'sm'}
+														<Input
+															size={'sm'}
 															onChange={(e) =>
 																setRange((prev) => {
 																	return {
@@ -422,7 +424,8 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 														/>
 													</Box>
 													<Box width={'150px'}>
-														<Input size={'sm'}
+														<Input
+															size={'sm'}
 															onChange={(e) =>
 																setRange((prev) => {
 																	return {
