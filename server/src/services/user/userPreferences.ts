@@ -10,12 +10,12 @@ export default class UserPreferencesService {
 	private constructor(userPref: IUserPreferences) {
 		this.userPref = userPref;
 
-		UserPreferencesService.instances.set(userPref.user._id.toHexString(), this);
+		UserPreferencesService.instances.set(userPref.user._id.toString(), this);
 	}
 
 	static async getService(userId: Types.ObjectId) {
-		if (this.instances.has(userId.toHexString())) {
-			return this.instances.get(userId.toHexString())!;
+		if (this.instances.has(userId.toString())) {
+			return this.instances.get(userId.toString())!;
 		}
 
 		const userPref = await UserPreferencesDB.findOne({ user: userId }).populate('user');
