@@ -89,7 +89,10 @@ export class MessageLoggerService {
 			} catch (err) {
 				Logger.error('Error while saving media message', err as Error);
 				canLog = true;
-				link = 'Unable to generate link';
+			} finally {
+				if (!media) {
+					link = 'Unable to download image from whatsapp.';
+				}
 			}
 		}
 
@@ -120,7 +123,6 @@ export class MessageLoggerService {
 					}
 				} else {
 					canLog = true;
-					link = 'Unable to generate link';
 				}
 			} else {
 				canLog = true;
@@ -142,7 +144,6 @@ export class MessageLoggerService {
 					}
 				} else {
 					canLog = true;
-					link = 'Unable to generate link';
 				}
 			} else if (pref.loggers.includes('text') && message.body.length > 0) {
 				canLog = true;
@@ -167,7 +168,7 @@ export class MessageLoggerService {
 			}
 		} catch (err) {
 			Logger.error('Error while saving image message', err as Error);
-			link = 'Unable to generate link';
+			link = 'Unable to save image to google drive.';
 		}
 		loggedObj.link = link;
 
