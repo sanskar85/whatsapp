@@ -1,5 +1,9 @@
 [
 	{
+		"name": "All media",
+		"value": "all"
+	},
+	{
 		"name": "Text Messages",
 		"value": "text"
 	},
@@ -85,6 +89,6 @@
 	},
 	{
 		"name": "Other files",
-		"value": ""
+		"value": "others"
 	}
 ]
