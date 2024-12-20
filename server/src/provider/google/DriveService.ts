@@ -63,8 +63,10 @@ export async function createOrGetFolder(
 	parent_folder_id: string = DRIVE_FOLDER_ID
 ) {
 	const drive = await getDrive();
+	console.log(`mimeType='application/vnd.google-apps.folder' and name='${folderName}'`);
+	
 	const { data } = await drive.files.list({
-		q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}`,
+		q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}'`,
 		fields: 'files(id, name)',
 	});
 	if (data.files?.length) {

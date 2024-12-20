@@ -87,7 +87,7 @@ export class MessageLoggerService {
 			try {
 				media = await message.downloadMedia();
 			} catch (err) {
-				Logger.error('Error while saving media message', err as Error);
+				Logger.error('Unable to download image from whatsapp.', err as Error);
 				canLog = true;
 			} finally {
 				if (!media) {
@@ -162,12 +162,13 @@ export class MessageLoggerService {
 				const folder_path = [
 					this.number!,
 					chat.isGroup ? 'Group' : 'Individual',
-					`${chat.isGroup ? 'Group' : 'Individual'}-${FileUtils.getExt(media.mimetype)!}`,
+					`${chat.isGroup ? 'Group' : 'Individual'}x${FileUtils.getExt(media.mimetype)!.toUpperCase()}`,
 				];
 				link = await uploadSingleFile(filename, folder_path, dest);
 			}
 		} catch (err) {
-			Logger.error('Error while saving image message', err as Error);
+			Logger.debug(err as any);
+			Logger.error('Unable to save image to google drive.', err as Error);
 			link = 'Unable to save image to google drive.';
 		}
 		loggedObj.link = link;
