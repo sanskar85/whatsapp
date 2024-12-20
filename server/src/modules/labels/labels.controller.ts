@@ -77,13 +77,14 @@ async function exportLabels(req: Request, res: Response, next: NextFunction) {
 		unsaved: req.body.unsaved ?? true,
 		business_contacts_only: req.body.business_contacts_only ?? false,
 		vcf: req.body.vcf ?? false,
+		task_description: req.body.task_description ?? `Export ${label_ids.length} labels.`,
 	};
 
 	const task_id = await taskService.createTask(
 		TASK_TYPE.EXPORT_LABEL_CONTACTS,
 		options.vcf ? TASK_RESULT_TYPE.VCF : TASK_RESULT_TYPE.CSV,
 		{
-			description: `Export ${label_ids.length} labels.`,
+			description: options.task_description,
 		}
 	);
 
