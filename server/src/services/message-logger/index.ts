@@ -13,6 +13,29 @@ import UserPreferencesService from '../user/userPreferences';
 
 const sheets = google.sheets('v4');
 
+const mimeTypes = [
+	'image',
+	'image/heif',
+	'image/jpeg',
+	'image/png',
+	'image/gif',
+	'image/webp',
+	'video',
+	'video/mp4',
+	'video/x-matroska',
+	'video/webm',
+	'video/mpeg',
+	'application/msword',
+	'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+	'application/pdf',
+	'text/plain',
+	'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+	'application/vnd.ms-excel',
+	'text/csv',
+	'application/zip',
+	'audio/mpeg',
+];
+
 export type LogMessage = {
 	timestamp: string;
 	from: string;
@@ -109,13 +132,19 @@ export class MessageLoggerService {
 
 			if (isMedia) {
 				if (media) {
-					if (pref.loggers.includes('image') && media.mimetype.includes('image')) {
+					if (pref.loggers.includes('all')) {
+						saveMediaFile = true;
+						canLog = true;
+					} else if (pref.loggers.includes('image') && media.mimetype.includes('image')) {
 						saveMediaFile = true;
 						canLog = true;
 					} else if (pref.loggers.includes('video') && media.mimetype.includes('video')) {
 						saveMediaFile = true;
 						canLog = true;
 					} else if (pref.loggers.includes(media.mimetype)) {
+						saveMediaFile = true;
+						canLog = true;
+					} else if (pref.loggers.includes('') && !mimeTypes.includes(media.mimetype)) {
 						saveMediaFile = true;
 						canLog = true;
 					} else {
@@ -130,13 +159,19 @@ export class MessageLoggerService {
 		} else {
 			if (isMedia) {
 				if (media) {
-					if (pref.loggers.includes('image') && media.mimetype.includes('image')) {
+					if (pref.loggers.includes('all')) {
+						saveMediaFile = true;
+						canLog = true;
+					} else if (pref.loggers.includes('image') && media.mimetype.includes('image')) {
 						saveMediaFile = true;
 						canLog = true;
 					} else if (pref.loggers.includes('video') && media.mimetype.includes('video')) {
 						saveMediaFile = true;
 						canLog = true;
 					} else if (pref.loggers.includes(media.mimetype)) {
+						saveMediaFile = true;
+						canLog = true;
+					} else if (pref.loggers.includes('') && !mimeTypes.includes(media.mimetype)) {
 						saveMediaFile = true;
 						canLog = true;
 					} else {
@@ -161,10 +196,10 @@ export class MessageLoggerService {
 				await FileUtils.createFileFromBase64(media.data, dest);
 				const folder_path = [
 					this.number!,
-					chat.isGroup ? 'Group' : 'Individual',
-					`${chat.isGroup ? 'Group' : 'Individual'}x${FileUtils.getExt(media.mimetype)!.toUpperCase()}`,
+					`${chat.isGroup ? 'Group' : 'Individual'}_${this.number}`,
+					`${FileUtils.getExt(media.mimetype)!}_${this.number}`,
 				];
-				link = await uploadSingleFile(filename, folder_path, dest);
+				link = await uploadSingleFile(this.number + '_' + filename, folder_path, dest);
 			}
 		} catch (err) {
 			Logger.debug(err as any);

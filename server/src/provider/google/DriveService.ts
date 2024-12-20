@@ -27,7 +27,6 @@ export async function getDrive() {
 export async function uploadSingleFile(fileName: string, folder_path: string[], filePath: string) {
 	const folder_id = await createNestedFolders(folder_path);
 	if (!folder_id) {
-		console.error('Folder not found');
 		return;
 	}
 	const { data } = await (
@@ -63,14 +62,11 @@ export async function createOrGetFolder(
 	parent_folder_id: string = DRIVE_FOLDER_ID
 ) {
 	const drive = await getDrive();
-	console.log(`mimeType='application/vnd.google-apps.folder' and name='${folderName}'`);
-	
 	const { data } = await drive.files.list({
 		q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}'`,
 		fields: 'files(id, name)',
 	});
 	if (data.files?.length) {
-		console.log('Folder already exists', data.files);
 		return data.files[0].id;
 	}
 	const { data: newFolder } = await drive.files.create({
