@@ -87,7 +87,7 @@ const EnhancementsSlice = createSlice({
 			state,
 			action: PayloadAction<typeof state.logger_prefs.individual_media.loggers>
 		) => {
-			state.updated_values.media = true;
+			state.updated_values.individual_media = true;
 			state.logger_prefs.individual_media.loggers = action.payload;
 		},
 		setMessageLoggerSettings: (
