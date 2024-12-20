@@ -29,6 +29,7 @@ type ContactGroupDetails = {
 	description?: string;
 	participants?: number;
 	canAddParticipants?: string;
+	canSendMessages?: string;
 };
 type LabelDetails = {
 	group_name: string;

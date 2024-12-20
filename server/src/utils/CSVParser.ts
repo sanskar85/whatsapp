@@ -159,6 +159,10 @@ export default class CSVParser {
 				field: 'canAddParticipants',
 				title: 'Can Add Participants',
 			},
+			{
+				field: 'canSendMessages',
+				title: 'Can Send Messages',
+			},
 		];
 
 		const csv = json2csv(contacts, {

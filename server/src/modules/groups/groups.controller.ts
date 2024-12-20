@@ -216,6 +216,7 @@ async function exportGroups(req: Request, res: Response, next: NextFunction) {
 							participant.participants = groupChat.participants.length;
 							participant.canAddParticipants =
 								groupChat.memberAddMode === 'all_member_add' ? 'Allowed' : 'Not Allowed';
+							participant.canSendMessages = groupChat.announce ? 'Allowed' : 'Not Allowed';
 						}
 					});
 
