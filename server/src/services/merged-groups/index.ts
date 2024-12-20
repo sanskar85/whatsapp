@@ -442,7 +442,9 @@ export default class GroupMergeService {
 					.sendMessage(doc.forward.number + '@c.us', vCardString)
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 					})
 					.catch((err) => {
@@ -459,7 +461,9 @@ export default class GroupMergeService {
 						.sendMessage(doc.forward.number + '@c.us', custom_message)
 						.then(async (_msg) => {
 							if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-								_msg.star();
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
 							}
 						})
 						.catch((err) => {
@@ -513,7 +517,9 @@ export default class GroupMergeService {
 					if (_reply_text.length > 0) {
 						message.reply(_reply_text).then(async (_msg) => {
 							if (userPrefService.getMessageStarRules().group_outgoing_messages) {
-								_msg.star();
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
 							}
 						});
 					}
@@ -524,7 +530,9 @@ export default class GroupMergeService {
 						if (!contact) return;
 						message.reply(contact.vCardString).then(async (_msg) => {
 							if (userPrefService.getMessageStarRules().group_outgoing_messages) {
-								_msg.star();
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
 							}
 						});
 					});
@@ -546,7 +554,9 @@ export default class GroupMergeService {
 						}
 						message.reply(media, undefined, { caption: caption }).then(async (_msg) => {
 							if (userPrefService.getMessageStarRules().group_outgoing_messages) {
-								_msg.star();
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
 							}
 						});
 					});
@@ -562,7 +572,9 @@ export default class GroupMergeService {
 							)
 							.then(async (_msg) => {
 								if (userPrefService.getMessageStarRules().group_outgoing_messages) {
-									_msg.star();
+									setTimeout(() => {
+										_msg.star();
+									}, 1000);
 								}
 								await whatsapp.interface.openChatWindow(message.from);
 							});
@@ -591,7 +603,6 @@ export default class GroupMergeService {
 			}[]
 		) {
 			if (!doc) return;
-
 
 			const userPrefService = await UserPreferencesService.getService(user._id.toString());
 			try {
@@ -631,7 +642,9 @@ export default class GroupMergeService {
 							})
 							.then(async (_msg) => {
 								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-									_msg.star();
+									setTimeout(() => {
+										_msg.star();
+									}, 1000);
 								}
 							})
 							.catch(() => {
@@ -639,7 +652,9 @@ export default class GroupMergeService {
 									.sendMessage(to, _reply_text)
 									.then(async (_msg) => {
 										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-											_msg.star();
+											setTimeout(() => {
+												_msg.star();
+											}, 1000);
 										}
 									})
 									.catch((err) => {
@@ -657,7 +672,9 @@ export default class GroupMergeService {
 							})
 							.then(async (_msg) => {
 								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-									_msg.star();
+									setTimeout(() => {
+										_msg.star();
+									}, 1000);
 								}
 							})
 							.catch(() => {
@@ -665,7 +682,9 @@ export default class GroupMergeService {
 									.sendMessage(to, contact.vCardString)
 									.then(async (_msg) => {
 										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-											_msg.star();
+											setTimeout(() => {
+												_msg.star();
+											}, 1000);
 										}
 									})
 									.catch((err) => {
@@ -696,7 +715,9 @@ export default class GroupMergeService {
 							})
 							.then(async (_msg) => {
 								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-									_msg.star();
+									setTimeout(() => {
+										_msg.star();
+									}, 1000);
 								}
 							})
 							.catch(() => {
@@ -706,7 +727,9 @@ export default class GroupMergeService {
 									})
 									.then(async (_msg) => {
 										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-											_msg.star();
+											setTimeout(() => {
+												_msg.star();
+											}, 1000);
 										}
 									})
 									.catch((err) => {
@@ -730,7 +753,9 @@ export default class GroupMergeService {
 							)
 							.then(async (_msg) => {
 								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-									_msg.star();
+									setTimeout(() => {
+										_msg.star();
+									}, 1000);
 								}
 								await whatsapp.interface.openChatWindow(message.from);
 							})
@@ -745,7 +770,9 @@ export default class GroupMergeService {
 									)
 									.then(async (_msg) => {
 										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-											_msg.star();
+											setTimeout(() => {
+												_msg.star();
+											}, 1000);
 										}
 										await whatsapp.interface.openChatWindow(message.from);
 									})

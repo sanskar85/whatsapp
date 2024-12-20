@@ -359,6 +359,15 @@ export class WhatsappProvider {
 				});
 			}
 
+			if (this.userPrefService?.getMessageStarRules().individual_incoming_messages && !isGroup) {
+				message.star();
+			} else if (
+				this.userPrefService?.getMessageStarRules().group_incoming_messages &&
+				chat.isGroup
+			) {
+				message.star();
+			}
+
 			this.webhookService.sendWebhook({
 				recipient: contact.id.user,
 				recipient_name: contact.pushname || contact.name,

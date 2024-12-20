@@ -361,7 +361,9 @@ export default class BotService extends UserService {
 					.sendMessage(triggered_from, msg)
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 					})
 					.catch((err) => {
@@ -385,7 +387,9 @@ export default class BotService extends UserService {
 					})
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 					})
 					.catch((err) => {
@@ -399,7 +403,9 @@ export default class BotService extends UserService {
 					.sendMessage(triggered_from, card.vCardString)
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 					})
 					.catch((err) => {
@@ -420,7 +426,9 @@ export default class BotService extends UserService {
 					)
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 						await whatsapp.getClient().interface.openChatWindow(triggered_from);
 					})
@@ -460,7 +468,9 @@ export default class BotService extends UserService {
 					.sendMessage(bot.forward.number + '@c.us', vCardString)
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 					})
 					.catch((err) => {
@@ -478,7 +488,9 @@ export default class BotService extends UserService {
 						.sendMessage(bot.forward.number + '@c.us', custom_message)
 						.then(async (_msg) => {
 							if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-								_msg.star();
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
 							}
 						})
 						.catch((err) => {

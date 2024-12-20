@@ -95,7 +95,9 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 			.then(async (_msg) => {
 				const userPrefService = await UserPreferencesService.getService(user.getUserId());
 				if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-					_msg.star();
+					setTimeout(() => {
+						_msg.star();
+					}, 1000);
 				}
 				await whatsapp.getClient().interface.openChatWindow(recipient);
 			});

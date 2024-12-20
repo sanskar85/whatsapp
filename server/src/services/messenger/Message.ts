@@ -150,7 +150,9 @@ export default class MessageService {
 					.sendMessage(msg.receiver, message)
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 					})
 					.catch((err) => {
@@ -166,7 +168,9 @@ export default class MessageService {
 					.sendMessage(msg.receiver, card.vCardString)
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 					})
 					.catch((err) => {
@@ -194,7 +198,9 @@ export default class MessageService {
 					})
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 					})
 					.catch((err) => {
@@ -217,7 +223,9 @@ export default class MessageService {
 					)
 					.then(async (_msg) => {
 						if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
-							_msg.star();
+							setTimeout(() => {
+								_msg.star();
+							}, 1000);
 						}
 						await whatsapp.getClient().interface.openChatWindow(msg.receiver);
 					})
