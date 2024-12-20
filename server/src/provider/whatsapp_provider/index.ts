@@ -298,9 +298,15 @@ export class WhatsappProvider {
 			if (!this.deviceService) {
 				return;
 			}
-			if (this.handledMessage.has(_message.id._serialized)) {
+			const messageKey = `${_message.from}-${this.number}`;
+			if (this.handledMessage.has(messageKey)) {
 				return;
 			}
+
+			this.handledMessage.set(messageKey, null);
+			setTimeout(() => {
+				this.handledMessage.delete(messageKey);
+			}, 1000);
 
 			const message = await this.client.getMessageById(_message.id._serialized);
 
@@ -313,7 +319,6 @@ export class WhatsappProvider {
 			const isGroup = chat.isGroup;
 
 			if (message.body) {
-				this.handledMessage.set(message.id._serialized, null);
 				if (!this.contact || contact.id._serialized === this.contact.id._serialized) {
 					return;
 				}
