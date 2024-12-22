@@ -419,7 +419,9 @@ export default function Bot() {
 							{ui.optionsError && <FormErrorMessage>{ui.optionsError}</FormErrorMessage>}
 						</FormControl>
 						<FormControl isInvalid={!!ui.optionsError} flexGrow={1}>
-							<Text className='text-gray-700 dark:text-gray-400'>Allowed Country Codes</Text>
+							<Text className='text-gray-700 dark:text-gray-400'>
+								Allowed Country Codes <Info>By default all countries.</Info>
+							</Text>
 							<Multiselect
 								displayValue='name'
 								placeholder='Select Country'
