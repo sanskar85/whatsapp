@@ -19,6 +19,13 @@ export default class LabelService {
 			business_contacts_only = false,
 			saved_contacts = false,
 			non_saved_contacts = false,
+			task_description,
+		}:{
+			vcf_only?: boolean;
+			business_contacts_only?: boolean;
+			saved_contacts?: boolean;
+			non_saved_contacts?: boolean;
+			task_description?: string;
 		}
 	) {
 		try {
@@ -28,6 +35,7 @@ export default class LabelService {
 				label_ids: ids,
 				saved: saved_contacts,
 				unsaved: non_saved_contacts,
+				task_description,
 			});
 			return true;
 		} catch (err) {
@@ -37,7 +45,7 @@ export default class LabelService {
 	static async assignLabel(
 		type: string,
 		label_id: string,
-		opts: { csv_file?: string; group_ids?: string[], numbers?: string[] }
+		opts: { csv_file?: string; group_ids?: string[]; numbers?: string[] }
 	) {
 		try {
 			await APIInstance.post(`/whatsapp/labels/assign`, {

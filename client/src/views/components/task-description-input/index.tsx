@@ -16,7 +16,7 @@ export type TaskInputHandle = {
 };
 
 type TaskInputProps = {
-	onConfirm: (vcf_only: boolean, task_description: string) => void;
+	onConfirm: (vcf_only: boolean, task_description?: string) => void;
 };
 
 export const TaskInput = forwardRef<TaskInputHandle, TaskInputProps>(
@@ -35,7 +35,7 @@ export const TaskInput = forwardRef<TaskInputHandle, TaskInputProps>(
 		}));
 
 		return (
-			<Modal isOpen={isOpen} onClose={onClose}>
+			<Modal isOpen={isOpen} onClose={onClose} isCentered>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Task Description</ModalHeader>
@@ -49,9 +49,12 @@ export const TaskInput = forwardRef<TaskInputHandle, TaskInputProps>(
 					</ModalBody>
 					<ModalFooter>
 						<Button colorScheme='blue' mr={3} onClick={onClose}>
-							Close
+							Cancel
 						</Button>
-						<Button colorScheme='green' onClick={() => onConfirm(vcf_only, task_description)}>
+						<Button
+							colorScheme='green'
+							onClick={() => onConfirm(vcf_only, task_description ? task_description : undefined)}
+						>
 							Save
 						</Button>
 					</ModalFooter>

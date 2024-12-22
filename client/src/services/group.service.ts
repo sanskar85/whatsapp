@@ -63,7 +63,13 @@ export default class GroupService {
 			business_contacts_only = false,
 			saved_contacts = false,
 			non_saved_contacts = false,
-			task_description = '',
+			task_description,
+		}: {
+			vcf_only?: boolean;
+			business_contacts_only?: boolean;
+			saved_contacts?: boolean;
+			non_saved_contacts?: boolean;
+			task_description?: string;
 		}
 	) {
 		try {

@@ -16,7 +16,7 @@ export default class ContactService {
 		saved_chat_contacts = false,
 		vcf_only = false,
 		business_contacts_only = false,
-		task_description: task_description = '',
+		task_description,
 	}: {
 		saved_contacts?: boolean;
 		non_saved_contacts?: boolean;

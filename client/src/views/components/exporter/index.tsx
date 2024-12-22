@@ -108,7 +108,7 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 		}));
 	};
 
-	const exportContacts = (vcf_only = false, task_description: string) => {
+	const exportContacts = (vcf_only = false, task_description?: string) => {
 		setUIDetails((prevState) => ({
 			...prevState,
 			[vcf_only ? 'VCF_EXPORTING' : 'CSV_EXPORTING']: true,
