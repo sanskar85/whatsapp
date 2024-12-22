@@ -25,7 +25,6 @@ export default class ContactService {
 		business_contacts_only?: boolean;
 		task_description?: string;
 	}) {
-		console.log(task_description);
 		try {
 			await APIInstance.post(`/whatsapp/contacts`, {
 				chat_contacts: saved_chat_contacts,

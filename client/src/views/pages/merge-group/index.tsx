@@ -31,6 +31,7 @@ import {
 import DeleteAlert, { DeleteAlertHandle } from '../../components/delete-alert';
 import LinkInputDialog from '../../components/link-input-dialog';
 import { NavbarDeleteElement, NavbarSearchElement } from '../../components/navbar';
+import { TaskInput, TaskInputHandle } from '../../components/task-description-input';
 import {
 	GroupMergeDialog,
 	GroupSettingDialog,
@@ -39,6 +40,7 @@ import {
 } from './components';
 
 const GroupMergePage = () => {
+	const taskDescriptionInput = useRef<TaskInputHandle>(null);
 	const {
 		isOpen: isMergeDialogOpen,
 		onOpen: openMergeDialog,
@@ -77,16 +79,20 @@ const GroupMergePage = () => {
 		});
 	};
 
-	const exportPendingRequests = useCallback(() => {
-		GroupService.exportPendingRequests(selectedGroups);
-		toast({
-			title: 'Exporting Pending Requests',
-			description: 'Please check background tasks for progress',
-			status: 'info',
-			duration: 3000,
-			isClosable: true,
-		});
-	}, [selectedGroups, toast]);
+	const exportPendingRequests = useCallback(
+		(task_description?: string) => {
+			GroupService.exportPendingRequests(selectedGroups, task_description);
+			toast({
+				title: 'Exporting Pending Requests',
+				description: 'Please check background tasks for progress',
+				status: 'info',
+				duration: 3000,
+				isClosable: true,
+			});
+			taskDescriptionInput.current?.close();
+		},
+		[selectedGroups, toast]
+	);
 
 	useEffect(() => {
 		function handleSwitchChange(isWhatsappGroups: boolean) {
@@ -144,7 +150,7 @@ const GroupMergePage = () => {
 								size={'sm'}
 								colorScheme='blue'
 								isDisabled={selectedGroups.length === 0}
-								onClick={exportPendingRequests}
+								onClick={() => taskDescriptionInput.current?.open()}
 							>
 								Pending Requests
 							</Button>
@@ -198,6 +204,12 @@ const GroupMergePage = () => {
 			<GroupMergeDialog isOpen={isMergeDialogOpen} onClose={closeMergeDialog} />
 			<GroupSettingDialog isOpen={isSettingDialogOpen} onClose={closeSettingDialog} />
 			<LinkInputDialog isOpen={isLinkDialogOpen} onClose={closeLinkDialog} />
+			<TaskInput
+				ref={taskDescriptionInput}
+				onConfirm={({ task_description }) => {
+					exportPendingRequests(task_description);
+				}}
+			/>
 		</Box>
 	);
 };

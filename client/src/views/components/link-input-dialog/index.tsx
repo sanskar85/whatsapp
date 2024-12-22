@@ -10,14 +10,16 @@ import {
 	useToast,
 	VStack,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import GroupService from '../../../services/group.service';
+import { TaskInput, TaskInputHandle } from '../task-description-input';
 
 type Props = {
 	isOpen: boolean;
 	onClose: () => void;
 };
 export default function LinkInputDialog({ isOpen, onClose }: Props) {
+	const taskInputRef = useRef<TaskInputHandle>(null);
 	const [linkInput, setLinkInput] = useState('');
 	const [links, setLinks] = useState<string[]>([]);
 	const [isChanged, setChanged] = useState(false);
@@ -47,7 +49,7 @@ export default function LinkInputDialog({ isOpen, onClose }: Props) {
 		setChanged(false);
 	};
 
-	const handleClose = async () => {
+	const handleClose = async (task_description?: string) => {
 		if (links.length === 0) {
 			toast({
 				title: 'No links provided',
@@ -58,7 +60,7 @@ export default function LinkInputDialog({ isOpen, onClose }: Props) {
 			});
 			return;
 		}
-		const success = await GroupService.generateInviteDetails(links);
+		const success = await GroupService.generateInviteDetails(links, task_description);
 		if (!success) {
 			toast({
 				title: 'Failed to export',
@@ -138,13 +140,17 @@ export default function LinkInputDialog({ isOpen, onClose }: Props) {
 							colorScheme='green'
 							variant='solid'
 							width='full'
-							onClick={handleClose}
+							onClick={() => taskInputRef.current?.open()}
 							isDisabled={isChanged}
 						>
 							Generate Details
 						</Button>
 					</VStack>
 				</ModalFooter>
+				<TaskInput
+					ref={taskInputRef}
+					onConfirm={({ task_description }) => handleClose(task_description)}
+				/>
 			</ModalContent>
 		</Modal>
 	);

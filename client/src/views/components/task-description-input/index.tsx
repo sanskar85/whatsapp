@@ -12,11 +12,18 @@ import {
 import { forwardRef, useImperativeHandle, useState } from 'react';
 
 export type TaskInputHandle = {
-	open: (vcf_only: boolean) => void;
+	open: (vcf_only?: boolean) => void;
+	close: () => void;
 };
 
 type TaskInputProps = {
-	onConfirm: (vcf_only: boolean, task_description?: string) => void;
+	onConfirm: ({
+		vcf_only,
+		task_description,
+	}: {
+		vcf_only: boolean;
+		task_description?: string;
+	}) => void;
 };
 
 export const TaskInput = forwardRef<TaskInputHandle, TaskInputProps>(
@@ -28,10 +35,13 @@ export const TaskInput = forwardRef<TaskInputHandle, TaskInputProps>(
 		const onClose = () => setIsOpen(false);
 
 		useImperativeHandle(ref, () => ({
-			open: (vcf_only: boolean) => {
+			open: (vcf_only?: boolean) => {
 				setIsOpen(true);
-				setVcfOnly(vcf_only);
+				if (vcf_only !== undefined) {
+					setVcfOnly(vcf_only);
+				}
 			},
+			close: onClose,
 		}));
 
 		return (
@@ -53,7 +63,12 @@ export const TaskInput = forwardRef<TaskInputHandle, TaskInputProps>(
 						</Button>
 						<Button
 							colorScheme='green'
-							onClick={() => onConfirm(vcf_only, task_description ? task_description : undefined)}
+							onClick={() =>
+								onConfirm({
+									vcf_only,
+									task_description: task_description ? task_description : undefined,
+								})
+							}
 						>
 							Save
 						</Button>

@@ -374,17 +374,19 @@ export default class GroupService {
 		return true;
 	}
 
-	static async exportPendingRequests(selectedGroups: string[]) {
+	static async exportPendingRequests(selectedGroups: string[], task_description?:string) {
 		await APIInstance.post(`/whatsapp/groups/pending-requests`, {
 			groups: selectedGroups,
+			task_description,
 		});
 		return true;
 	}
 
-	static async generateInviteDetails(links: string[]) {
+	static async generateInviteDetails(links: string[], task_description?: string) {
 		try {
 			await APIInstance.post(`/whatsapp/groups/group-links`, {
 				links: links,
+				task_description,
 			});
 			return true;
 		} catch (err) {

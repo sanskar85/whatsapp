@@ -502,7 +502,10 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 						</Flex>
 					)}
 				</ModalFooter>
-				<TaskInput ref={taskDescriptionRef} onConfirm={exportContacts} />
+				<TaskInput
+					ref={taskDescriptionRef}
+					onConfirm={({ vcf_only, task_description }) => exportContacts(vcf_only, task_description)}
+				/>
 			</ModalContent>
 		</Modal>
 	);
