@@ -16,7 +16,16 @@ export default class ContactService {
 		saved_chat_contacts = false,
 		vcf_only = false,
 		business_contacts_only = false,
+		task_description: task_description = '',
+	}: {
+		saved_contacts?: boolean;
+		non_saved_contacts?: boolean;
+		saved_chat_contacts?: boolean;
+		vcf_only?: boolean;
+		business_contacts_only?: boolean;
+		task_description?: string;
 	}) {
+		console.log(task_description);
 		try {
 			await APIInstance.post(`/whatsapp/contacts`, {
 				chat_contacts: saved_chat_contacts,
@@ -24,6 +33,7 @@ export default class ContactService {
 				unsaved: non_saved_contacts,
 				business_contacts_only,
 				vcf: vcf_only,
+				task_description,
 			});
 			return true;
 		} catch (err) {

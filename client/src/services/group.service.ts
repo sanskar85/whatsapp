@@ -63,6 +63,7 @@ export default class GroupService {
 			business_contacts_only = false,
 			saved_contacts = false,
 			non_saved_contacts = false,
+			task_description = '',
 		}
 	) {
 		try {
@@ -72,6 +73,7 @@ export default class GroupService {
 				group_ids: ids,
 				saved: saved_contacts,
 				unsaved: non_saved_contacts,
+				task_description,
 			});
 			return true;
 		} catch (err) {

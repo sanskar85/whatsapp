@@ -29,6 +29,7 @@ import LabelService from '../../../services/label.service';
 import { StoreNames, StoreState } from '../../../store';
 import { setContactsCount, setSettingsOpen } from '../../../store/reducers/UserDetailsReducers';
 import CheckButton from '../check-button';
+import { TaskInput, TaskInputHandle } from '../task-description-input';
 
 export type ExportsModalHandler = {
 	open: () => void;
@@ -56,6 +57,7 @@ const initialUIDetails = {
 };
 
 const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
+	const taskDescriptionRef = useRef<TaskInputHandle>(null);
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const dispatch = useDispatch();
 	const toast = useToast();
@@ -106,7 +108,7 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 		}));
 	};
 
-	const exportContacts = (vcf_only = false) => {
+	const exportContacts = (vcf_only = false, task_description: string) => {
 		setUIDetails((prevState) => ({
 			...prevState,
 			[vcf_only ? 'VCF_EXPORTING' : 'CSV_EXPORTING']: true,
@@ -130,6 +132,7 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 			saved_contacts: SAVED,
 			saved_chat_contacts: false,
 			non_saved_contacts: UNSAVED,
+			task_description,
 		};
 
 		if (ALL) {
@@ -480,7 +483,7 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 									bgColor: 'green.400',
 								}}
 								width={'48%'}
-								onClick={() => exportContacts(false)}
+								onClick={() => taskDescriptionRef.current?.open(false)}
 								isLoading={uiDetails.CSV_EXPORTING}
 							>
 								<Text color={'white'}>CSV</Text>
@@ -492,13 +495,14 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 								}}
 								width={'48%'}
 								isLoading={uiDetails.VCF_EXPORTING}
-								onClick={() => exportContacts(true)}
+								onClick={() => taskDescriptionRef.current?.open(true)}
 							>
 								<Text color={'white'}>VCF</Text>
 							</Button>
 						</Flex>
 					)}
 				</ModalFooter>
+				<TaskInput ref={taskDescriptionRef} onConfirm={exportContacts} />
 			</ModalContent>
 		</Modal>
 	);
