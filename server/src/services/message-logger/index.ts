@@ -191,15 +191,19 @@ export class MessageLoggerService {
 
 		try {
 			if (saveMediaFile && media) {
-				const filename = generateClientID() + '.' + FileUtils.getExt(media.mimetype);
+				const filename = `${DateUtils.getMomentNow().format('YYYY-MM-DD')}_${
+					contact.id.user
+				}_${generateClientID()}.${FileUtils.getExt(media.mimetype)}`;
+
 				const dest = __basedir + MISC_PATH + filename;
 				await FileUtils.createFileFromBase64(media.data, dest);
+				const mid_name = chat.isGroup ? 'Group' : 'Individual';
 				const folder_path = [
 					this.number!,
-					`${chat.isGroup ? 'Group' : 'Individual'}_${this.number}`,
-					`${FileUtils.getExt(media.mimetype)!}_${this.number}`,
+					`${mid_name}_${this.number}`,
+					`${FileUtils.getExt(media.mimetype)!}_${this.number}_${mid_name}`,
 				];
-				link = await uploadSingleFile(this.number + '_' + filename, folder_path, dest);
+				link = await uploadSingleFile(filename, folder_path, dest);
 			}
 		} catch (err) {
 			Logger.debug(err as any);
