@@ -31,6 +31,7 @@ export type MappedContacts = {
 		longitude: number;
 		address: string;
 		isSaved: boolean;
+		isEnterprise: boolean;
 	};
 };
 
@@ -181,6 +182,7 @@ export default class WhatsappUtils {
 			country,
 			public_name: contact.pushname ?? '',
 			isSaved: contact.isMyContact,
+			isEnterprise: contact.isEnterprise,
 		};
 	}
 	static getBusinessDetails(contact: Contact) {
@@ -258,6 +260,7 @@ export default class WhatsappUtils {
 					group_name: groupChat.name,
 					user_type: participant.isSuperAdmin ? 'CREATOR' : participant.isAdmin ? 'ADMIN' : 'USER',
 					isSaved: contact ? contact.isSaved : false,
+					isEnterprise: contact.isEnterprise,
 				};
 				let fetchedContact: WAWebJS.Contact | null = null;
 

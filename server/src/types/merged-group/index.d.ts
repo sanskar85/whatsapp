@@ -39,6 +39,8 @@ export default interface IMergedGroup extends Document {
 	active: boolean;
 	min_delay: number;
 	max_delay: number;
+	start_time: string;
+	end_time: string;
 	canSendAdmin: boolean;
 	multiple_responses: boolean;
 	triggers: string[];

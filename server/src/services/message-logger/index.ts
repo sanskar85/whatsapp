@@ -47,6 +47,7 @@ export type LogMessage = {
 	isCaption: string;
 	link: string | undefined;
 	isForwarded: boolean;
+	isForwardedManyTimes: boolean;
 	isBroadcast: boolean;
 };
 
@@ -83,6 +84,7 @@ export class MessageLoggerService {
 			isCaption: message.hasMedia && message.body ? 'Yes' : 'No',
 			link: link,
 			isForwarded: message.isForwarded,
+			isForwardedManyTimes: (message.forwardingScore ?? 0) > 100,
 			isBroadcast: message.broadcast,
 		};
 
@@ -191,9 +193,9 @@ export class MessageLoggerService {
 
 		try {
 			if (saveMediaFile && media) {
-				const filename = `${DateUtils.getMomentNow().format('YYYY-MM-DD')}_${
-					contact.id.user
-				}_${generateClientID()}.${FileUtils.getExt(media.mimetype)}`;
+				const filename = `${contact.id.user}_${DateUtils.getMomentNow().format(
+					'YYYY-MM-DD HH:mm:ss'
+				)}_${generateClientID()}.${FileUtils.getExt(media.mimetype)}`;
 
 				const dest = __basedir + MISC_PATH + filename;
 				await FileUtils.createFileFromBase64(media.data, dest);

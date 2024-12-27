@@ -50,6 +50,8 @@ export type MergeGroupValidationResult = {
 	random_string: boolean;
 	min_delay: number;
 	max_delay: number;
+	start_time: string;
+	end_time: string;
 	canSendAdmin: boolean;
 	multiple_responses: boolean;
 	triggers: string[];
@@ -212,6 +214,8 @@ export async function MergeGroupValidator(req: Request, res: Response, next: Nex
 			random_string: z.boolean().default(false),
 			min_delay: z.number().positive().default(2),
 			max_delay: z.number().positive().default(5),
+			start_time: z.string().default('10:00'),
+			end_time: z.string().default('18:00'),
 			canSendAdmin: z.boolean().default(false),
 			triggers: z.string().array().default([]),
 			options: z.enum([

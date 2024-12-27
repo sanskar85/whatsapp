@@ -101,6 +101,8 @@ export default class GroupMergeService {
 			random_string: boolean;
 			min_delay: number;
 			max_delay: number;
+			start_time: string;
+			end_time: string;
 			canSendAdmin: boolean;
 			multiple_responses: boolean;
 			triggers: string[];
@@ -155,6 +157,8 @@ export default class GroupMergeService {
 			random_string?: boolean;
 			min_delay: number;
 			max_delay: number;
+			start_time: string;
+			end_time: string;
 			canSendAdmin: boolean;
 			multiple_responses: boolean;
 			triggers: string[];
@@ -195,6 +199,8 @@ export default class GroupMergeService {
 					...(details.triggers && { triggers: details.triggers }),
 					...(details.options && { options: details.options }),
 					...(details.forward && { forward: details.forward }),
+					...(details.start_time && { start_time: details.start_time }),
+					...(details.end_time && { end_time: details.end_time }),
 					...(details.allowed_country_codes !== undefined && {
 						allowed_country_codes: details.allowed_country_codes,
 					}),
@@ -402,6 +408,15 @@ export default class GroupMergeService {
 				}
 			}
 
+			if (
+				DateUtils.isTimeBetween(
+					doc.start_time ?? '10:00',
+					doc.end_time ?? '18:00',
+					DateUtils.getMomentNow()
+				)
+			) {
+				return;
+			}
 			const country_code = await WhatsappUtils.getCountryCode(contact);
 
 			if (

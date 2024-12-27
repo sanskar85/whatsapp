@@ -73,19 +73,6 @@ async function initiateWhatsapp(req: Request, res: Response, next: NextFunction)
 	}
 }
 
-async function logoutWhatsapp(req: Request, res: Response, next: NextFunction) {
-	const { client_id } = req.locals;
-
-	const whatsapp = WhatsappProvider.clientByClientID(client_id);
-	if (whatsapp) {
-		whatsapp.logoutClient();
-	}
-	return Respond({
-		res,
-		status: 200,
-	});
-}
-
 async function deviceLogout(req: Request, res: Response, next: NextFunction) {
 	const { client_id } = req.locals;
 	WhatsappProvider.clientByClientID(client_id)?.logoutClient();
@@ -268,7 +255,7 @@ const AuthController = {
 	validateLogin,
 	deviceLogout,
 	initiateWhatsapp,
-	logoutWhatsapp,
+	logoutWhatsapp: deviceLogout,
 	resetPassword,
 };
 

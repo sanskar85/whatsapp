@@ -21,6 +21,7 @@ const schema = new mongoose.Schema<IMessageLogger>({
 	isCaption: String,
 	link: String,
 	isForwarded: Boolean,
+	isForwardedManyTimes: Boolean,
 	isBroadcast: Boolean,
 });
 

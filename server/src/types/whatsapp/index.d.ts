@@ -4,6 +4,7 @@ export type TContact = {
 	country: string;
 	isBusiness: string;
 	public_name: string;
+	isEnterprise: boolean;
 };
 
 export type TBusinessContact = TContact & {

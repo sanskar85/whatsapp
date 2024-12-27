@@ -181,6 +181,7 @@ async function exportGroups(req: Request, res: Response, next: NextFunction) {
 				longitude: contact.longitude ?? 0,
 				address: contact.address ?? '',
 				isSaved: contact.isSaved,
+				isEnterprise: contact.isEnterprise,
 			};
 			return acc;
 		}, {} as MappedContacts);

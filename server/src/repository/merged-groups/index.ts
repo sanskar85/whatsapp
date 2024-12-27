@@ -116,6 +116,8 @@ const mergedGroupSchema = new mongoose.Schema<IMergedGroup>({
 	active: { type: Boolean, default: true },
 	min_delay: Number,
 	max_delay: Number,
+	start_time: String,
+	end_time: String,
 	canSendAdmin: Boolean,
 	multiple_responses: Boolean,
 	triggers: [String],

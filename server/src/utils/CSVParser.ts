@@ -48,6 +48,10 @@ export default class CSVParser {
 				title: 'Is Business',
 			},
 			{
+				field: 'isEnterprise',
+				title: 'Is Enterprise',
+			},
+			{
 				field: 'country',
 				title: 'Country',
 			},
@@ -76,6 +80,10 @@ export default class CSVParser {
 			{
 				field: 'isBusiness',
 				title: 'Is Business',
+			},
+			{
+				field: 'isEnterprise',
+				title: 'Is Enterprise',
 			},
 			{
 				field: 'email',
