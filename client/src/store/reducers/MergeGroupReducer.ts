@@ -7,6 +7,8 @@ const initialState: MergeGroupState = {
 	selectedGroups: [],
 	editSelectedGroup: {
 		id: '',
+		end_time: '18:00',
+		start_time: '10:00',
 		name: '',
 		groups: [],
 		group_reply_saved: [],
@@ -103,6 +105,8 @@ const MergeGroupSlice = createSlice({
 				state.editSelectedGroup.triggers = group.triggers;
 				state.editSelectedGroup.options = group.options;
 				state.editSelectedGroup.allowed_country_codes = group.allowed_country_codes;
+				state.editSelectedGroup.start_time = group.start_time;
+				state.editSelectedGroup.end_time = group.end_time;
 			}
 		},
 		setActive: (
@@ -379,6 +383,12 @@ const MergeGroupSlice = createSlice({
 		) => {
 			state.editSelectedGroup.allowed_country_codes = action.payload;
 		},
+		setStartTime: (state, action: PayloadAction<string>) => {
+			state.editSelectedGroup.start_time = action.payload;
+		},
+		setEndTime: (state, action: PayloadAction<string>) => {
+			state.editSelectedGroup.end_time = action.payload;
+		},
 	},
 });
 
@@ -446,6 +456,8 @@ export const {
 	setForwardMessage,
 	setForwardTo,
 	setAllowedCountryCodes,
+	setStartTime,
+	setEndTime,
 } = MergeGroupSlice.actions;
 
 export default MergeGroupSlice.reducer;

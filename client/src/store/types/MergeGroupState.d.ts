@@ -56,6 +56,8 @@ type MergedGroup = {
 			isMultiSelect: boolean;
 		}[];
 	}[];
+	start_time: string;
+	end_time: string;
 	restricted_numbers: string[];
 	min_delay: number;
 	max_delay: number;

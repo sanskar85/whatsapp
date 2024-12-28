@@ -62,6 +62,7 @@ import {
 	removeSelectedGroup,
 	removeTrigger,
 	setAllowedCountryCodes,
+	setEndTime,
 	setForwardMessage,
 	setForwardTo,
 	setGroupReplySavedAttachments,
@@ -85,6 +86,7 @@ import {
 	setPrivateReplyUnsavedSharedContactCards,
 	setPrivateReplyUnsavedText,
 	setRestrictedNumbers,
+	setStartTime,
 	setTriggerAtIndex,
 	toggleMultipleResponses,
 	toggleRandomString,
@@ -431,6 +433,40 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 						</FormControl>
 						<Box flex={1}>
 							<Flex gap={4}>
+								<FormControl flex={1}>
+									<Text className='text-gray-700 dark:text-gray-400 text-sm'>
+										Start At (in IST)
+									</Text>
+									<Input
+										type='time'
+										placeholder='00:00'
+										rounded={'md'}
+										border={'none'}
+										className='text-black  !bg-[#ECECEC]'
+										_focus={{
+											border: 'none',
+											outline: 'none',
+										}}
+										value={editSelectedGroup.start_time}
+										onChange={(e) => dispatch(setStartTime(e.target.value))}
+									/>
+								</FormControl>
+								<FormControl flex={1}>
+									<Text className='text-gray-700 dark:text-gray-400 text-sm'>End At (in IST)</Text>
+									<Input
+										type='time'
+										placeholder='00:00'
+										rounded={'md'}
+										border={'none'}
+										className='text-black  !bg-[#ECECEC]'
+										_focus={{
+											border: 'none',
+											outline: 'none',
+										}}
+										value={editSelectedGroup.end_time}
+										onChange={(e) => dispatch(setEndTime(e.target.value))}
+									/>
+								</FormControl>
 								<DelayInput
 									placeholder='Min Delay (in sec)'
 									value={editSelectedGroup.min_delay}
@@ -441,7 +477,7 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 									value={editSelectedGroup.max_delay}
 									onChange={(num) => dispatch(setMaxDelay(num))}
 								/>
-								<Grid width={'50%'} className='grid-cols-2' mt={'1rem'}>
+								<Grid width={'40%'} className='grid-cols-2' mt={'1rem'}>
 									<GridItem>
 										<Checkbox
 											colorScheme='green'

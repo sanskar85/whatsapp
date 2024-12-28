@@ -49,7 +49,7 @@ const processGroup = (group: IMergedGroup) => {
 		options: group.options ?? BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE,
 		forward: group.forward,
 		start_time: group.start_time ?? '10:00',
-		enf_time: group.end_time ?? '18:00',
+		end_time: group.end_time ?? '18:00',
 		allowed_country_codes: group.allowed_country_codes ?? [],
 	};
 };
