@@ -1,15 +1,22 @@
+import fs from 'fs';
 import moment from 'moment';
 import { Types } from 'mongoose';
 import Logger from 'n23-logger';
-import WAWebJS from 'whatsapp-web.js';
+import WAWebJS, { GroupChat, MessageMedia, Poll } from 'whatsapp-web.js';
+import { ATTACHMENTS_PATH } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import { WhatsappProvider } from '../../provider/whatsapp_provider';
 import { DeviceDB } from '../../repository/user';
 import { IDevice, IUser } from '../../types/users';
 import DateUtils from '../../utils/DateUtils';
+import { randomVector } from '../../utils/ExpressUtils';
 import BotService from '../bot';
+import ContactCardService from '../contact-card';
+import { mimeTypes } from '../message-logger';
 import { PaymentService } from '../payments';
+import UploadService from '../uploads';
 import UserService from './user';
+import UserPreferencesService from './userPreferences';
 
 export default class DeviceService extends UserService {
 	private device: IDevice;
@@ -304,9 +311,11 @@ export default class DeviceService extends UserService {
 		body,
 		contact,
 		client_id,
+		chat,
 		isGroup = false,
 		fromPoll = false,
 		message_id = '',
+		message,
 	}: {
 		triggered_from: string;
 		body: string;
@@ -315,6 +324,8 @@ export default class DeviceService extends UserService {
 		fromPoll: boolean;
 		message_id: string;
 		client_id: string;
+		chat: WAWebJS.Chat;
+		message?: WAWebJS.Message;
 	}) {
 		const { isSubscribed, isNew } = this.isSubscribed();
 		if (!isSubscribed && !isNew) {
@@ -322,6 +333,7 @@ export default class DeviceService extends UserService {
 		}
 
 		const botService = new BotService(this.getUser());
+		const userPreferences = await UserPreferencesService.getService(this.getUserId());
 		botService.handleMessage(triggered_from, body, contact, {
 			isGroup,
 			fromPoll,
@@ -331,5 +343,178 @@ export default class DeviceService extends UserService {
 			client_id,
 			device_id: this.device._id,
 		});
+
+		if (isGroup && Object.keys(userPreferences.getMessageModerationRules()).length > 0) {
+			const user = this.getUser();
+			const whatsapp = WhatsappProvider.clientByClientID(client_id)!;
+			if (!whatsapp) {
+				return;
+			}
+			const groupChat = chat as GroupChat;
+			const moderationRules = userPreferences.getMessageModerationRules();
+
+			Object.values(moderationRules).forEach(async (rule) => {
+				if (!rule.groups || !rule.groups.includes(chat.id._serialized)) {
+					return;
+				}
+
+				let media;
+
+				try {
+					media = await message?.downloadMedia();
+				} catch (err) {}
+
+				let isRestricted = false;
+
+				if (media) {
+					if (
+						rule.file_types.includes('all') ||
+						(rule.file_types.includes('image') && media.mimetype.includes('image')) ||
+						(rule.file_types.includes('video') && media.mimetype.includes('video')) ||
+						rule.file_types.includes(media.mimetype) ||
+						(rule.file_types.includes('') && !mimeTypes.includes(media.mimetype))
+					) {
+						isRestricted = true;
+					} else {
+						isRestricted = false;
+					}
+				} else {
+					if (rule.file_types.includes('all') || rule.file_types.includes('text')) {
+						isRestricted = true;
+					} else {
+						isRestricted = false;
+					}
+				}
+
+				if (!isRestricted || !rule.admin_rule || !rule.creator_rule) {
+					return;
+				}
+
+				const { admins, creators } = groupChat.participants.reduce(
+					(acc, curr) => {
+						if (curr.isSuperAdmin) {
+							acc.creators.push(curr.id._serialized);
+						} else if (curr.id) {
+							acc.admins.push(curr.id._serialized);
+						}
+						return acc;
+					},
+					{
+						creators: [] as string[],
+						admins: [] as string[],
+					}
+				);
+
+				if (rule.creator_rule) {
+					creators.forEach((num) => {
+						sendMessage(num, rule.admin_rule);
+					});
+				}
+				if (rule.admin_rule) {
+					admins.forEach((num) => {
+						sendMessage(num, rule.creator_rule);
+					});
+				}
+			});
+
+			async function sendMessage(
+				recipient: string,
+				rule: {
+					message: string;
+					shared_contact_cards: Types.ObjectId[];
+					attachments: Types.ObjectId[];
+					polls: { title: string; options: string[]; isMultiSelect: boolean }[];
+				}
+			) {
+				let msg = rule.message;
+				if (msg) {
+					if (msg.includes('{{public_name}}')) {
+						msg = msg.replace('{{public_name}}', contact.pushname);
+					}
+
+					whatsapp
+						.getClient()
+						.sendMessage(triggered_from, msg)
+						.then(async (_msg) => {
+							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
+							}
+						})
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				}
+
+				for (const attachment_id of rule.attachments) {
+					const mediaObject = await new UploadService(user).getAttachment(attachment_id);
+					const path = __basedir + ATTACHMENTS_PATH + mediaObject.filename;
+					if (!fs.existsSync(path)) {
+						continue;
+					}
+					const media = MessageMedia.fromFilePath(path);
+					if (mediaObject.name) {
+						media.filename = mediaObject.name + path.substring(path.lastIndexOf('.'));
+					}
+					whatsapp
+						.getClient()
+						.sendMessage(triggered_from, media, {
+							caption: mediaObject.caption,
+						})
+						.then(async (_msg) => {
+							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
+							}
+						})
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				}
+
+				(rule.shared_contact_cards ?? []).forEach(async (card_id) => {
+					const card = await new ContactCardService(user).getContact(card_id)!;
+					whatsapp
+						.getClient()
+						.sendMessage(triggered_from, card.vCardString)
+						.then(async (_msg) => {
+							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
+							}
+						})
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				});
+
+				(rule.polls ?? []).forEach(async (poll) => {
+					const { title, options, isMultiSelect } = poll;
+					whatsapp
+						.getClient()
+						.sendMessage(
+							triggered_from,
+							new Poll(title, options, {
+								messageSecret: randomVector(32),
+								allowMultipleAnswers: isMultiSelect,
+							})
+						)
+						.then(async (_msg) => {
+							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
+							}
+							await whatsapp.getClient().interface.openChatWindow(triggered_from);
+						})
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				});
+			}
+		}
 	}
 }

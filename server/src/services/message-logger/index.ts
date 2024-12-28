@@ -13,7 +13,7 @@ import UserPreferencesService from '../user/userPreferences';
 
 const sheets = google.sheets('v4');
 
-const mimeTypes = [
+export const mimeTypes = [
 	'image',
 	'image/heif',
 	'image/jpeg',

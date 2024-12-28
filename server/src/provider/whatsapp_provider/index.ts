@@ -246,6 +246,7 @@ export class WhatsappProvider {
 						triggered_from: chat.id._serialized,
 						body: opt,
 						contact,
+						chat,
 						isGroup: chat.isGroup,
 						fromPoll: true,
 						client_id: this.client_id,
@@ -317,6 +318,7 @@ export class WhatsappProvider {
 					fromPoll: false,
 					client_id: this.client_id,
 					message_id: message.id._serialized,
+					chat,
 				});
 				if (isGroup) {
 					const groupService = new GroupMergeService(this.userService.getUser());
@@ -337,6 +339,7 @@ export class WhatsappProvider {
 					body: '',
 					contact,
 					isGroup,
+					chat,
 					fromPoll: false,
 					client_id: this.client_id,
 					message_id: message.id._serialized,

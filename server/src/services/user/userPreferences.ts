@@ -41,6 +41,10 @@ export default class UserPreferencesService {
 		return this.userPref.messageLogRules;
 	}
 
+	getMessageModerationRules() {
+		return this.userPref.messageModerationRules;
+	}
+
 	async addMessageLogRule(
 		rules: {
 			id: string;
