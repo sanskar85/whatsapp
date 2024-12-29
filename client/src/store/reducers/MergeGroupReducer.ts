@@ -15,6 +15,7 @@ const initialState: MergeGroupState = {
 		group_reply_unsaved: [],
 		private_reply_saved: [],
 		private_reply_unsaved: [],
+		private_reply_admin: [],
 		restricted_numbers: [],
 		min_delay: 2,
 		max_delay: 7,
@@ -128,6 +129,7 @@ const MergeGroupSlice = createSlice({
 				state.editSelectedGroup.allowed_country_codes = group.allowed_country_codes;
 				state.editSelectedGroup.start_time = group.start_time;
 				state.editSelectedGroup.end_time = group.end_time;
+				state.editSelectedGroup.private_reply_admin = group.private_reply_admin;
 			}
 		},
 		setActive: (
@@ -194,6 +196,14 @@ const MergeGroupSlice = createSlice({
 				polls: [],
 			});
 		},
+		addPrivateReplyAdmin: (state) => {
+			state.editSelectedGroup.private_reply_admin.push({
+				text: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			});
+		},
 		addPrivateReplyUnsaved: (state) => {
 			state.editSelectedGroup.private_reply_unsaved.push({
 				text: '',
@@ -214,6 +224,9 @@ const MergeGroupSlice = createSlice({
 		removePrivateReplyUnsaved: (state, action: PayloadAction<number>) => {
 			state.editSelectedGroup.private_reply_unsaved.splice(action.payload, 1);
 		},
+		removePrivateReplyAdmin: (state, action: PayloadAction<number>) => {
+			state.editSelectedGroup.private_reply_admin.splice(action.payload, 1);
+		},
 		setGroupReplySavedText: (state, action: PayloadAction<{ index: number; text: string }>) => {
 			state.editSelectedGroup.group_reply_saved[action.payload.index].text = action.payload.text;
 		},
@@ -226,6 +239,9 @@ const MergeGroupSlice = createSlice({
 		setPrivateReplyUnsavedText: (state, action: PayloadAction<{ index: number; text: string }>) => {
 			state.editSelectedGroup.private_reply_unsaved[action.payload.index].text =
 				action.payload.text;
+		},
+		setPrivateReplyAdminText: (state, action: PayloadAction<{ index: number; text: string }>) => {
+			state.editSelectedGroup.private_reply_admin[action.payload.index].text = action.payload.text;
 		},
 		setGroupReplySavedSharedContactCards: (
 			state,
@@ -255,6 +271,13 @@ const MergeGroupSlice = createSlice({
 			state.editSelectedGroup.private_reply_unsaved[action.payload.index].shared_contact_cards =
 				action.payload.text;
 		},
+		setPrivateReplyAdminSharedContactCards: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.private_reply_admin[action.payload.index].shared_contact_cards =
+				action.payload.text;
+		},
 		setGroupReplySavedAttachments: (
 			state,
 			action: PayloadAction<{ index: number; text: string[] }>
@@ -281,6 +304,13 @@ const MergeGroupSlice = createSlice({
 			action: PayloadAction<{ index: number; text: string[] }>
 		) => {
 			state.editSelectedGroup.private_reply_unsaved[action.payload.index].attachments =
+				action.payload.text;
+		},
+		setPrivateReplyAdminAttachments: (
+			state,
+			action: PayloadAction<{ index: number; text: string[] }>
+		) => {
+			state.editSelectedGroup.private_reply_admin[action.payload.index].attachments =
 				action.payload.text;
 		},
 		setGroupReplySavedPolls: (
@@ -336,6 +366,20 @@ const MergeGroupSlice = createSlice({
 			}>
 		) => {
 			state.editSelectedGroup.private_reply_unsaved[action.payload.index].polls =
+				action.payload.polls;
+		},
+		setPrivateReplyAdminPolls: (
+			state,
+			action: PayloadAction<{
+				index: number;
+				polls: {
+					title: string;
+					options: string[];
+					isMultiSelect: boolean;
+				}[];
+			}>
+		) => {
+			state.editSelectedGroup.private_reply_admin[action.payload.index].polls =
 				action.payload.polls;
 		},
 		clearEditMergeGroup: (state) => {
@@ -492,6 +536,12 @@ export const {
 	setStartTime,
 	setEndTime,
 	setModerationRule,
+	addPrivateReplyAdmin,
+	removePrivateReplyAdmin,
+	setPrivateReplyAdminAttachments,
+	setPrivateReplyAdminPolls,
+	setPrivateReplyAdminSharedContactCards,
+	setPrivateReplyAdminText,
 } = MergeGroupSlice.actions;
 
 export default MergeGroupSlice.reducer;

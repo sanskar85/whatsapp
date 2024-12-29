@@ -3,7 +3,6 @@ import { MergedGroup } from '../store/types/MergeGroupState';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function processMergedGroup(group: any) {
-	console.log(group);
 	return {
 		id: group.id as string,
 		name: group.name as string,
@@ -12,6 +11,7 @@ function processMergedGroup(group: any) {
 		group_reply_unsaved: group.group_reply_unsaved ?? [],
 		private_reply_saved: group.private_reply_saved ?? [],
 		private_reply_unsaved: group.private_reply_unsaved ?? [],
+		private_reply_admin: group.private_reply_admin ?? [],
 		restricted_numbers: group.restricted_numbers,
 		min_delay: group.min_delay,
 		max_delay: group.max_delay,
@@ -120,70 +120,11 @@ export default class GroupService {
 		}
 	}
 
-	static async mergeGroups(details: {
-		start_time: string;
-		end_time: string;
-		group_name: string;
-		group_ids: string[];
-		group_reply_saved: {
-			text: string;
-			shared_contact_cards: string[];
-			attachments: string[];
-			polls: {
-				title: string;
-				options: string[];
-				isMultiSelect: boolean;
-			}[];
-		}[];
-		group_reply_unsaved: {
-			text: string;
-			shared_contact_cards: string[];
-			attachments: string[];
-			polls: {
-				title: string;
-				options: string[];
-				isMultiSelect: boolean;
-			}[];
-		}[];
-		private_reply_saved: {
-			text: string;
-			shared_contact_cards: string[];
-			attachments: string[];
-			polls: {
-				title: string;
-				options: string[];
-				isMultiSelect: boolean;
-			}[];
-		}[];
-		private_reply_unsaved: {
-			text: string;
-			shared_contact_cards: string[];
-			attachments: string[];
-			polls: {
-				title: string;
-				options: string[];
-				isMultiSelect: boolean;
-			}[];
-		}[];
-		min_delay: number;
-		max_delay: number;
-		reply_business_only: boolean;
-		random_string: boolean;
-		restricted_numbers: string[];
-		canSendAdmin: boolean;
-		multiple_responses: boolean;
-		triggers: string[];
-		options: string;
-		forward: {
-			number: string;
-			message: string;
-		};
-		allowed_country_codes: string[];
-	}) {
+	static async mergeGroups(details: MergedGroup) {
 		try {
 			const { data } = await APIInstance.post(`/whatsapp/groups/merge`, {
-				group_name: details.group_name,
-				group_ids: details.group_ids,
+				group_name: details.name,
+				group_ids: details.groups,
 				group_reply_saved: details.group_reply_saved,
 				group_reply_unsaved: details.group_reply_unsaved,
 				private_reply_saved: details.private_reply_saved,
@@ -199,6 +140,7 @@ export default class GroupService {
 				options: details.options,
 				forward: details.forward,
 				allowed_country_codes: details.allowed_country_codes,
+				private_reply_admin: details.private_reply_admin,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {
@@ -218,66 +160,7 @@ export default class GroupService {
 
 	static async editMergedGroup(
 		id: string,
-		details: {
-			name: string;
-			start_time: string;
-			end_time: string;
-			groups: string[];
-			group_reply_saved: {
-				text: string;
-				shared_contact_cards: string[];
-				attachments: string[];
-				polls: {
-					title: string;
-					options: string[];
-					isMultiSelect: boolean;
-				}[];
-			}[];
-			group_reply_unsaved: {
-				text: string;
-				shared_contact_cards: string[];
-				attachments: string[];
-				polls: {
-					title: string;
-					options: string[];
-					isMultiSelect: boolean;
-				}[];
-			}[];
-			private_reply_saved: {
-				text: string;
-				shared_contact_cards: string[];
-				attachments: string[];
-				polls: {
-					title: string;
-					options: string[];
-					isMultiSelect: boolean;
-				}[];
-			}[];
-			private_reply_unsaved: {
-				text: string;
-				shared_contact_cards: string[];
-				attachments: string[];
-				polls: {
-					title: string;
-					options: string[];
-					isMultiSelect: boolean;
-				}[];
-			}[];
-			restricted_numbers: string[];
-			min_delay: number;
-			max_delay: number;
-			reply_business_only: boolean;
-			random_string: boolean;
-			canSendAdmin: boolean;
-			multiple_responses: boolean;
-			triggers: string[];
-			options: string;
-			forward: {
-				number: string;
-				message: string;
-			};
-			allowed_country_codes: string[];
-		}
+		details: MergedGroup
 	) {
 		try {
 			const { data } = await APIInstance.patch(`/whatsapp/groups/merge/${id}`, {
@@ -300,6 +183,7 @@ export default class GroupService {
 				allowed_country_codes: details.allowed_country_codes,
 				start_time: details.start_time,
 				end_time: details.end_time,
+				private_reply_admin: details.private_reply_admin,
 			});
 			return processMergedGroup(data.group);
 		} catch (err) {
@@ -430,39 +314,7 @@ export default class GroupService {
 		merged_group_id,
 	}: {
 		merged_group_id: string;
-		details: {
-			file_types: string[];
-			group_rule: {
-				message: string;
-				shared_contact_cards: string[];
-				attachments: string[];
-				polls: {
-					title: string;
-					options: string[];
-					isMultiSelect: boolean;
-				}[];
-			};
-			admin_rule: {
-				message: string;
-				shared_contact_cards: string[];
-				attachments: string[];
-				polls: {
-					title: string;
-					options: string[];
-					isMultiSelect: boolean;
-				}[];
-			};
-			creator_rule: {
-				message: string;
-				shared_contact_cards: string[];
-				attachments: string[];
-				polls: {
-					title: string;
-					options: string[];
-					isMultiSelect: boolean;
-				}[];
-			};
-		};
+		details: MergedGroup['moderator_rules'];
 	}) {
 		try {
 			const { data } = await APIInstance.post(

@@ -77,7 +77,6 @@ const MessageModerationRule = forwardRef<MessageModerationRuleHandle>((_, ref) =
 		isOpen,
 		onClose,
 		onOpen: (id: string, data: MergedGroup['moderator_rules']) => {
-			console.log(data, 'merged');
 			setGroupRule(data.group_rule);
 			setCreatorRule(data.creator_rule);
 			setMergedGroupId(id);
@@ -151,7 +150,7 @@ const MessageModerationRule = forwardRef<MessageModerationRuleHandle>((_, ref) =
 			<ModalContent>
 				<ModalHeader>
 					<Text fontSize='2xl' fontWeight='bold'>
-						Message Moderation Rule
+						APK Moderation Rule
 					</Text>
 				</ModalHeader>
 				<ModalBody>

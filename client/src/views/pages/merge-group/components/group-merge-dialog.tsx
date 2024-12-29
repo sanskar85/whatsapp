@@ -49,6 +49,7 @@ import {
 	addGroupReplyUnsaved,
 	addMergedGroup,
 	addMultipleSelectedGroup,
+	addPrivateReplyAdmin,
 	addPrivateReplySaved,
 	addPrivateReplyUnsaved,
 	addSelectedGroup,
@@ -57,6 +58,7 @@ import {
 	removeAllTriggers,
 	removeGroupReplySaved,
 	removeGroupReplyUnsaved,
+	removePrivateReplyAdmin,
 	removePrivateReplySaved,
 	removePrivateReplyUnsaved,
 	removeSelectedGroup,
@@ -77,6 +79,10 @@ import {
 	setMinDelay,
 	setName,
 	setOptions,
+	setPrivateReplyAdminAttachments,
+	setPrivateReplyAdminPolls,
+	setPrivateReplyAdminSharedContactCards,
+	setPrivateReplyAdminText,
 	setPrivateReplySavedAttachments,
 	setPrivateReplySavedPolls,
 	setPrivateReplySavedSharedContactCards,
@@ -332,7 +338,7 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 									</Flex>
 								</Flex>
 								{editSelectedGroup.triggers.map((t, index) => (
-									<Flex gap={2}>
+									<Flex gap={2} key={index}>
 										<Textarea
 											width={'full'}
 											key={index}
@@ -398,9 +404,9 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 						</FormControl>
 
 						<FormControl flexGrow={1}>
-							<Text className='text-gray-700 dark:text-gray-400'>
+							<Box className='text-gray-700 dark:text-gray-400'>
 								Allowed Country Codes<Info>By default all countries.</Info>
-							</Text>
+							</Box>
 							<Multiselect
 								displayValue='name'
 								placeholder='Select Country'
@@ -870,6 +876,152 @@ const GroupMerge = ({ onClose, isOpen }: GroupMergeProps) => {
 													}
 													onPollsSelected={(ids) =>
 														dispatch(setPrivateReplyUnsavedPolls({ polls: ids, index }))
+													}
+												/>
+											</Box>
+										</VStack>
+									))}
+								</Flex>
+								<Flex className='flex-col gap-2 p-2 border-2 border-gray-400 rounded-lg'>
+									<Flex justifyContent={'space-between'}>
+										Private Reply Admin{' '}
+										<IconButton
+											icon={<AddIcon />}
+											aria-label='add-icon'
+											onClick={() => dispatch(addPrivateReplyAdmin())}
+										/>
+									</Flex>
+
+									{editSelectedGroup.private_reply_admin.map((group, index) => (
+										<VStack key={index} alignItems={'stretch'} gap={'1rem'}>
+											<Flex justifyContent={'space-between'}>
+												<Text fontWeight={'semibold'} mb={'-1.0rem'}>
+													Message {index + 1}
+												</Text>
+												<IconButton
+													icon={<DeleteIcon />}
+													aria-label='minus-icon'
+													size={'sm'}
+													colorScheme='orange'
+													onClick={() => dispatch(removePrivateReplyAdmin(index))}
+												/>
+											</Flex>
+											<FormControl>
+												<FormLabel>Text</FormLabel>
+												<Textarea
+													ref={(el) => (messageRef.current['private-admin'] = el)}
+													width={'full'}
+													size={'sm'}
+													rounded={'md'}
+													placeholder={'eg. Hello there!'}
+													border={'none'}
+													className='text-black !bg-[#ECECEC] '
+													_placeholder={{
+														opacity: 0.4,
+														color: 'inherit',
+													}}
+													_focus={{ border: 'none', outline: 'none' }}
+													value={group.text ?? ''}
+													onChange={(e) =>
+														dispatch(setPrivateReplyAdminText({ index, text: e.target.value }))
+													}
+												/>
+											</FormControl>
+											<Flex>
+												<Tag
+													size={'sm'}
+													m={'0.25rem'}
+													p={'0.5rem'}
+													width={'fit-content'}
+													borderRadius='md'
+													variant='solid'
+													colorScheme='gray'
+													_hover={{ cursor: 'pointer' }}
+													onClick={() => {
+														const text = insertVariablesToMessage(
+															'private-admin',
+															'{{admin_name}}',
+															group.text ?? ''
+														);
+														dispatch(setPrivateReplyAdminText({ index, text }));
+													}}
+												>
+													<TagLabel>{'{{admin_name}}'}</TagLabel>
+												</Tag>
+												<Tag
+													size={'sm'}
+													m={'0.25rem'}
+													p={'0.5rem'}
+													width={'fit-content'}
+													borderRadius='md'
+													variant='solid'
+													colorScheme='gray'
+													_hover={{ cursor: 'pointer' }}
+													onClick={() => {
+														const text = insertVariablesToMessage(
+															'private-admin',
+															'{{group_name}}',
+															group.text ?? ''
+														);
+														dispatch(setPrivateReplyAdminText({ index, text }));
+													}}
+												>
+													<TagLabel>{'{{group_name}}'}</TagLabel>
+												</Tag>
+												<Tag
+													size={'sm'}
+													m={'0.25rem'}
+													p={'0.5rem'}
+													width={'fit-content'}
+													borderRadius='md'
+													variant='solid'
+													colorScheme='gray'
+													_hover={{ cursor: 'pointer' }}
+													onClick={() => {
+														const text = insertVariablesToMessage(
+															'private-admin',
+															'{{sender_number}}',
+															group.text ?? ''
+														);
+														dispatch(setPrivateReplyAdminText({ index, text }));
+													}}
+												>
+													<TagLabel>{'{{sender_number}}'}</TagLabel>
+												</Tag>
+												<Tag
+													size={'sm'}
+													m={'0.25rem'}
+													p={'0.5rem'}
+													width={'fit-content'}
+													borderRadius='md'
+													variant='solid'
+													colorScheme='gray'
+													_hover={{ cursor: 'pointer' }}
+													onClick={() => {
+														const text = insertVariablesToMessage(
+															'private-admin',
+															'{{timestamp}}',
+															group.text ?? ''
+														);
+														dispatch(setPrivateReplyAdminText({ index, text }));
+													}}
+												>
+													<TagLabel>{'{{timestamp}}'}</TagLabel>
+												</Tag>
+											</Flex>
+											<Box>
+												<AddOns
+													attachments={group.attachments}
+													shared_contact_cards={group.shared_contact_cards}
+													polls={group.polls}
+													onAttachmentsSelected={(ids) =>
+														dispatch(setPrivateReplyAdminAttachments({ text: ids, index }))
+													}
+													onContactsSelected={(ids) =>
+														dispatch(setPrivateReplyAdminSharedContactCards({ text: ids, index }))
+													}
+													onPollsSelected={(ids) =>
+														dispatch(setPrivateReplyAdminPolls({ polls: ids, index }))
 													}
 												/>
 											</Box>

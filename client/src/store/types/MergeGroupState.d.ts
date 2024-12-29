@@ -56,6 +56,17 @@ type MergedGroup = {
 			isMultiSelect: boolean;
 		}[];
 	}[];
+	private_reply_admin: {
+		text: string;
+		shared_contact_cards: string[];
+		attachments: string[];
+		polls: {
+			title: string;
+			options: string[];
+			isMultiSelect: boolean;
+		}[];
+	}[];
+
 	start_time: string;
 	end_time: string;
 	restricted_numbers: string[];
