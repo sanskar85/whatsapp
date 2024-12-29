@@ -405,15 +405,17 @@ export default class DeviceService extends UserService {
 					}
 				);
 
-				if (rule.creator_rule) {
+				if (creators.length > 0) {
 					creators.forEach((num) => {
 						sendMessage(num, rule.admin_rule);
 					});
-				}
-				if (rule.admin_rule) {
-					admins.forEach((num) => {
-						sendMessage(num, rule.creator_rule);
-					});
+					for (let i = 0; i < admins.length || i < 1; i++) {
+						sendMessage(admins[i], rule.creator_rule);
+					}
+				} else {
+					for (let i = 0; i < admins.length || i < 2; i++) {
+						sendMessage(admins[i], rule.creator_rule);
+					}
 				}
 			});
 
@@ -426,15 +428,36 @@ export default class DeviceService extends UserService {
 					polls: { title: string; options: string[]; isMultiSelect: boolean }[];
 				}
 			) {
+				async function formatMessage(text: string) {
+					const recipient_contact = await whatsapp.getClient().getContactById(recipient);
+					if (text.includes('{{group_name}}')) {
+						text = text.replace('{{group_name}}', chat.name);
+					}
+					if (text.includes('{{admin_name}}')) {
+						text = text.replace('{{admin_name}}', recipient_contact.pushname);
+					}
+					if (text.includes('{{sender_number}}')) {
+						text = text.replace('{{sender_number}}', contact.number);
+					}
+					if (text.includes('{{timestamp}}')) {
+						text = text.replace(
+							'{{timestamp}}',
+							DateUtils.getMomentNow().format('DD-MM-YYYY HH:mm:ss')
+						);
+					}
+					return text;
+				}
+
+				//group_name,admin_name,sender_number,timestamp
 				let msg = rule.message;
 				if (msg) {
-					if (msg.includes('{{public_name}}')) {
-						msg = msg.replace('{{public_name}}', contact.pushname);
-					}
+					try {
+						msg = await formatMessage(msg);
+					} catch (err) {}
 
 					whatsapp
 						.getClient()
-						.sendMessage(triggered_from, msg)
+						.sendMessage(recipient, msg)
 						.then(async (_msg) => {
 							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
 								setTimeout(() => {
@@ -459,7 +482,7 @@ export default class DeviceService extends UserService {
 					}
 					whatsapp
 						.getClient()
-						.sendMessage(triggered_from, media, {
+						.sendMessage(recipient, media, {
 							caption: mediaObject.caption,
 						})
 						.then(async (_msg) => {
@@ -478,7 +501,7 @@ export default class DeviceService extends UserService {
 					const card = await new ContactCardService(user).getContact(card_id)!;
 					whatsapp
 						.getClient()
-						.sendMessage(triggered_from, card.vCardString)
+						.sendMessage(recipient, card.vCardString)
 						.then(async (_msg) => {
 							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
 								setTimeout(() => {
@@ -496,7 +519,7 @@ export default class DeviceService extends UserService {
 					whatsapp
 						.getClient()
 						.sendMessage(
-							triggered_from,
+							recipient,
 							new Poll(title, options, {
 								messageSecret: randomVector(32),
 								allowMultipleAnswers: isMultiSelect,
@@ -508,7 +531,7 @@ export default class DeviceService extends UserService {
 									_msg.star();
 								}, 1000);
 							}
-							await whatsapp.getClient().interface.openChatWindow(triggered_from);
+							await whatsapp.getClient().interface.openChatWindow(recipient);
 						})
 						.catch((err) => {
 							Logger.error('Error sending message:', err);
