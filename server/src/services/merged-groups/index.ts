@@ -331,7 +331,7 @@ export default class GroupMergeService {
 	) {
 		const modified_result = await MergedGroupDB.updateOne(
 			{ _id: id },
-			{ $set: { moderator_rules: rule } }
+			{ $set: { moderation_rules: rule } }
 		);
 		if (modified_result.modifiedCount === 0) {
 			return false;
