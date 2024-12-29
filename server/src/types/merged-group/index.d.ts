@@ -33,6 +33,12 @@ export default interface IMergedGroup extends Document {
 		shared_contact_cards?: IContactCard[];
 		polls?: IPolls[];
 	}[];
+	private_reply_admin: {
+		text: string;
+		attachments?: IUpload[];
+		shared_contact_cards?: IContactCard[];
+		polls?: IPolls[];
+	}[];
 	allowed_country_codes: string[];
 	restricted_numbers: IUpload[];
 	reply_business_only: boolean;

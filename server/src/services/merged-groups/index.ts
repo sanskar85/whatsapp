@@ -38,6 +38,7 @@ const processGroup = (group: IMergedGroup) => {
 		group_reply_unsaved: group.group_reply_unsaved,
 		private_reply_saved: group.private_reply_saved,
 		private_reply_unsaved: group.private_reply_unsaved,
+		private_reply_admin: group.private_reply_admin,
 		min_delay: group.min_delay ?? 2,
 		max_delay: group.max_delay ?? 7,
 		restricted_numbers: group.restricted_numbers ?? [],
@@ -130,6 +131,12 @@ export default class GroupMergeService {
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
 			}[];
+			private_reply_admin: {
+				text: string;
+				attachments: Types.ObjectId[];
+				shared_contact_cards: Types.ObjectId[];
+				polls: IPolls[];
+			}[];
 			allowed_country_codes: string[];
 			restricted_numbers?: Types.ObjectId[];
 			reply_business_only: boolean;
@@ -186,6 +193,12 @@ export default class GroupMergeService {
 				attachments: Types.ObjectId[];
 				polls: IPolls[];
 			}[];
+			private_reply_admin: {
+				text: string;
+				attachments: Types.ObjectId[];
+				shared_contact_cards: Types.ObjectId[];
+				polls: IPolls[];
+			}[];
 			allowed_country_codes: string[];
 			restricted_numbers?: Types.ObjectId[];
 			reply_business_only?: boolean;
@@ -221,6 +234,9 @@ export default class GroupMergeService {
 					...(details.private_reply_saved && { private_reply_saved: details.private_reply_saved }),
 					...(details.private_reply_unsaved && {
 						private_reply_unsaved: details.private_reply_unsaved,
+					}),
+					...(details.private_reply_admin && {
+						private_reply_admin: details.private_reply_admin,
 					}),
 					restricted_numbers: details.restricted_numbers,
 					...(details.reply_business_only && { reply_business_only: details.reply_business_only }),
@@ -371,7 +387,7 @@ export default class GroupMergeService {
 		}
 
 		let cond = true;
-		if (doc.triggers.length > 0) {
+		if (doc.triggers.length > 0 && message_body) {
 			cond = false;
 			for (const trigger of doc.triggers) {
 				if (doc.options === BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE) {
@@ -447,10 +463,14 @@ export default class GroupMergeService {
 			}
 		}
 
+		if (!cond) {
+			return false;
+		}
+
 		if (
 			DateUtils.isTimeBetween(
-				doc.start_time ?? '10:00',
-				doc.end_time ?? '18:00',
+				DateUtils.getMoment(doc.start_time ?? '10:00'),
+				DateUtils.getMoment(doc.end_time ?? '18:00'),
 				DateUtils.getMomentNow()
 			)
 		) {
@@ -470,7 +490,7 @@ export default class GroupMergeService {
 			}
 		}
 
-		return cond;
+		return true;
 	}
 
 	public async handleGroupMessage(
@@ -502,7 +522,7 @@ export default class GroupMergeService {
 			from: contact.id._serialized,
 			group_name: chat.name,
 		};
-		const message_body = message.body;
+		const message_body = message.hasMedia ? '' : message.body;
 
 		const triggered_groups = (
 			await Promise.all(
@@ -518,9 +538,11 @@ export default class GroupMergeService {
 			const privateReply = contact.isMyContact
 				? doc.private_reply_saved
 				: doc.private_reply_unsaved;
+			const adminPrivateReply = doc.private_reply_admin;
 
 			sendGroupReply(doc, groupReply);
 			sendPrivateReply(doc, privateReply);
+			sendAdminPrivateReply(doc, adminPrivateReply);
 
 			const userPrefService = await UserPreferencesService.getService(this.user._id.toString());
 
@@ -905,6 +927,215 @@ export default class GroupMergeService {
 			}
 		}
 
+		async function sendAdminPrivateReply(
+			doc: IMergedGroup,
+			allReplies: {
+				text: string;
+				attachments?: IUpload[] | undefined;
+				shared_contact_cards?: IContactCard[] | undefined;
+				polls?: IPolls[] | undefined;
+			}[]
+		) {
+			if (!doc) return;
+
+			const userPrefService = await UserPreferencesService.getService(user._id.toString());
+
+			for (const reply of allReplies) {
+				try {
+					const { text, attachments, shared_contact_cards, polls } = reply;
+
+					if (
+						text.length === 0 &&
+						attachments?.length === 0 &&
+						shared_contact_cards?.length === 0 &&
+						polls?.length === 0
+					) {
+						return;
+					}
+					await Delay(getRandomNumber(doc.min_delay, doc.max_delay));
+
+					let _reply_text = text.replace(new RegExp('{{public_name}}', 'g'), contact.pushname);
+
+					const to = contact.id._serialized;
+					if (_reply_text.length > 0 && doc.random_string) {
+						_reply_text += randomMessageText();
+					}
+					if (_reply_text.length > 0) {
+						whatsapp
+							.sendMessage(to, _reply_text, {
+								quotedMessageId: message.id._serialized,
+							})
+							.then(async (_msg) => {
+								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+									setTimeout(() => {
+										_msg.star();
+									}, 1000);
+								}
+							})
+							.catch(() => {
+								whatsapp
+									.sendMessage(to, _reply_text)
+									.then(async (_msg) => {
+										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+											setTimeout(() => {
+												_msg.star();
+											}, 1000);
+										}
+									})
+									.catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
+							});
+					}
+					shared_contact_cards?.forEach(async (id) => {
+						const contact_service = new ContactCardService(user);
+						const contact = await contact_service.getContact(id as unknown as Types.ObjectId);
+						if (!contact) return;
+						whatsapp
+							.sendMessage(to, contact.vCardString, {
+								quotedMessageId: message.id._serialized,
+							})
+							.then(async (_msg) => {
+								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+									setTimeout(() => {
+										_msg.star();
+									}, 1000);
+								}
+							})
+							.catch(() => {
+								whatsapp
+									.sendMessage(to, contact.vCardString)
+									.then(async (_msg) => {
+										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+											setTimeout(() => {
+												_msg.star();
+											}, 1000);
+										}
+									})
+									.catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
+							});
+					});
+
+					attachments?.forEach(async (id) => {
+						const attachment_service = new UploadService(user);
+						const attachment = await attachment_service.getAttachment(
+							id as unknown as Types.ObjectId
+						);
+						if (!attachment) return;
+						const { filename, caption, name } = attachment;
+						const path = __basedir + ATTACHMENTS_PATH + filename;
+						if (!fs.existsSync(path)) {
+							return null;
+						}
+						const media = MessageMedia.fromFilePath(path);
+						if (name) {
+							media.filename = name + path.substring(path.lastIndexOf('.'));
+						}
+						whatsapp
+							.sendMessage(to, media, {
+								caption: caption,
+								quotedMessageId: message.id._serialized,
+							})
+							.then(async (_msg) => {
+								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+									setTimeout(() => {
+										_msg.star();
+									}, 1000);
+								}
+							})
+							.catch(() => {
+								whatsapp
+									.sendMessage(to, media, {
+										caption: caption,
+									})
+									.then(async (_msg) => {
+										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+											setTimeout(() => {
+												_msg.star();
+											}, 1000);
+										}
+									})
+									.catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
+							});
+					});
+
+					polls?.forEach(async (poll) => {
+						const { title, options, isMultiSelect } = poll;
+						whatsapp
+							.sendMessage(
+								to,
+								new Poll(title, options, {
+									messageSecret: randomVector(32),
+									allowMultipleAnswers: isMultiSelect,
+								}),
+								{
+									quotedMessageId: message.id._serialized,
+								}
+							)
+							.then(async (_msg) => {
+								if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+									setTimeout(() => {
+										_msg.star();
+									}, 1000);
+								}
+								await whatsapp.interface.openChatWindow(message.from);
+							})
+							.catch(() => {
+								whatsapp
+									.sendMessage(
+										to,
+										new Poll(title, options, {
+											messageSecret: randomVector(32),
+											allowMultipleAnswers: isMultiSelect,
+										})
+									)
+									.then(async (_msg) => {
+										if (userPrefService.getMessageStarRules().individual_outgoing_messages) {
+											setTimeout(() => {
+												_msg.star();
+											}, 1000);
+										}
+										await whatsapp.interface.openChatWindow(message.from);
+									})
+									.catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
+							});
+					});
+
+					if (shared_contact_cards && shared_contact_cards.length > 0) {
+						if (PROMOTIONAL_MESSAGE_2) {
+							whatsapp
+								.sendMessage(to, PROMOTIONAL_MESSAGE_2, {
+									quotedMessageId: message.id._serialized,
+								})
+								.catch(() => {
+									whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_2).catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
+								});
+						}
+					} else if (!isSubscribed && isNew) {
+						if (PROMOTIONAL_MESSAGE_1) {
+							whatsapp
+								.sendMessage(to, PROMOTIONAL_MESSAGE_1, {
+									quotedMessageId: message.id._serialized,
+								})
+								.catch(() => {
+									whatsapp.sendMessage(to, PROMOTIONAL_MESSAGE_1).catch((err) => {
+										Logger.error('Error sending message:', err);
+									});
+								});
+						}
+					}
+				} catch (err) {}
+			}
+		}
+
 		async function checkForMessageModeration(
 			doc: IMergedGroup,
 			message: WAWebJS.Message,
@@ -1064,7 +1295,7 @@ export default class GroupMergeService {
 				return;
 			}
 
-			if (group_rule && group_rule.message.length > 0) {
+			if (group_rule) {
 				sendMessage(group_id, group_rule);
 			}
 			if (creator_rule && creators.length > 0) {

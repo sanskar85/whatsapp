@@ -105,6 +105,30 @@ const mergedGroupSchema = new mongoose.Schema<IMergedGroup>({
 			],
 		},
 	],
+	private_reply_admin: [
+		{
+			text: String,
+			attachments: [
+				{
+					type: Schema.Types.ObjectId,
+					ref: 'Upload',
+				},
+			],
+			shared_contact_cards: [
+				{
+					type: Schema.Types.ObjectId,
+					ref: 'ContactCard',
+				},
+			],
+			polls: [
+				{
+					title: String,
+					options: [String],
+					isMultiSelect: Boolean,
+				},
+			],
+		},
+	],
 	restricted_numbers: [
 		{
 			type: Schema.Types.ObjectId,

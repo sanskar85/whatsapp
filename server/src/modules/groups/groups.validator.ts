@@ -45,6 +45,12 @@ export type MergeGroupValidationResult = {
 		attachments: Types.ObjectId[];
 		polls: IPolls[];
 	}[];
+	private_reply_admin: {
+		text: string;
+		shared_contact_cards: Types.ObjectId[];
+		attachments: Types.ObjectId[];
+		polls: IPolls[];
+	}[];
 	restricted_numbers: Types.ObjectId[];
 	reply_business_only: boolean;
 	random_string: boolean;
@@ -221,6 +227,32 @@ export async function MergeGroupValidator(req: Request, res: Response, next: Nex
 				})
 				.array()
 				.default([]),
+			private_reply_admin: z
+				.object({
+					text: z.string(),
+					shared_contact_cards: z
+						.string()
+						.array()
+						.default([])
+						.refine((attachments) => !attachments.some((value) => !Types.ObjectId.isValid(value)))
+						.transform((attachments) => attachments.map((value) => new Types.ObjectId(value))),
+					attachments: z
+						.string()
+						.array()
+						.default([])
+						.refine((attachments) => !attachments.some((value) => !Types.ObjectId.isValid(value)))
+						.transform((attachments) => attachments.map((value) => new Types.ObjectId(value))),
+					polls: z
+						.object({
+							title: z.string(),
+							options: z.string().array().min(1),
+							isMultiSelect: z.boolean().default(false),
+						})
+						.array()
+						.default([]),
+				})
+				.array()
+				.default([]),
 			restricted_numbers: z
 				.string()
 				.array()
@@ -337,11 +369,13 @@ export async function MessageModerationValidator(req: Request, res: Response, ne
 		message: z.string(),
 		shared_contact_cards: z.string().array(),
 		attachments: z.string().array(),
-		polls: z.object({
-			title: z.string(),
-			options: z.string().array(),
-			isMultiSelect: z.boolean(),
-		}).array(),
+		polls: z
+			.object({
+				title: z.string(),
+				options: z.string().array(),
+				isMultiSelect: z.boolean(),
+			})
+			.array(),
 	});
 
 	const reqValidator = z.object({
