@@ -15,6 +15,7 @@ const HEADERS = [
 	'Link',
 	'Is Forwarded',
 	'Is Broadcast',
+	'Is Forwarded Many Times',
 ];
 
 export type HeaderType = typeof HEADERS;

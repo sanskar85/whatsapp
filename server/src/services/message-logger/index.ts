@@ -275,8 +275,8 @@ export class MessageLoggerService {
 							m.isCaption,
 							m.link,
 							m.isForwarded ? 'Forwarded' : '',
-							m.isForwardedManyTimes ? 'Forwarded Many Times' : '',
 							m.isBroadcast ? 'Broadcast' : '',
+							m.isForwardedManyTimes ? 'Forwarded Many Times' : '',
 						];
 					}),
 				},
