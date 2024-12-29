@@ -341,7 +341,7 @@ export async function MessageModerationValidator(req: Request, res: Response, ne
 			title: z.string(),
 			options: z.string().array(),
 			isMultiSelect: z.boolean(),
-		}),
+		}).array(),
 	});
 
 	const reqValidator = z.object({
