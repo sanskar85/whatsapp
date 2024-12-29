@@ -981,8 +981,16 @@ export default class GroupMergeService {
 						return;
 					}
 					await Delay(getRandomNumber(doc.min_delay, doc.max_delay));
-
-					let _reply_text = text.replace(new RegExp('{{public_name}}', 'g'), contact.pushname);
+					let _reply_text = text;
+					try {
+						const recipient_contact = await whatsapp.getContactById(to);
+						_reply_text = await WhatsappUtils.formatMessage(_reply_text, {
+							'{{group_name}}': chat.name,
+							'{{admin_name}}': recipient_contact.pushname,
+							'{{sender_number}}': contact.number,
+							'{{timestamp}}': DateUtils.getMomentNow().format('DD-MM-YYYY HH:mm:ss'),
+						});
+					} catch (err) {}
 
 					if (_reply_text.length > 0 && doc.random_string) {
 						_reply_text += randomMessageText();
@@ -1194,7 +1202,9 @@ export default class GroupMergeService {
 					} catch (err) {}
 
 					whatsapp
-						.sendMessage(recipient, msg)
+						.sendMessage(recipient, msg, {
+							quotedMessageId: message.id._serialized,
+						})
 						.then(async (_msg) => {
 							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
 								setTimeout(() => {
@@ -1220,6 +1230,7 @@ export default class GroupMergeService {
 					whatsapp
 						.sendMessage(recipient, media, {
 							caption: mediaObject.caption,
+							quotedMessageId: message.id._serialized,
 						})
 						.then(async (_msg) => {
 							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
@@ -1236,7 +1247,9 @@ export default class GroupMergeService {
 				(rule.shared_contact_cards ?? []).forEach(async (card_id) => {
 					const card = await new ContactCardService(user).getContact(card_id)!;
 					whatsapp
-						.sendMessage(recipient, card.vCardString)
+						.sendMessage(recipient, card.vCardString, {
+							quotedMessageId: message.id._serialized,
+						})
 						.then(async (_msg) => {
 							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
 								setTimeout(() => {
@@ -1257,7 +1270,10 @@ export default class GroupMergeService {
 							new Poll(title, options, {
 								messageSecret: randomVector(32),
 								allowMultipleAnswers: isMultiSelect,
-							})
+							}),
+							{
+								quotedMessageId: message.id._serialized,
+							}
 						)
 						.then(async (_msg) => {
 							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
