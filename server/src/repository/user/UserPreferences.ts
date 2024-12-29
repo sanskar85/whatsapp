@@ -37,6 +37,10 @@ const schema = new Schema<IUserPreferences>({
 			},
 		},
 	},
+	messageModerationRules: {
+		type: Object,
+		default: {},
+	},
 	messageStarRules: {
 		type: Object,
 		default: {
