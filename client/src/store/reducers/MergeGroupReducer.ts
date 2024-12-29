@@ -30,6 +30,27 @@ const initialState: MergeGroupState = {
 			message: '',
 		},
 		allowed_country_codes: [],
+		moderator_rules: {
+			admin_rule: {
+				attachments: [],
+				message: '',
+				polls: [],
+				shared_contact_cards: [],
+			},
+			creator_rule: {
+				attachments: [],
+				message: '',
+				polls: [],
+				shared_contact_cards: [],
+			},
+			file_types: [],
+			group_rule: {
+				attachments: [],
+				message: '',
+				polls: [],
+				shared_contact_cards: [],
+			},
+		},
 	},
 	uiDetails: {
 		isSaving: false,

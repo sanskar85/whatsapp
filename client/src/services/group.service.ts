@@ -1,8 +1,9 @@
 import APIInstance from '../config/APIInstance';
+import { MergedGroup } from '../store/types/MergeGroupState';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function processMergedGroup(group: any) {
-	console.log(group)
+	console.log(group);
 	return {
 		id: group.id as string,
 		name: group.name as string,
@@ -25,7 +26,28 @@ function processMergedGroup(group: any) {
 		allowed_country_codes: group.allowed_country_codes ?? [],
 		start_time: group.start_time,
 		end_time: group.end_time,
-	};
+		moderator_rules: {
+			admin_rule: {
+				message: group.moderator_rules?.admin_rule?.message ?? '',
+				shared_contact_cards: group.moderator_rules?.admin_rule?.shared_contact_cards ?? [],
+				attachments: group.moderator_rules?.admin_rule?.attachments ?? [],
+				polls: group.moderator_rules?.admin_rule?.polls ?? [],
+			},
+			creator_rule: {
+				message: group.moderator_rules?.creator_rule?.message ?? '',
+				shared_contact_cards: group.moderator_rules?.creator_rule?.shared_contact_cards ?? [],
+				attachments: group.moderator_rules?.creator_rule?.attachments ?? [],
+				polls: group.moderator_rules?.creator_rule?.polls ?? [],
+			},
+			group_rule: {
+				message: group.moderator_rules?.group_rule?.message ?? '',
+				shared_contact_cards: group.moderator_rules?.group_rule?.shared_contact_cards ?? [],
+				attachments: group.moderator_rules?.group_rule?.attachments ?? [],
+				polls: group.moderator_rules?.group_rule?.polls ?? [],
+			},
+			file_types: group?.file_types ?? [],
+		},
+	} as MergedGroup;
 }
 
 export default class GroupService {
@@ -383,7 +405,7 @@ export default class GroupService {
 		return true;
 	}
 
-	static async exportPendingRequests(selectedGroups: string[], task_description?:string) {
+	static async exportPendingRequests(selectedGroups: string[], task_description?: string) {
 		await APIInstance.post(`/whatsapp/groups/pending-requests`, {
 			groups: selectedGroups,
 			task_description,
@@ -398,6 +420,61 @@ export default class GroupService {
 				task_description,
 			});
 			return true;
+		} catch (err) {
+			return false;
+		}
+	}
+
+	static async updateMessageModerationRules({
+		details,
+		merged_group_id,
+	}: {
+		merged_group_id: string;
+		details: {
+			file_types: string[];
+			group_rule: {
+				message: string;
+				shared_contact_cards: string[];
+				attachments: string[];
+				polls: {
+					title: string;
+					options: string[];
+					isMultiSelect: boolean;
+				}[];
+			};
+			admin_rule: {
+				message: string;
+				shared_contact_cards: string[];
+				attachments: string[];
+				polls: {
+					title: string;
+					options: string[];
+					isMultiSelect: boolean;
+				}[];
+			};
+			creator_rule: {
+				message: string;
+				shared_contact_cards: string[];
+				attachments: string[];
+				polls: {
+					title: string;
+					options: string[];
+					isMultiSelect: boolean;
+				}[];
+			};
+		};
+	}) {
+		try {
+			const { data } = await APIInstance.post(
+				`/whatsapp/groups/merge/${merged_group_id}/message-moderator`,
+				{
+					file_types: details.file_types,
+					group_rule: details.group_rule,
+					admin_rule: details.admin_rule,
+					creator_rule: details.creator_rule,
+				}
+			);
+			return data.success;
 		} catch (err) {
 			return false;
 		}

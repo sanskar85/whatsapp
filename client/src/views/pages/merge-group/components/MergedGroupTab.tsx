@@ -18,6 +18,7 @@ import {
 import { useRef } from 'react';
 import { AiOutlineClear } from 'react-icons/ai';
 import { IoIosCloudDownload } from 'react-icons/io';
+import { MdRule } from 'react-icons/md';
 import { PiPause, PiPlay } from 'react-icons/pi';
 import { useDispatch, useSelector } from 'react-redux';
 import useFilteredList from '../../../../hooks/useFilteredList';
@@ -32,11 +33,15 @@ import {
 } from '../../../../store/reducers/MergeGroupReducer';
 import ConfirmationAlert, { ConfirmationAlertHandle } from '../../../components/confirmation-alert';
 import DeleteAlert, { DeleteAlertHandle } from '../../../components/delete-alert';
+import MessageModerationRule, {
+	MessageModerationRuleHandle,
+} from '../../../components/message-moderation-dialog';
 import GroupMerge from './group-merge-dialog';
 
 export default function MergedGroupTab() {
 	const deleteAlertRef = useRef<DeleteAlertHandle>(null);
 	const confirmationRef = useRef<ConfirmationAlertHandle>(null);
+	const moderationRuleRef = useRef<MessageModerationRuleHandle>(null);
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
 	const theme = useTheme();
@@ -185,6 +190,25 @@ export default function MergedGroupTab() {
 														onClick={() => download(group.id)}
 													/>
 												</Tooltip>
+												<Tooltip
+													label='Moderation Rules'
+													aria-label='Moderation Rules'
+													placement='top'
+												>
+													<IconButton
+														title='Moderation Rules'
+														aria-label='rules'
+														icon={
+															<Box as='span' title='Moderation Rules'>
+																<MdRule />
+															</Box>
+														}
+														colorScheme='gray'
+														onClick={() =>
+															moderationRuleRef.current?.onOpen(group.id, group.moderator_rules)
+														}
+													/>
+												</Tooltip>
 											</HStack>
 										</Td>
 									</Tr>
@@ -196,6 +220,7 @@ export default function MergedGroupTab() {
 			</TableContainer>
 			<DeleteAlert ref={deleteAlertRef} onConfirm={clearHistory} type={'Previous Responses'} />
 			<ConfirmationAlert ref={confirmationRef} onConfirm={toggleActive} disclaimer='' />
+			<MessageModerationRule ref={moderationRuleRef} />
 			<GroupMerge isOpen={isOpen} onClose={onClose} />
 		</>
 	);

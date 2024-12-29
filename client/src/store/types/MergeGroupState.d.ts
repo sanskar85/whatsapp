@@ -73,4 +73,37 @@ type MergedGroup = {
 		message: string;
 	};
 	allowed_country_codes: string[];
+	moderator_rules: {
+		group_rule: {
+			message: string;
+			shared_contact_cards: string[];
+			attachments: string[];
+			polls: {
+				title: string;
+				options: string[];
+				isMultiSelect: boolean;
+			}[];
+		};
+		admin_rule: {
+			message: string;
+			shared_contact_cards: string[];
+			attachments: string[];
+			polls: {
+				title: string;
+				options: string[];
+				isMultiSelect: boolean;
+			}[];
+		};
+		creator_rule: {
+			message: string;
+			shared_contact_cards: string[];
+			attachments: string[];
+			polls: {
+				title: string;
+				options: string[];
+				isMultiSelect: boolean;
+			}[];
+		};
+		file_types: string[];
+	};
 };
