@@ -10,7 +10,7 @@ export default class UserPreferencesService {
 	private constructor(userPref: IUserPreferences) {
 		this.userPref = userPref;
 
-		UserPreferencesService.instances.set(userPref.user._id.toString(), this);
+		UserPreferencesService.instances.set(userPref.user._id.toString() as unknown as string, this);
 	}
 
 	static async getService(userId: Types.ObjectId) {
@@ -18,11 +18,14 @@ export default class UserPreferencesService {
 			return this.instances.get(userId.toString())!;
 		}
 
-		const userPref = await UserPreferencesDB.findOne({ user: userId }).populate('user');
+		const userPref = await UserPreferencesDB.findOne({ user: userId });
+		console.log(userPref?.user, 'outer');
 		if (userPref === null || userPref.user === null) {
 			const doc = await UserPreferencesDB.create({ user: userId });
-			const userPref = await doc.populate('user');
-			return new UserPreferencesService(userPref);
+			console.log(doc, 'doc');
+			const userPref = await UserPreferencesDB.findOne({ user: userId });
+			console.log(userPref!.user, 'inner');
+			return new UserPreferencesService(userPref!);
 		}
 
 		return new UserPreferencesService(userPref);
@@ -122,7 +125,8 @@ export default class UserPreferencesService {
 			}[];
 		};
 	}) {
-		this.userPref.messageModerationRules[rule.title] = rule;
+		this.userPref.messageModerationRules;
+		console.log(rule, 'setting')
 
 		await UserPreferencesDB.updateOne(
 			{ user: this.userPref.user },
