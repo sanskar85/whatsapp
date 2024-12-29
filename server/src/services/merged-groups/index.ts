@@ -52,6 +52,27 @@ const processGroup = (group: IMergedGroup) => {
 		start_time: group.start_time ?? '10:00',
 		end_time: group.end_time ?? '18:00',
 		allowed_country_codes: group.allowed_country_codes ?? [],
+		moderator_rules: group.moderation_rules ?? {
+			file_types: [],
+			group_rule: {
+				message: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			},
+			creator_rule: {
+				message: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			},
+			admin_rule: {
+				message: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			},
+		},
 	};
 };
 
