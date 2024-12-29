@@ -34,6 +34,7 @@ import {
 	CreateGroupValidationResult,
 	GroupSettingValidationResult,
 	MergeGroupValidationResult,
+	MessageModerationValidationResult,
 } from './groups.validator';
 
 async function groups(req: Request, res: Response, next: NextFunction) {
@@ -740,6 +741,23 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 	}
 }
 
+async function updateMessageModerationRules(req: Request, res: Response, next: NextFunction) {
+	const { id, user, data } = req.locals;
+	const success = await new GroupMergeService(user.getUser()).updateMessageModerationRule(
+		id,
+		data as MessageModerationValidationResult
+	);
+
+	if (!success) {
+		return next(new APIError(API_ERRORS.COMMON_ERRORS.NOT_FOUND));
+	}
+
+	return Respond({
+		res,
+		status: 200,
+	});
+}
+
 const GroupsController = {
 	groups,
 	exportGroups,
@@ -756,6 +774,7 @@ const GroupsController = {
 	updateGroupsDetails,
 	pendingRequests,
 	groupLinks,
+	updateMessageModerationRules,
 };
 
 export default GroupsController;

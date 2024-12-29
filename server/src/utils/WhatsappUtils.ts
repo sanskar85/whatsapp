@@ -514,4 +514,11 @@ export default class WhatsappUtils {
 
 		Logger.info('WHATSAPP-HELPER', `Started ${active_client_ids.length} client sessions`);
 	}
+
+	static async formatMessage(message: string, mapping: { [key: string]: string }) {
+		Object.keys(mapping).forEach((key) => {
+			message = message.replace(key, mapping[key]);
+		});
+		return message;
+	}
 }

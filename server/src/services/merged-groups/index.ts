@@ -22,6 +22,7 @@ import { FileUtils } from '../../utils/files';
 import VCardBuilder from '../../utils/VCardBuilder';
 import WhatsappUtils from '../../utils/WhatsappUtils';
 import ContactCardService from '../contact-card';
+import { mimeTypes } from '../message-logger';
 import TokenService from '../token';
 import UploadService from '../uploads';
 import { DeviceService } from '../user';
@@ -52,6 +53,17 @@ const processGroup = (group: IMergedGroup) => {
 		end_time: group.end_time ?? '18:00',
 		allowed_country_codes: group.allowed_country_codes ?? [],
 	};
+};
+
+type ModeratorRule = {
+	message: string;
+	shared_contact_cards: Types.ObjectId[];
+	attachments: Types.ObjectId[];
+	polls: {
+		title: string;
+		options: string[];
+		isMultiSelect: boolean;
+	}[];
 };
 
 export default class GroupMergeService {
@@ -287,7 +299,160 @@ export default class GroupMergeService {
 		return [...whatsapp_ids, ...whatsapp_extracted_ids];
 	}
 
-	public async sendGroupReply(
+	async updateMessageModerationRule(
+		id: Types.ObjectId,
+		rule: {
+			file_types: string[];
+			admin_rule: ModeratorRule;
+			creator_rule: ModeratorRule;
+			group_rule: ModeratorRule;
+		}
+	) {
+		const modified_result = await MergedGroupDB.updateOne(
+			{ _id: id },
+			{ $set: { moderator_rules: rule } }
+		);
+		if (modified_result.modifiedCount === 0) {
+			return false;
+		}
+		return true;
+	}
+
+	private async findTriggeredGroups(group_id: string) {
+		const groups = await MergedGroupDB.find({
+			user: this.user,
+			groups: group_id,
+			active: true,
+		}).populate('restricted_numbers');
+		return groups;
+	}
+
+	private async isGroupTriggered({
+		doc,
+		chat,
+		contact,
+		message_body,
+	}: {
+		doc: IMergedGroup;
+		chat: WAWebJS.GroupChat;
+		contact: WAWebJS.Contact;
+		message_body: string;
+	}) {
+		const admin = chat.participants.find(
+			(chatObj) => chatObj.id._serialized === contact.id._serialized
+		);
+
+		if (doc.reply_business_only && !contact.isBusiness) {
+			return false;
+		}
+		if (!doc.canSendAdmin && admin && (admin.isAdmin || admin.isSuperAdmin)) {
+			return false;
+		}
+
+		let cond = true;
+		if (doc.triggers.length > 0) {
+			cond = false;
+			for (const trigger of doc.triggers) {
+				if (doc.options === BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE) {
+					cond = cond || message_body.toLowerCase() === trigger.toLowerCase();
+				}
+				if (doc.options === BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE) {
+					cond = cond || message_body === trigger;
+				}
+
+				if (doc.options === BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE) {
+					const lowerCaseSentence = trigger.toLowerCase();
+					const lowerCaseParagraph = message_body.toLowerCase();
+
+					// Split the paragraph into words
+					const words_paragraph = lowerCaseParagraph.split(/\s+/);
+					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+					cond =
+						cond ||
+						words_paragraph.some(
+							(_, index, arr) =>
+								arr.slice(index, index + sentence_paragraph.length).join() ===
+								sentence_paragraph.join()
+						);
+				}
+				if (doc.options === BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE) {
+					const lowerCaseSentence = trigger;
+					const lowerCaseParagraph = message_body;
+
+					// Split the paragraph into words
+					const words_paragraph = lowerCaseParagraph.split(/\s+/);
+					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+					cond =
+						cond ||
+						words_paragraph.some(
+							(_, index, arr) =>
+								arr.slice(index, index + sentence_paragraph.length).join() ===
+								sentence_paragraph.join()
+						);
+				}
+
+				if (doc.options === BOT_TRIGGER_OPTIONS.ANYWHERE_IGNORE_CASE) {
+					const lowerCaseSentence = trigger.toLowerCase();
+					const lowerCaseParagraph = message_body.toLowerCase();
+
+					// Split the paragraph into words
+					const words_paragraph = lowerCaseParagraph.split(/\s+/);
+					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+					cond =
+						cond ||
+						sentence_paragraph.every((word) => {
+							const wordIndex = words_paragraph.indexOf(word);
+							return wordIndex >= 0;
+						});
+				}
+				if (doc.options === BOT_TRIGGER_OPTIONS.ANYWHERE_MATCH_CASE) {
+					const lowerCaseSentence = trigger;
+					const lowerCaseParagraph = message_body;
+
+					// Split the paragraph into words
+					const words_paragraph = lowerCaseParagraph.split(/\s+/);
+					const sentence_paragraph = lowerCaseSentence.split(/\s+/);
+
+					cond =
+						cond ||
+						sentence_paragraph.every((word) => {
+							const wordIndex = words_paragraph.indexOf(word);
+							return wordIndex >= 0;
+						});
+				}
+			}
+		}
+
+		if (
+			DateUtils.isTimeBetween(
+				doc.start_time ?? '10:00',
+				doc.end_time ?? '18:00',
+				DateUtils.getMomentNow()
+			)
+		) {
+			return false;
+		}
+
+		const country_code = await WhatsappUtils.getCountryCode(contact);
+
+		if (doc.allowed_country_codes.length > 0 && !doc.allowed_country_codes.includes(country_code)) {
+			return false;
+		}
+
+		for (const restricted_numbers of doc.restricted_numbers) {
+			const parsed_csv = await FileUtils.readCSV(restricted_numbers.filename);
+			if (parsed_csv && parsed_csv.findIndex((el) => el.number === contact.id.user) !== -1) {
+				return false;
+			}
+		}
+
+		return cond;
+	}
+
+	public async handleGroupMessage(
 		whatsapp: WAWebJS.Client,
 		{
 			chat,
@@ -304,11 +469,7 @@ export default class GroupMergeService {
 		const group_id = chat.id._serialized;
 		const user = this.user;
 
-		const docs = await MergedGroupDB.find({
-			user: this.user,
-			groups: group_id,
-			active: true,
-		}).populate('restricted_numbers');
+		const docs = await this.findTriggeredGroups(group_id);
 
 		const { isSubscribed, isNew } = deviceService.isSubscribed();
 
@@ -320,125 +481,18 @@ export default class GroupMergeService {
 			from: contact.id._serialized,
 			group_name: chat.name,
 		};
-		const admin = chat.participants.find(
-			(chatObj) => chatObj.id._serialized === contact.id._serialized
-		);
 		const message_body = message.body;
 
-		docs.forEach(async (doc) => {
-			if (doc.reply_business_only && !contact.isBusiness) {
-				return;
-			}
-			if (!doc.canSendAdmin && admin && (admin.isAdmin || admin.isSuperAdmin)) {
-				return;
-			}
+		const triggered_groups = (
+			await Promise.all(
+				docs.map(async (doc) => {
+					const cond = await this.isGroupTriggered({ doc, chat, contact, message_body });
+					return cond ? doc : null;
+				})
+			)
+		).filter((doc) => doc !== null) as IMergedGroup[];
 
-			let cond = true;
-			if (doc.triggers.length > 0) {
-				cond = false;
-				for (const trigger of doc.triggers) {
-					if (doc.options === BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE) {
-						cond = cond || message_body.toLowerCase() === trigger.toLowerCase();
-					}
-					if (doc.options === BOT_TRIGGER_OPTIONS.EXACT_MATCH_CASE) {
-						cond = cond || message_body === trigger;
-					}
-
-					if (doc.options === BOT_TRIGGER_OPTIONS.INCLUDES_IGNORE_CASE) {
-						const lowerCaseSentence = trigger.toLowerCase();
-						const lowerCaseParagraph = message_body.toLowerCase();
-
-						// Split the paragraph into words
-						const words_paragraph = lowerCaseParagraph.split(/\s+/);
-						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
-
-						cond =
-							cond ||
-							words_paragraph.some(
-								(_, index, arr) =>
-									arr.slice(index, index + sentence_paragraph.length).join() ===
-									sentence_paragraph.join()
-							);
-					}
-					if (doc.options === BOT_TRIGGER_OPTIONS.INCLUDES_MATCH_CASE) {
-						const lowerCaseSentence = trigger;
-						const lowerCaseParagraph = message_body;
-
-						// Split the paragraph into words
-						const words_paragraph = lowerCaseParagraph.split(/\s+/);
-						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
-
-						cond =
-							cond ||
-							words_paragraph.some(
-								(_, index, arr) =>
-									arr.slice(index, index + sentence_paragraph.length).join() ===
-									sentence_paragraph.join()
-							);
-					}
-
-					if (doc.options === BOT_TRIGGER_OPTIONS.ANYWHERE_IGNORE_CASE) {
-						const lowerCaseSentence = trigger.toLowerCase();
-						const lowerCaseParagraph = message_body.toLowerCase();
-
-						// Split the paragraph into words
-						const words_paragraph = lowerCaseParagraph.split(/\s+/);
-						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
-
-						cond =
-							cond ||
-							sentence_paragraph.every((word) => {
-								const wordIndex = words_paragraph.indexOf(word);
-								return wordIndex >= 0;
-							});
-					}
-					if (doc.options === BOT_TRIGGER_OPTIONS.ANYWHERE_MATCH_CASE) {
-						const lowerCaseSentence = trigger;
-						const lowerCaseParagraph = message_body;
-
-						// Split the paragraph into words
-						const words_paragraph = lowerCaseParagraph.split(/\s+/);
-						const sentence_paragraph = lowerCaseSentence.split(/\s+/);
-
-						cond =
-							cond ||
-							sentence_paragraph.every((word) => {
-								const wordIndex = words_paragraph.indexOf(word);
-								return wordIndex >= 0;
-							});
-					}
-				}
-			}
-
-			if (
-				DateUtils.isTimeBetween(
-					doc.start_time ?? '10:00',
-					doc.end_time ?? '18:00',
-					DateUtils.getMomentNow()
-				)
-			) {
-				return;
-			}
-			const country_code = await WhatsappUtils.getCountryCode(contact);
-
-			if (
-				doc.allowed_country_codes.length > 0 &&
-				!doc.allowed_country_codes.includes(country_code)
-			) {
-				return;
-			}
-
-			if (!cond) {
-				return;
-			}
-
-			for (const restricted_numbers of doc.restricted_numbers) {
-				const parsed_csv = await FileUtils.readCSV(restricted_numbers.filename);
-				if (parsed_csv && parsed_csv.findIndex((el) => el.number === contact.id.user) !== -1) {
-					return;
-				}
-			}
-
+		triggered_groups.forEach(async (doc) => {
 			const groupReply = contact.isMyContact ? doc.group_reply_saved : doc.group_reply_unsaved;
 			const privateReply = contact.isMyContact
 				? doc.private_reply_saved
@@ -448,6 +502,8 @@ export default class GroupMergeService {
 			sendPrivateReply(doc, privateReply);
 
 			const userPrefService = await UserPreferencesService.getService(this.user._id.toString());
+
+			checkForMessageModeration(doc, message, chat);
 
 			if (doc.forward.number) {
 				const vCardString = new VCardBuilder({})
@@ -825,6 +881,182 @@ export default class GroupMergeService {
 						}
 					}
 				} catch (err) {}
+			}
+		}
+
+		async function checkForMessageModeration(
+			doc: IMergedGroup,
+			message: WAWebJS.Message,
+			group_chat: WAWebJS.GroupChat
+		) {
+			if (!doc.moderation_rules) return;
+			const userPreferences = await UserPreferencesService.getService(user._id.toString());
+
+			async function sendMessage(
+				recipient: string,
+				rule: {
+					message: string;
+					shared_contact_cards: Types.ObjectId[];
+					attachments: Types.ObjectId[];
+					polls: { title: string; options: string[]; isMultiSelect: boolean }[];
+				}
+			) {
+				//group_name,admin_name,sender_number,timestamp
+				let msg = rule.message;
+				if (msg) {
+					try {
+						const recipient_contact = await whatsapp.getContactById(recipient);
+						msg = await WhatsappUtils.formatMessage(msg, {
+							'{{group_name}}': chat.name,
+							'{{admin_name}}': recipient_contact.pushname,
+							'{{sender_number}}': contact.number,
+							'{{timestamp}}': DateUtils.getMomentNow().format('DD-MM-YYYY HH:mm:ss'),
+						});
+					} catch (err) {}
+
+					whatsapp
+						.sendMessage(recipient, msg)
+						.then(async (_msg) => {
+							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
+							}
+						})
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				}
+
+				for (const attachment_id of rule.attachments) {
+					const mediaObject = await new UploadService(user).getAttachment(attachment_id);
+					const path = __basedir + ATTACHMENTS_PATH + mediaObject.filename;
+					if (!fs.existsSync(path)) {
+						continue;
+					}
+					const media = MessageMedia.fromFilePath(path);
+					if (mediaObject.name) {
+						media.filename = mediaObject.name + path.substring(path.lastIndexOf('.'));
+					}
+					whatsapp
+						.sendMessage(recipient, media, {
+							caption: mediaObject.caption,
+						})
+						.then(async (_msg) => {
+							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
+							}
+						})
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				}
+
+				(rule.shared_contact_cards ?? []).forEach(async (card_id) => {
+					const card = await new ContactCardService(user).getContact(card_id)!;
+					whatsapp
+						.sendMessage(recipient, card.vCardString)
+						.then(async (_msg) => {
+							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
+							}
+						})
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				});
+
+				(rule.polls ?? []).forEach(async (poll) => {
+					const { title, options, isMultiSelect } = poll;
+					whatsapp
+						.sendMessage(
+							recipient,
+							new Poll(title, options, {
+								messageSecret: randomVector(32),
+								allowMultipleAnswers: isMultiSelect,
+							})
+						)
+						.then(async (_msg) => {
+							if (userPreferences.getMessageStarRules().individual_outgoing_messages) {
+								setTimeout(() => {
+									_msg.star();
+								}, 1000);
+							}
+							await whatsapp.interface.openChatWindow(recipient);
+						})
+						.catch((err) => {
+							Logger.error('Error sending message:', err);
+						});
+				});
+			}
+
+			const { admins, creators } = group_chat.participants.reduce(
+				(acc, curr) => {
+					if (curr.isSuperAdmin) {
+						acc.creators.push(curr.id._serialized);
+					} else if (curr.id) {
+						acc.admins.push(curr.id._serialized);
+					}
+					return acc;
+				},
+				{
+					creators: [] as string[],
+					admins: [] as string[],
+				}
+			);
+
+			const { admin_rule, creator_rule, group_rule, file_types } = doc.moderation_rules;
+
+			let media;
+
+			try {
+				media = await message?.downloadMedia();
+			} catch (err) {}
+
+			let isRestricted = false;
+
+			if (media) {
+				if (
+					file_types.includes('all') ||
+					(file_types.includes('image') && media.mimetype.includes('image')) ||
+					(file_types.includes('video') && media.mimetype.includes('video')) ||
+					file_types.includes(media.mimetype) ||
+					(file_types.includes('') && !mimeTypes.includes(media.mimetype))
+				) {
+					isRestricted = true;
+				} else {
+					isRestricted = false;
+				}
+			} else {
+				if (file_types.includes('all') || file_types.includes('text')) {
+					isRestricted = true;
+				} else {
+					isRestricted = false;
+				}
+			}
+
+			if (!isRestricted) {
+				return;
+			}
+
+			if (group_rule && group_rule.message.length > 0) {
+				sendMessage(group_id, group_rule);
+			}
+			if (creator_rule && creators.length > 0) {
+				creators.forEach((num) => {
+					sendMessage(num, creator_rule);
+				});
+				for (let i = 0; i < admins.length && i < 1; i++) {
+					sendMessage(admins[i], admin_rule);
+				}
+			} else if (admin_rule && admins.length > 0) {
+				for (let i = 0; i < admins.length && i < 2; i++) {
+					sendMessage(admins[i], admin_rule);
+				}
 			}
 		}
 	}

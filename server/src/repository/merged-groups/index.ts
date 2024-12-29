@@ -134,6 +134,98 @@ const mergedGroupSchema = new mongoose.Schema<IMergedGroup>({
 		type: [String],
 		default: [],
 	},
+	moderation_rules: {
+		type: {
+			file_types: [String],
+			group_rule: {
+				message: String,
+				shared_contact_cards: [
+					{
+						type: Schema.Types.ObjectId,
+						ref: 'ContactCard',
+					},
+				],
+				attachments: [
+					{
+						type: Schema.Types.ObjectId,
+						ref: 'Upload',
+					},
+				],
+				polls: [
+					{
+						title: String,
+						options: [String],
+						isMultiSelect: Boolean,
+					},
+				],
+			},
+			admin_rule: {
+				message: String,
+				shared_contact_cards: [
+					{
+						type: Schema.Types.ObjectId,
+						ref: 'ContactCard',
+					},
+				],
+				attachments: [
+					{
+						type: Schema.Types.ObjectId,
+						ref: 'Upload',
+					},
+				],
+				polls: [
+					{
+						title: String,
+						options: [String],
+						isMultiSelect: Boolean,
+					},
+				],
+			},
+			creator_rule: {
+				message: String,
+				shared_contact_cards: [
+					{
+						type: Schema.Types.ObjectId,
+						ref: 'ContactCard',
+					},
+				],
+				attachments: [
+					{
+						type: Schema.Types.ObjectId,
+						ref: 'Upload',
+					},
+				],
+				polls: [
+					{
+						title: String,
+						options: [String],
+						isMultiSelect: Boolean,
+					},
+				],
+			},
+		},
+		default: {
+			file_types: [],
+			group_rule: {
+				message: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			},
+			admin_rule: {
+				message: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			},
+			creator_rule: {
+				message: '',
+				shared_contact_cards: [],
+				attachments: [],
+				polls: [],
+			},
+		},
+	},
 });
 
 const MergedGroupDB = mongoose.model<IMergedGroup>('MergedGroup', mergedGroupSchema);

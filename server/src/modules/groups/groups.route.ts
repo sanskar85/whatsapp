@@ -8,6 +8,7 @@ import {
 	GroupSettingValidator,
 	LinkReportValidator,
 	MergeGroupValidator,
+	MessageModerationValidator,
 } from './groups.validator';
 
 const router = express.Router();
@@ -16,6 +17,11 @@ router
 	.route('/export')
 	.all(VerifyUser, VerifyClientID, PaymentValidator.isSubscribed)
 	.post(GroupsController.exportGroups);
+
+router
+	.route('/merge/:id/message-moderator')
+	.all(VerifyUser, IDValidator)
+	.post(MessageModerationValidator, GroupsController.updateMessageModerationRules);
 
 router
 	.route('/merge/:id/clear-responses')

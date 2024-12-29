@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { Types } from 'mongoose';
 import { z } from 'zod';
 import APIError from '../../errors/api-errors';
 
@@ -10,32 +9,6 @@ export type CreateMessageLogRule = {
 	loggers: string[];
 	include: string[];
 	exclude: string[];
-};
-
-export type CreateMessageModerationRule = {
-	title: string;
-	merged_groups: Types.ObjectId[];
-	file_types: string[];
-	admin_rule: {
-		message: string;
-		shared_contact_cards: Types.ObjectId[];
-		attachments: Types.ObjectId[];
-		polls: {
-			title: string;
-			options: string[];
-			isMultiSelect: boolean;
-		}[];
-	};
-	creator_rule: {
-		message: string;
-		shared_contact_cards: Types.ObjectId[];
-		attachments: Types.ObjectId[];
-		polls: {
-			title: string;
-			options: string[];
-			isMultiSelect: boolean;
-		}[];
-	};
 };
 
 export type UpdateMessageLogRule = {
@@ -133,71 +106,6 @@ export async function UpdateMessageStarRulesValidator(
 		individual_incoming_messages: z.boolean().default(false),
 		group_outgoing_messages: z.boolean().default(false),
 		group_incoming_messages: z.boolean().default(false),
-	});
-
-	const reqValidatorResult = reqValidator.safeParse(req.body);
-
-	if (reqValidatorResult.success) {
-		req.locals.data = reqValidatorResult.data;
-		return next();
-	}
-	const message = reqValidatorResult.error.issues
-		.map((err) => err.path)
-		.flat()
-		.filter((item, pos, arr) => arr.indexOf(item) == pos)
-		.join(', ');
-
-	return next(
-		new APIError({
-			STATUS: 400,
-			TITLE: 'INVALID_FIELDS',
-			MESSAGE: message,
-		})
-	);
-}
-
-export async function CreateMessageModerationRuleValidator(
-	req: Request,
-	res: Response,
-	next: NextFunction
-) {
-	const idValidator = z
-		.string()
-		.array()
-		.default([])
-		.refine((r) => !r.some((value) => !Types.ObjectId.isValid(value)))
-		.transform((r) => r.map((value) => new Types.ObjectId(value)));
-
-	const reqValidator = z.object({
-		title: z.string().min(1, 'Title length should be more than 1.'),
-		merged_groups: idValidator,
-		file_types: z.string().array().default([]),
-		admin_rule: z.object({
-			message: z.string().default(''),
-			shared_contact_cards: idValidator,
-			attachments: idValidator,
-			polls: z
-				.object({
-					title: z.string(),
-					options: z.string().array().min(1),
-					isMultiSelect: z.boolean().default(false),
-				})
-				.array()
-				.default([]),
-		}),
-		creator_rule: z.object({
-			message: z.string().default(''),
-			shared_contact_cards: idValidator,
-			attachments: idValidator,
-			polls: z
-				.object({
-					title: z.string(),
-					options: z.string().array().min(1),
-					isMultiSelect: z.boolean().default(false),
-				})
-				.array()
-				.default([]),
-		}),
 	});
 
 	const reqValidatorResult = reqValidator.safeParse(req.body);

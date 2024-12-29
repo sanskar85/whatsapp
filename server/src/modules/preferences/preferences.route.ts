@@ -3,7 +3,6 @@ import { VerifyClientID, VerifyUser } from '../../middleware';
 import UserController from './preferences.controller';
 import {
 	CreateMessageLogRuleValidator,
-	CreateMessageModerationRuleValidator,
 	UpdateMessageLogRuleValidator,
 	UpdateMessageStarRulesValidator,
 } from './preferences.validator';
@@ -22,17 +21,6 @@ router
 	.get(UserController.getMessageLogRules)
 	.post(CreateMessageLogRuleValidator, VerifyClientID, UserController.addMessageLogRule)
 	.patch(UpdateMessageLogRuleValidator, UserController.updateMessageLogRule);
-
-router
-	.route('/message-moderator/rules/:id')
-	.all(VerifyUser)
-	.delete(UserController.deleteMessageModerationRules);
-router
-	.route('/message-moderator/rules')
-	.all(VerifyUser)
-	.get(UserController.getMessageLogRules)
-	.post(CreateMessageModerationRuleValidator, UserController.addMessageModerationRule)
-	.patch(CreateMessageModerationRuleValidator, UserController.updateMessageModerationRule);
 
 router
 	.route('/message-star-rules')

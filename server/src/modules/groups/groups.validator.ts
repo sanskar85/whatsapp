@@ -63,6 +63,25 @@ export type MergeGroupValidationResult = {
 	allowed_country_codes: string[];
 };
 
+type ModeratorRule = {
+	file_types: string[];
+	message: string;
+	shared_contact_cards: Types.ObjectId[];
+	attachments: Types.ObjectId[];
+	polls: {
+		title: string;
+		options: string[];
+		isMultiSelect: boolean;
+	}[];
+};
+
+export type MessageModerationValidationResult = {
+	file_types: string[];
+	group_rule: ModeratorRule;
+	creator_rule: ModeratorRule;
+	admin_rule: ModeratorRule;
+};
+
 export async function CreateGroupValidator(req: Request, res: Response, next: NextFunction) {
 	if (req.method !== 'POST') {
 		return next();
@@ -296,6 +315,46 @@ export async function LinkReportValidator(req: Request, res: Response, next: Nex
 
 	if (reqValidatorResult.success) {
 		req.locals.data = reqValidatorResult.data.links;
+		return next();
+	}
+	const message = reqValidatorResult.error.issues
+		.map((err) => err.path)
+		.flat()
+		.filter((item, pos, arr) => arr.indexOf(item) == pos)
+		.join(', ');
+
+	return next(
+		new APIError({
+			STATUS: 400,
+			TITLE: 'INVALID_FIELDS',
+			MESSAGE: message,
+		})
+	);
+}
+
+export async function MessageModerationValidator(req: Request, res: Response, next: NextFunction) {
+	const moderationSchema = z.object({
+		message: z.string(),
+		shared_contact_cards: z.string().array(),
+		attachments: z.string().array(),
+		polls: z.object({
+			title: z.string(),
+			options: z.string().array(),
+			isMultiSelect: z.boolean(),
+		}),
+	});
+
+	const reqValidator = z.object({
+		file_types: z.string().array(),
+		group_rule: moderationSchema,
+		creator_rule: moderationSchema,
+		admin_rule: moderationSchema,
+	});
+
+	const reqValidatorResult = reqValidator.safeParse(req.body);
+
+	if (reqValidatorResult.success) {
+		req.locals.data = reqValidatorResult.data;
 		return next();
 	}
 	const message = reqValidatorResult.error.issues

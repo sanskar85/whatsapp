@@ -4,6 +4,7 @@ import IContactCard from '../contact-cards';
 import IPolls from '../polls';
 import IUpload from '../uploads';
 import { IUser } from '../users';
+
 export default interface IMergedGroup extends Document {
 	user: IUser;
 	name: string;
@@ -48,5 +49,38 @@ export default interface IMergedGroup extends Document {
 	forward: {
 		number: string;
 		message: string;
+	};
+	moderation_rules: {
+		file_types: string[];
+		group_rule: {
+			message: string;
+			shared_contact_cards: Types.ObjectId[];
+			attachments: Types.ObjectId[];
+			polls: {
+				title: string;
+				options: string[];
+				isMultiSelect: boolean;
+			}[];
+		};
+		admin_rule: {
+			message: string;
+			shared_contact_cards: Types.ObjectId[];
+			attachments: Types.ObjectId[];
+			polls: {
+				title: string;
+				options: string[];
+				isMultiSelect: boolean;
+			}[];
+		};
+		creator_rule: {
+			message: string;
+			shared_contact_cards: Types.ObjectId[];
+			attachments: Types.ObjectId[];
+			polls: {
+				title: string;
+				options: string[];
+				isMultiSelect: boolean;
+			}[];
+		};
 	};
 }

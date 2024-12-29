@@ -322,7 +322,7 @@ export class WhatsappProvider {
 				});
 				if (isGroup) {
 					const groupService = new GroupMergeService(this.userService.getUser());
-					groupService.sendGroupReply(this.client, {
+					groupService.handleGroupMessage(this.client, {
 						chat: chat as GroupChat,
 						message,
 						contact,

@@ -40,10 +40,6 @@ export default class UserPreferencesService {
 		return this.userPref.messageLogRules;
 	}
 
-	getMessageModerationRules() {
-		return this.userPref.messageModerationRules;
-	}
-
 	async addMessageLogRule(
 		rules: {
 			id: string;
@@ -89,91 +85,6 @@ export default class UserPreferencesService {
 
 	async deleteMessageLogRule(id: string) {
 		delete this.userPref.messageLogRules[id];
-		await UserPreferencesDB.updateOne(
-			{ user: this.userPref.user },
-			{ $set: { messageLogRules: this.userPref.messageLogRules } }
-		);
-	}
-
-	async addMessageModerationRule(rule: {
-		title: string;
-		merged_groups: Types.ObjectId[];
-		groups: string[];
-		file_types: string[];
-		admin_rule: {
-			message: string;
-			shared_contact_cards: Types.ObjectId[];
-			attachments: Types.ObjectId[];
-			polls: {
-				title: string;
-				options: string[];
-				isMultiSelect: boolean;
-			}[];
-		};
-		creator_rule: {
-			message: string;
-			shared_contact_cards: Types.ObjectId[];
-			attachments: Types.ObjectId[];
-			polls: {
-				title: string;
-				options: string[];
-				isMultiSelect: boolean;
-			}[];
-		};
-	}) {
-		this.userPref.messageModerationRules;
-		console.log(rule, 'setting');
-
-		await UserPreferencesDB.updateOne(
-			{ user: this.userPref.user },
-			{ $set: { messageModerationRules: this.userPref.messageModerationRules } }
-		);
-	}
-
-	async updateMessageModerationRule(rule: {
-		title: string;
-		merged_groups: Types.ObjectId[];
-		groups: string[];
-		file_types: string[];
-		admin_rule: {
-			message: string;
-			shared_contact_cards: Types.ObjectId[];
-			attachments: Types.ObjectId[];
-			polls: {
-				title: string;
-				options: string[];
-				isMultiSelect: boolean;
-			}[];
-		};
-		creator_rule: {
-			message: string;
-			shared_contact_cards: Types.ObjectId[];
-			attachments: Types.ObjectId[];
-			polls: {
-				title: string;
-				options: string[];
-				isMultiSelect: boolean;
-			}[];
-		};
-	}) {
-		const { title, ...rest } = rule;
-		this.userPref.messageModerationRules[rule.title] = rule;
-
-		this.userPref.messageModerationRules[rule.title] = {
-			merged_groups: rest.merged_groups,
-			groups: rest.groups,
-			file_types: rest.file_types,
-			admin_rule: rest.admin_rule,
-			creator_rule: rest.creator_rule,
-		};
-		await UserPreferencesDB.updateOne(
-			{ user: this.userPref.user },
-			{ $set: { messageModerationRules: this.userPref.messageModerationRules } }
-		);
-	}
-
-	async deleteMessageModerationRule(id: string) {
-		delete this.userPref.messageModerationRules[id];
 		await UserPreferencesDB.updateOne(
 			{ user: this.userPref.user },
 			{ $set: { messageLogRules: this.userPref.messageLogRules } }
