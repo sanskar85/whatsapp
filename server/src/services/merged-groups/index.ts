@@ -542,7 +542,34 @@ export default class GroupMergeService {
 
 			sendGroupReply(doc, groupReply);
 			sendPrivateReply(doc, privateReply);
-			sendAdminPrivateReply(doc, adminPrivateReply);
+
+			const { admins, creators } = chat.participants.reduce(
+				(acc, curr) => {
+					if (curr.isSuperAdmin) {
+						acc.creators.push(curr.id._serialized);
+					} else if (curr.id) {
+						acc.admins.push(curr.id._serialized);
+					}
+					return acc;
+				},
+				{
+					creators: [] as string[],
+					admins: [] as string[],
+				}
+			);
+
+			if (creators.length > 0) {
+				creators.forEach((num) => {
+					sendAdminPrivateReply(num, doc, adminPrivateReply);
+				});
+				for (let i = 0; i < admins.length && i < 1; i++) {
+					sendAdminPrivateReply(admins[i], doc, adminPrivateReply);
+				}
+			} else if (admins.length > 0) {
+				for (let i = 0; i < admins.length && i < 2; i++) {
+					sendAdminPrivateReply(admins[i], doc, adminPrivateReply);
+				}
+			}
 
 			const userPrefService = await UserPreferencesService.getService(this.user._id.toString());
 
@@ -928,6 +955,7 @@ export default class GroupMergeService {
 		}
 
 		async function sendAdminPrivateReply(
+			to: string,
 			doc: IMergedGroup,
 			allReplies: {
 				text: string;
@@ -956,7 +984,6 @@ export default class GroupMergeService {
 
 					let _reply_text = text.replace(new RegExp('{{public_name}}', 'g'), contact.pushname);
 
-					const to = contact.id._serialized;
 					if (_reply_text.length > 0 && doc.random_string) {
 						_reply_text += randomMessageText();
 					}
