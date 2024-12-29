@@ -27,6 +27,7 @@ export const mimeTypes = [
 	'video/mpeg',
 	'application/msword',
 	'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+	'application/vnd.android.package-archive',
 	'application/pdf',
 	'text/plain',
 	'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
