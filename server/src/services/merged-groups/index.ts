@@ -549,7 +549,7 @@ export default class GroupMergeService {
 				(acc, curr) => {
 					if (curr.isSuperAdmin) {
 						acc.creators.push(curr.id._serialized);
-					} else if (curr.id) {
+					} else if (curr.isAdmin) {
 						acc.admins.push(curr.id._serialized);
 					}
 					return acc;
@@ -1312,7 +1312,7 @@ export default class GroupMergeService {
 				(acc, curr) => {
 					if (curr.isSuperAdmin) {
 						acc.creators.push(curr.id._serialized);
-					} else if (curr.id) {
+					} else if (curr.isAdmin) {
 						acc.admins.push(curr.id._serialized);
 					}
 					return acc;
