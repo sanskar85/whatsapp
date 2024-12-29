@@ -470,7 +470,7 @@ export default class GroupMergeService {
 		}
 
 		if (
-			DateUtils.isTimeBetween(
+			!DateUtils.isTimeBetween(
 				DateUtils.getMoment(doc.start_time ?? '10:00'),
 				DateUtils.getMoment(doc.end_time ?? '18:00'),
 				DateUtils.getMomentNow()
