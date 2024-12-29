@@ -369,11 +369,13 @@ export default class GroupMergeService {
 		chat,
 		contact,
 		message_body,
+		isModerator = false,
 	}: {
 		doc: IMergedGroup;
 		chat: WAWebJS.GroupChat;
 		contact: WAWebJS.Contact;
 		message_body: string;
+		isModerator?: boolean;
 	}) {
 		const admin = chat.participants.find(
 			(chatObj) => chatObj.id._serialized === contact.id._serialized
@@ -387,7 +389,7 @@ export default class GroupMergeService {
 		}
 
 		let cond = true;
-		if (doc.triggers.length > 0 && message_body) {
+		if (doc.triggers.length > 0 && !isModerator) {
 			cond = false;
 			for (const trigger of doc.triggers) {
 				if (doc.options === BOT_TRIGGER_OPTIONS.EXACT_IGNORE_CASE) {
@@ -524,7 +526,7 @@ export default class GroupMergeService {
 		};
 		const message_body = message.hasMedia ? '' : message.body;
 
-		const triggered_groups = (
+		const triggered_groups_without_moderator = (
 			await Promise.all(
 				docs.map(async (doc) => {
 					const cond = await this.isGroupTriggered({ doc, chat, contact, message_body });
@@ -533,7 +535,7 @@ export default class GroupMergeService {
 			)
 		).filter((doc) => doc !== null) as IMergedGroup[];
 
-		triggered_groups.forEach(async (doc) => {
+		triggered_groups_without_moderator.forEach(async (doc) => {
 			const groupReply = contact.isMyContact ? doc.group_reply_saved : doc.group_reply_unsaved;
 			const privateReply = contact.isMyContact
 				? doc.private_reply_saved
@@ -572,8 +574,6 @@ export default class GroupMergeService {
 			}
 
 			const userPrefService = await UserPreferencesService.getService(this.user._id.toString());
-
-			checkForMessageModeration(doc, message, chat);
 
 			if (doc.forward.number) {
 				const vCardString = new VCardBuilder({})
@@ -614,6 +614,25 @@ export default class GroupMergeService {
 						});
 				}
 			}
+		});
+
+		const triggered_groups_with_moderator = (
+			await Promise.all(
+				docs.map(async (doc) => {
+					const cond = await this.isGroupTriggered({
+						doc,
+						chat,
+						contact,
+						message_body,
+						isModerator: true,
+					});
+					return cond ? doc : null;
+				})
+			)
+		).filter((doc) => doc !== null) as IMergedGroup[];
+
+		triggered_groups_with_moderator.forEach(async (doc) => {
+			checkForMessageModeration(doc, message, chat);
 		});
 
 		async function sendGroupReply(
