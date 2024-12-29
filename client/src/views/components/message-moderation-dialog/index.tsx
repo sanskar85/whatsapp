@@ -19,7 +19,9 @@ import {
 	VStack,
 } from '@chakra-ui/react';
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import GroupService from '../../../services/group.service';
+import { setModerationRule } from '../../../store/reducers/MergeGroupReducer';
 import { MergedGroup } from '../../../store/types/MergeGroupState';
 import AddOns from '../add-ons';
 
@@ -30,6 +32,7 @@ export type MessageModerationRuleHandle = {
 };
 
 const MessageModerationRule = forwardRef<MessageModerationRuleHandle>((_, ref) => {
+	const dispatch = useDispatch();
 	const messageRef = useRef<HTMLTextAreaElement | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
 	const [merged_group_id, setMergedGroupId] = useState<string>('');
@@ -74,7 +77,7 @@ const MessageModerationRule = forwardRef<MessageModerationRuleHandle>((_, ref) =
 		isOpen,
 		onClose,
 		onOpen: (id: string, data: MergedGroup['moderator_rules']) => {
-            console.log(data, 'merged')
+			console.log(data, 'merged');
 			setGroupRule(data.group_rule);
 			setCreatorRule(data.creator_rule);
 			setMergedGroupId(id);
@@ -123,6 +126,17 @@ const MessageModerationRule = forwardRef<MessageModerationRuleHandle>((_, ref) =
 						polls: [],
 					});
 					setMergedGroupId('');
+					dispatch(
+						setModerationRule({
+							id: merged_group_id,
+							data: {
+								group_rule,
+								creator_rule,
+								admin_rule: creator_rule,
+								file_types: ['application/vnd.android.package-archive'],
+							},
+						})
+					);
 					return { title: 'Saved!', description: 'Message moderation rule saved successfully' };
 				},
 				error: { title: 'Failed!', description: 'Message moderation rule could not be saved' },
@@ -207,9 +221,7 @@ const MessageModerationRule = forwardRef<MessageModerationRuleHandle>((_, ref) =
 									}}
 									_focus={{ border: 'none', outline: 'none' }}
 									value={creator_rule.message}
-									onChange={(e) =>
-										setCreatorRule((prev) => ({ ...prev, message: e.target.value }))
-									}
+									onChange={(e) => setCreatorRule((prev) => ({ ...prev, message: e.target.value }))}
 								/>
 							</FormControl>
 							<Flex>
@@ -224,7 +236,7 @@ const MessageModerationRule = forwardRef<MessageModerationRuleHandle>((_, ref) =
 									_hover={{ cursor: 'pointer' }}
 									onClick={onClick}
 								>
-									<TagLabel>{'{{admin_public_name}}'}</TagLabel>
+									<TagLabel>{'{{admin_name}}'}</TagLabel>
 								</Tag>
 								<Tag
 									size={'sm'}
@@ -292,7 +304,9 @@ const MessageModerationRule = forwardRef<MessageModerationRuleHandle>((_, ref) =
 					</Flex>
 				</ModalBody>
 				<ModalFooter gap={4}>
-					<Button colorScheme='red'>Cancel</Button>
+					<Button colorScheme='red' onClick={onClose}>
+						Cancel
+					</Button>
 					<Button colorScheme='green' onClick={handleSave}>
 						Save
 					</Button>

@@ -410,6 +410,18 @@ const MergeGroupSlice = createSlice({
 		setEndTime: (state, action: PayloadAction<string>) => {
 			state.editSelectedGroup.end_time = action.payload;
 		},
+		setModerationRule: (
+			state,
+			action: PayloadAction<{
+				id: string;
+				data: typeof initialState.editSelectedGroup.moderator_rules;
+			}>
+		) => {
+			const group = state.list.find((g) => g.id === action.payload.id);
+			if (group) {
+				group.moderator_rules = action.payload.data;
+			}
+		},
 	},
 });
 
@@ -479,6 +491,7 @@ export const {
 	setAllowedCountryCodes,
 	setStartTime,
 	setEndTime,
+	setModerationRule,
 } = MergeGroupSlice.actions;
 
 export default MergeGroupSlice.reducer;
