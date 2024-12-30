@@ -88,6 +88,10 @@
 		"value": "audio/mpeg"
 	},
 	{
+		"name": "apk",
+		"value": "application/vnd.android.package-archive"
+	},
+	{
 		"name": "Other files",
 		"value": ""
 	}
