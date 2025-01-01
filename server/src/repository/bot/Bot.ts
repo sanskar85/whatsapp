@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { BOT_TRIGGER_OPTIONS, BOT_TRIGGER_TO } from '../../config/const';
+import { BOT_TRIGGER_OPTIONS } from '../../config/const';
 import IBot from '../../types/bot/Bot';
 
 const botSchema = new mongoose.Schema<IBot>({
@@ -7,10 +7,11 @@ const botSchema = new mongoose.Schema<IBot>({
 		type: Schema.Types.ObjectId,
 		ref: 'User',
 	},
-	respond_to: {
-		type: String,
-		enum: Object.values(BOT_TRIGGER_TO),
-		default: BOT_TRIGGER_TO.ALL,
+	recipient: {
+		saved: Boolean,
+		unsaved: Boolean,
+		include: [String],
+		exclude: [String],
 	},
 	trigger: [String],
 	trigger_gap_seconds: Number,

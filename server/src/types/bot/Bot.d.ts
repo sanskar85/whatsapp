@@ -1,5 +1,5 @@
 import { Document } from 'mongoose';
-import { BOT_TRIGGER_OPTIONS, BOT_TRIGGER_TO } from '../../config/const';
+import { BOT_TRIGGER_OPTIONS } from '../../config/const';
 import IContactCard from '../contact-cards';
 import IPolls from '../polls';
 import IUpload from '../uploads';
@@ -8,7 +8,12 @@ import { IUser } from '../users';
 export default interface IBot extends Document {
 	user: IUser;
 
-	respond_to: BOT_TRIGGER_TO;
+	recipient: {
+		saved: boolean;
+		unsaved: boolean;
+		include: string[];
+		exclude: string[];
+	};
 
 	trigger: string[];
 	trigger_gap_seconds: number;

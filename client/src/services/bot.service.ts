@@ -6,7 +6,12 @@ export default class BotService {
 		trigger: string[];
 		message: string;
 		random_string: boolean;
-		respond_to: string;
+		recipient: {
+			include: string[];
+			exclude: string[];
+			saved: boolean;
+			unsaved: boolean;
+		};
 		trigger_gap_seconds: number;
 		response_delay_seconds: number;
 		options: string;
@@ -46,7 +51,12 @@ export default class BotService {
 				options: res.options ?? 'INCLUDES_MATCH_CASE',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
-				respond_to: res.respond_to ?? '',
+				recipient: res.recipient ?? {
+					include: [],
+					exclude: [],
+					saved: false,
+					unsaved: false,
+				},
 				message: res.message ?? '',
 				random_string: res.random_string ?? false,
 				attachments: res.attachments ?? [],
@@ -75,7 +85,12 @@ export default class BotService {
 				options: res.options ?? 'INCLUDES_MATCH_CASE',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
-				respond_to: res.respond_to ?? '',
+				recipient: res.recipient ?? {
+					include: [],
+					exclude: [],
+					saved: false,
+					unsaved: false,
+				},
 				message: res.message ?? '',
 				random_string: res.random_string ?? false,
 				attachments: res.attachments ?? [],
@@ -102,7 +117,12 @@ export default class BotService {
 				options: res.options ?? 'INCLUDES_MATCH_CASE',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
-				respond_to: res.respond_to ?? '',
+				recipient: res.recipient ?? {
+					include: [],
+					exclude: [],
+					saved: false,
+					unsaved: false,
+				},
 				message: res.message ?? '',
 				random_string: res.random_string ?? false,
 				attachments: res.attachments ?? [],
@@ -135,7 +155,12 @@ export default class BotService {
 			trigger: string[];
 			message: string;
 			random_string: boolean;
-			respond_to: string;
+			recipient: {
+				include: string[];
+				exclude: string[];
+				saved: boolean;
+				unsaved: boolean;
+			};
 			trigger_gap_seconds: number;
 			options: string;
 			startAt: string;
@@ -174,7 +199,12 @@ export default class BotService {
 				options: string;
 				startAt: string;
 				endAt: string;
-				respond_to: string;
+				recipient: {
+					include: string[];
+					exclude: string[];
+					saved: boolean;
+					unsaved: boolean;
+				};
 				message: string;
 				random_string: boolean;
 				attachments: string[];
@@ -210,7 +240,12 @@ export default class BotService {
 				options: res.options ?? '',
 				startAt: res.startAt ?? '',
 				endAt: res.endAt ?? '',
-				respond_to: res.respond_to ?? '',
+				recipient: res.recipient ?? {
+					include: [],
+					exclude: [],
+					saved: false,
+					unsaved: false,
+				},
 				message: res.message ?? '',
 				random_string: res.random_string ?? false,
 				attachments: res.attachments ?? [],

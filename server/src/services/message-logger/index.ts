@@ -123,13 +123,14 @@ export class MessageLoggerService {
 		}
 
 		if (!chat.isGroup) {
-			if (isSaved && !pref.saved) {
+			const is_include = pref.include.length > 0 && pref.include.includes(contact.id.user);
+			const is_exclude = pref.exclude.length > 0 && pref.exclude.includes(contact.id.user);
+
+			if (isSaved && !pref.saved && !is_include) {
 				return;
-			} else if (!isSaved && !pref.unsaved) {
+			} else if (!isSaved && !pref.unsaved && !is_include) {
 				return;
-			} else if (pref.exclude.length > 0 && pref.exclude.includes(contact.id.user)) {
-				return;
-			} else if (pref.include.length > 0 && !pref.include.includes(contact.id.user)) {
+			} else if (is_exclude) {
 				return;
 			}
 

@@ -27,7 +27,12 @@ export type BotState = {
 
 export type Bot = {
 	bot_id: string;
-	respond_to: string;
+	recipient: {
+		include: string[];
+		exclude: string[];
+		saved: boolean;
+		unsaved: boolean;
+	};
 	trigger: string[];
 	trigger_gap_seconds: number;
 	response_delay_seconds: number;

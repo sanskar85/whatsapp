@@ -17,6 +17,7 @@ import {
 	TagLabel,
 	Text,
 	Textarea,
+	useDisclosure,
 	useToast,
 } from '@chakra-ui/react';
 import Multiselect from 'multiselect-react-dropdown';
@@ -47,7 +48,7 @@ import {
 	setNurturing,
 	setOptions,
 	setPolls,
-	setRespondTo,
+	setRecipient,
 	setResponseDelayTime,
 	setResponseDelayType,
 	setStartAt,
@@ -58,7 +59,9 @@ import {
 	updateBot,
 } from '../../../store/reducers/BotReducers';
 import AddOns from '../../components/add-ons';
+import CheckButton from '../../components/check-button';
 import Info from '../../components/info';
+import NumberInputDialog from '../../components/number-input-dialog';
 import { AddDevicePopup, SubscriptionPopup } from '../../components/subscription-alert';
 import AllResponders from './components/AllResponders';
 import { NumberInput, SelectElement, TextAreaElement, TextInput } from './components/Inputs';
@@ -74,6 +77,18 @@ export default function Bot() {
 	const toast = useToast();
 	const messageRef = useRef(0);
 
+	const {
+		isOpen: isIncludeNumberInputOpen,
+		onClose: closeIncludeNumberInput,
+		onOpen: openIncludeNumberInput,
+	} = useDisclosure();
+
+	const {
+		isOpen: isExcludeNumberInputOpen,
+		onClose: closeExcludeNumberInput,
+		onOpen: openExcludeNumberInput,
+	} = useDisclosure();
+
 	const [isAlertMessage, setIsAlertMessage] = useState(false);
 	const [readMoreDetails, setReadMoreDetails] = useState({
 		title: '',
@@ -87,7 +102,7 @@ export default function Bot() {
 		trigger,
 		message,
 		options,
-		respond_to,
+		recipient,
 		shared_contact_cards,
 		attachments,
 		response_delay_seconds,
@@ -179,17 +194,6 @@ export default function Bot() {
 				errorPayload.error = '';
 				dispatch(setError(errorPayload));
 			}
-		}
-
-		if (!respond_to) {
-			errorPayload.type = 'respondToError';
-			errorPayload.error = 'Recipients is required';
-			dispatch(setError(errorPayload));
-			notHasError = false;
-		} else {
-			errorPayload.type = 'respondToError';
-			errorPayload.error = '';
-			dispatch(setError(errorPayload));
 		}
 
 		if (!options) {
@@ -361,28 +365,51 @@ export default function Bot() {
 					{/*--------------------------------- RECIPIENTS SECTION--------------------------- */}
 
 					<Flex gap={4}>
-						<FormControl isInvalid={!!ui.respondToError} flexGrow={1}>
+						<Flex direction={'column'}>
 							<Text className='text-gray-700 dark:text-gray-400'>Recipients</Text>
-							<SelectElement
-								value={respond_to}
-								onChangeText={(text) => dispatch(setRespondTo(text))}
-								options={[
-									{
-										value: 'ALL',
-										title: 'All',
-									},
-									{
-										value: 'SAVED_CONTACTS',
-										title: 'Saved Contacts',
-									},
-									{
-										value: 'NON_SAVED_CONTACTS',
-										title: 'Non Saved Contacts',
-									},
-								]}
-							/>
-							{ui.respondToError && <FormErrorMessage>{ui.respondToError}</FormErrorMessage>}
-						</FormControl>
+							<Flex width={'full'} alignItems={'center'} justifyContent={'space-between'} gap={4}>
+								<Flex className='gap-2'>
+									<CheckButton
+										gap={2}
+										label='Saved'
+										name='Saved'
+										onChange={({ value }) => dispatch(setRecipient({ saved: value }))}
+										value={recipient.saved}
+									/>
+								</Flex>
+								<Flex className='gap-2'>
+									<CheckButton
+										gap={2}
+										label='Unsaved'
+										name='Unsaved'
+										onChange={({ value }) => dispatch(setRecipient({ unsaved: value }))}
+										value={recipient.unsaved}
+									/>
+								</Flex>
+
+								<Flex gap={2}>
+									<Button fontWeight={'normal'} onClick={openIncludeNumberInput}>
+										Include({recipient.include.length})
+									</Button>
+									<NumberInputDialog
+										numbers={recipient.include}
+										onConfirm={(numbers) => dispatch(setRecipient({ include: numbers }))}
+										isOpen={isIncludeNumberInputOpen}
+										onClose={closeIncludeNumberInput}
+									/>
+									<Button fontWeight={'normal'} onClick={openExcludeNumberInput}>
+										Exclude({recipient.exclude.length})
+									</Button>
+									<NumberInputDialog
+										numbers={recipient.exclude}
+										onConfirm={(numbers) => dispatch(setRecipient({ exclude: numbers }))}
+										isOpen={isExcludeNumberInputOpen}
+										onClose={closeExcludeNumberInput}
+									/>
+								</Flex>
+							</Flex>
+						</Flex>
+
 						<FormControl isInvalid={!!ui.optionsError} flexGrow={1}>
 							<Text className='text-gray-700 dark:text-gray-400'>Conditions</Text>
 

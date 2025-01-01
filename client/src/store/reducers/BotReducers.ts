@@ -9,7 +9,12 @@ const initialState: BotState = {
 		trigger: [],
 		message: '',
 		random_string: false,
-		respond_to: 'ALL',
+		recipient: {
+			include: [],
+			exclude: [],
+			saved: true,
+			unsaved: true,
+		},
 		options: 'INCLUDES_IGNORE_CASE',
 		startAt: '10:00',
 		endAt: '18:00',
@@ -76,7 +81,7 @@ const BotSlice = createSlice({
 			state.details.trigger = state.all_bots[index].trigger;
 			state.details.message = state.all_bots[index].message;
 			state.details.random_string = state.all_bots[index].random_string;
-			state.details.respond_to = state.all_bots[index].respond_to;
+			state.details.recipient = state.all_bots[index].recipient;
 			state.details.options = state.all_bots[index].options;
 			state.details.attachments = state.all_bots[index].attachments;
 			state.details.shared_contact_cards = state.all_bots[index].shared_contact_cards;
@@ -146,9 +151,14 @@ const BotSlice = createSlice({
 		toggleRandomString: (state) => {
 			state.details.random_string = !state.details.random_string;
 		},
-		setRespondTo: (state, action: PayloadAction<typeof initialState.details.respond_to>) => {
-			state.details.respond_to = action.payload;
-			state.ui.respondToError = '';
+		setRecipient: (
+			state,
+			action: PayloadAction<Partial<typeof initialState.details.recipient>>
+		) => {
+			state.details.recipient = {
+				...state.details.recipient,
+				...action.payload,
+			};
 		},
 		setOptions: (state, action: PayloadAction<typeof initialState.details.options>) => {
 			state.details.options = action.payload;
@@ -263,7 +273,7 @@ export const {
 	setTriggerAtIndex,
 	setMessage,
 	toggleRandomString,
-	setRespondTo,
+	setRecipient,
 	setOptions,
 	setAttachments,
 	setContactCards,

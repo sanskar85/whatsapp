@@ -1,11 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import { Types } from 'mongoose';
 import { z } from 'zod';
-import { BOT_TRIGGER_OPTIONS, BOT_TRIGGER_TO } from '../../config/const';
+import { BOT_TRIGGER_OPTIONS } from '../../config/const';
 import APIError from '../../errors/api-errors';
 
 export type CreateBotValidationResult = {
-	respond_to: BOT_TRIGGER_TO;
+	recipient: {
+		include: string[];
+		exclude: string[];
+		saved: boolean;
+		unsaved: boolean;
+	};
 	trigger_gap_seconds: number;
 	response_delay_seconds: number;
 	options: BOT_TRIGGER_OPTIONS;
@@ -48,11 +53,12 @@ export async function CreateBotValidator(req: Request, res: Response, next: Next
 		trigger: z.string().array().default([]),
 		random_string: z.boolean().default(false),
 		message: z.string().trim().default(''),
-		respond_to: z.enum([
-			BOT_TRIGGER_TO.ALL,
-			BOT_TRIGGER_TO.SAVED_CONTACTS,
-			BOT_TRIGGER_TO.NON_SAVED_CONTACTS,
-		]),
+		recipient: z.object({
+			include: z.string().array().default([]),
+			exclude: z.string().array().default([]),
+			saved: z.boolean().default(false),
+			unsaved: z.boolean().default(false),
+		}),
 		trigger_gap_seconds: z.number().positive().default(1),
 		response_delay_seconds: z.number().nonnegative().default(0),
 		options: z.enum([

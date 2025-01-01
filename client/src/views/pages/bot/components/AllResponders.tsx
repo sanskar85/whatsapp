@@ -107,7 +107,15 @@ export default function AllResponders() {
 									))}
 								</Td>
 								<Td className='whitespace-break-spaces'>{bot.message}</Td>
-								<Td>{bot.respond_to.split('_').join(' ')}</Td>
+								<Td>
+									{bot.recipient.saved && bot.recipient.unsaved
+										? 'All'
+										: bot.recipient.saved
+										? 'Saved'
+										: bot.recipient.unsaved
+										? 'Unsaved'
+										: 'None'}
+								</Td>
 								<Td>{bot.options.split('_').join(' ')}</Td>
 								<Td>
 									{bot.attachments.length} / {bot.shared_contact_cards.length}

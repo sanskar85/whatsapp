@@ -2,12 +2,7 @@ import fs from 'fs';
 import { Types } from 'mongoose';
 import Logger from 'n23-logger';
 import WAWebJS, { MessageMedia, Poll } from 'whatsapp-web.js';
-import {
-	ATTACHMENTS_PATH,
-	BOT_TRIGGER_OPTIONS,
-	BOT_TRIGGER_TO,
-	MESSAGE_SCHEDULER_TYPE,
-} from '../../config/const';
+import { ATTACHMENTS_PATH, BOT_TRIGGER_OPTIONS, MESSAGE_SCHEDULER_TYPE } from '../../config/const';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import { WhatsappProvider } from '../../provider/whatsapp_provider';
 import { BotResponseDB } from '../../repository/bot';
@@ -41,7 +36,7 @@ export default class BotService extends UserService {
 		}).populate('attachments shared_contact_cards ');
 		return bots.map((bot) => ({
 			bot_id: bot._id as Types.ObjectId,
-			respond_to: bot.respond_to,
+			recipient: bot.recipient,
 			trigger: bot.trigger,
 			trigger_gap_seconds: bot.trigger_gap_seconds,
 			response_delay_seconds: bot.response_delay_seconds,
@@ -92,7 +87,7 @@ export default class BotService extends UserService {
 
 		return {
 			bot_id: bot._id as Types.ObjectId,
-			respond_to: bot.respond_to,
+			recipient: bot.recipient,
 			trigger: bot.trigger,
 			trigger_gap_seconds: bot.trigger_gap_seconds,
 			response_delay_seconds: bot.response_delay_seconds,
@@ -188,12 +183,27 @@ export default class BotService extends UserService {
 				if (!bot) {
 					return false;
 				}
-				const is_recipient =
-					bot.respond_to === BOT_TRIGGER_TO.ALL ||
-					(bot.respond_to === BOT_TRIGGER_TO.SAVED_CONTACTS && contact.isMyContact) ||
-					(bot.respond_to === BOT_TRIGGER_TO.NON_SAVED_CONTACTS && !contact.isMyContact);
 
-				if (!is_recipient) {
+				if (
+					bot.recipient.exclude.length > 0 &&
+					bot.recipient.exclude.includes(contact.id._serialized)
+				) {
+					return false;
+				}
+
+				const is_include =
+					bot.recipient.include.length > 0 &&
+					bot.recipient.include.includes(contact.id._serialized);
+
+				if (!is_include) {
+					return false;
+				}
+
+				const is_recipient =
+					(bot.recipient.saved && contact.isMyContact) ||
+					(bot.recipient.unsaved && !contact.isMyContact);
+
+				if (!is_recipient && !is_include) {
 					return false;
 				}
 
@@ -585,7 +595,12 @@ export default class BotService extends UserService {
 	}
 
 	public createBot(data: {
-		respond_to: BOT_TRIGGER_TO;
+		recipient: {
+			include: string[];
+			exclude: string[];
+			saved: boolean;
+			unsaved: boolean;
+		};
 		trigger_gap_seconds: number;
 		response_delay_seconds: number;
 		options: BOT_TRIGGER_OPTIONS;
@@ -630,7 +645,7 @@ export default class BotService extends UserService {
 		bot.save();
 		return {
 			bot_id: bot._id as Types.ObjectId,
-			respond_to: bot.respond_to,
+			recipient: bot.recipient,
 			trigger: bot.trigger,
 			trigger_gap_seconds: bot.trigger_gap_seconds,
 			response_delay_seconds: bot.response_delay_seconds,
@@ -656,7 +671,12 @@ export default class BotService extends UserService {
 	public async modifyBot(
 		id: Types.ObjectId,
 		data: {
-			respond_to?: BOT_TRIGGER_TO;
+			recipient?: {
+				saved: boolean;
+				unsaved: boolean;
+				include: string[];
+				exclude: string[];
+			};
 			trigger_gap_seconds?: number;
 			response_delay_seconds?: number;
 			options?: BOT_TRIGGER_OPTIONS;
@@ -698,14 +718,11 @@ export default class BotService extends UserService {
 		if (!bot) {
 			throw new InternalError(INTERNAL_ERRORS.COMMON_ERRORS.NOT_FOUND);
 		}
-		if (data.respond_to) {
-			bot.respond_to = data.respond_to;
+		if (data.recipient) {
+			bot.recipient = data.recipient;
 		}
 		if (data.trigger) {
 			bot.trigger = data.trigger;
-		}
-		if (data.respond_to) {
-			bot.respond_to = data.respond_to;
 		}
 		if (data.trigger_gap_seconds) {
 			bot.trigger_gap_seconds = data.trigger_gap_seconds;
@@ -763,7 +780,7 @@ export default class BotService extends UserService {
 
 		return {
 			bot_id: bot._id as Types.ObjectId,
-			respond_to: bot.respond_to,
+			recipient: bot.recipient,
 			trigger: bot.trigger,
 			trigger_gap_seconds: bot.trigger_gap_seconds,
 			response_delay_seconds: bot.response_delay_seconds,
@@ -796,7 +813,7 @@ export default class BotService extends UserService {
 		bot.save();
 		return {
 			bot_id: bot._id as Types.ObjectId,
-			respond_to: bot.respond_to,
+			recipient: bot.recipient,
 			trigger: bot.trigger,
 			trigger_gap_seconds: bot.trigger_gap_seconds,
 			response_delay_seconds: bot.response_delay_seconds,
