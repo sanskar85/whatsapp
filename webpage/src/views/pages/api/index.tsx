@@ -1,5 +1,12 @@
 import { Divider, Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
-import { API_KEY, API_NAME, API_PAGE, WEBHOOK_CREATE, WEBHOOK_INPUT, WEBHOOK_VALIDATE } from '../../../assets/Images';
+import {
+	API_KEY,
+	API_NAME,
+	API_PAGE,
+	WEBHOOK_CREATE,
+	WEBHOOK_INPUT,
+	WEBHOOK_VALIDATE,
+} from '../../../assets/Images';
 import CodeBlocks from '../../components/copyblock';
 import Navbar from '../../components/navbar';
 
@@ -9,7 +16,9 @@ export default function APIWebhook() {
 			<Navbar />
 			<section className='p-6 md:px-[5%]'>
 				<section id='heading' className=' pt-[70px]'>
-					<h1 className='text-primary text-2xl md:text-4xl font-bold'>Whatsleads API Keys and Webhooks</h1>
+					<h1 className='text-primary text-2xl md:text-4xl font-bold'>
+						Whatsleads API Keys and Webhooks
+					</h1>
 				</section>
 				<Tabs variant='soft-rounded' colorScheme='green'>
 					<TabList>
@@ -135,7 +144,7 @@ export default function APIWebhook() {
 									<div className='grid grid-cols-1 md:grid-cols-2'>
 										<div>
 											<Divider className='w-3/4' />
-											<p className='mt-4'>Sends a media (image, video).</p>
+											<p className='mt-4'>Sends a media (ex: image, video, audio).</p>
 										</div>
 										<div>
 											<CodeBlocks
