@@ -986,7 +986,15 @@ export default class GroupMergeService {
 			if (!doc) return;
 
 			const userPrefService = await UserPreferencesService.getService(user._id.toString());
-
+			try {
+				await GroupPrivateReplyDB.create({
+					...createDocData,
+					mergedGroup: doc._id,
+					unique_id: doc.multiple_responses ? message.id._serialized : 'only-once-key',
+				});
+			} catch (err) {
+				return;
+			}
 			for (const reply of allReplies) {
 				try {
 					const { text, attachments, shared_contact_cards, polls } = reply;
