@@ -260,7 +260,7 @@ export default class WhatsappUtils {
 					group_name: groupChat.name,
 					user_type: participant.isSuperAdmin ? 'CREATOR' : participant.isAdmin ? 'ADMIN' : 'USER',
 					isSaved: contact ? contact.isSaved : false,
-					isEnterprise: contact.isEnterprise,
+					isEnterprise: contact?.isEnterprise ?? false,
 				};
 				let fetchedContact: WAWebJS.Contact | null = null;
 
