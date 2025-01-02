@@ -59,7 +59,6 @@ import {
 	updateBot,
 } from '../../../store/reducers/BotReducers';
 import AddOns from '../../components/add-ons';
-import CheckButton from '../../components/check-button';
 import Info from '../../components/info';
 import NumberInputDialog from '../../components/number-input-dialog';
 import { AddDevicePopup, SubscriptionPopup } from '../../components/subscription-alert';
@@ -369,22 +368,42 @@ export default function Bot() {
 							<Text className='text-gray-700 dark:text-gray-400'>Recipients</Text>
 							<Flex width={'full'} alignItems={'center'} justifyContent={'space-between'} gap={4}>
 								<Flex className='gap-2'>
-									<CheckButton
-										gap={2}
-										label='Saved'
-										name='Saved'
-										onChange={({ value }) => dispatch(setRecipient({ saved: value }))}
-										value={recipient.saved}
-									/>
+									<Flex gap={4} alignItems={'center'}>
+										<IconButton
+											isRound={true}
+											variant='solid'
+											aria-label='Done'
+											size='xs'
+											icon={recipient.saved ? <CheckIcon color='white' /> : <></>}
+											onClick={() => {
+												dispatch(setRecipient({ saved: !recipient.saved }));
+											}}
+											className={`${
+												recipient.saved ? '!bg-[#4CB072]' : '!bg-[#A6A6A6] '
+											} hover:!bg-green-700 `}
+										/>
+										<Text fontSize='sm' className='text-gray-800 dark:text-white'>
+											Saved
+										</Text>
+									</Flex>
 								</Flex>
 								<Flex className='gap-2'>
-									<CheckButton
-										gap={2}
-										label='Unsaved'
-										name='Unsaved'
-										onChange={({ value }) => dispatch(setRecipient({ unsaved: value }))}
-										value={recipient.unsaved}
-									/>
+									<Flex gap={4} alignItems={'center'}>
+										<IconButton
+											isRound={true}
+											variant='solid'
+											aria-label='Done'
+											size='xs'
+											icon={recipient.unsaved ? <CheckIcon color='white' /> : <></>}
+											onClick={() => {
+												dispatch(setRecipient({ unsaved: !recipient.unsaved }));
+											}}
+											className={`${
+												recipient.unsaved ? '!bg-[#4CB072]' : '!bg-[#A6A6A6] '
+											} hover:!bg-green-700 `}
+										/>
+										<Text className='text-gray-800 dark:text-white'>Unsaved</Text>
+									</Flex>
 								</Flex>
 
 								<Flex gap={2}>
