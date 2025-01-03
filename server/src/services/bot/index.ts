@@ -195,7 +195,7 @@ export default class BotService extends UserService {
 					bot.recipient.include.length > 0 &&
 					bot.recipient.include.includes(contact.id._serialized);
 
-				if (!is_include) {
+				if (is_include) {
 					return false;
 				}
 
