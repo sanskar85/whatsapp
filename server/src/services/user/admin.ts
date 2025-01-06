@@ -16,11 +16,13 @@ export default class AdminService extends UserService {
 			role: UserRoles.USER,
 		});
 
-		const ids = users.map((user) => user._id);
+		const client_ids = users
+			.map((user) => WhatsappProvider.clientByUser(user._id))
+			.filter((client) => !!client) as string[];
 
 		const devices = await DeviceDB.find({
-			user: {
-				$in: ids,
+			client_id: {
+				$in: client_ids,
 			},
 		});
 
