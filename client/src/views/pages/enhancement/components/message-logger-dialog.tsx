@@ -41,6 +41,7 @@ import {
 } from '../../../../store/reducers/EnhancementsReducers';
 import CheckButton from '../../../components/check-button';
 import DeleteAlert, { DeleteAlertHandle } from '../../../components/delete-alert';
+import Info from '../../../components/info';
 import NumberInputDialog from '../../../components/number-input-dialog';
 import MimeSelector from './mime-type-selector';
 import GroupsRuleDialog from './rule-dialog';
@@ -262,6 +263,9 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 							<Box>
 								<Text fontWeight={'medium'} fontSize={'lg'}>
 									Individual Text Message
+									<Info>
+										Priority: Exclude {'>'} Include {'>'} Saved {'>'} Unsaved
+									</Info>
 								</Text>
 							</Box>
 							<Flex width={'full'} alignItems={'center'} justifyContent={'flex-end'} gap={4}>
@@ -321,6 +325,9 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 							<Box>
 								<Text fontWeight={'medium'} fontSize={'lg'}>
 									Individual Media Message
+									<Info>
+										Priority: Exclude {'>'} Include {'>'} Saved {'>'} Unsaved
+									</Info>
 								</Text>
 							</Box>
 							<Flex width={'full'} alignItems={'center'} justifyContent={'space-between'} gap={4}>

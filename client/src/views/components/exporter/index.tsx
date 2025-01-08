@@ -400,7 +400,7 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 									})
 								}
 							>
-								Business Only
+								With Business Details
 							</Checkbox>
 						</HStack>
 					</Flex>

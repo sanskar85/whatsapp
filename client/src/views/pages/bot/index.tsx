@@ -365,7 +365,12 @@ export default function Bot() {
 
 					<Flex gap={4}>
 						<Flex direction={'column'}>
-							<Text className='text-gray-700 dark:text-gray-400'>Recipients</Text>
+							<Text className='text-gray-700 dark:text-gray-400 z-[10000000]'>
+								Recipients
+								<Info>
+									Priority: Exclude {'>'} Include {'>'} Saved {'>'} Unsaved
+								</Info>
+							</Text>
 							<Flex width={'full'} alignItems={'center'} justifyContent={'space-between'} gap={4}>
 								<Flex className='gap-2'>
 									<Flex gap={4} alignItems={'center'}>
