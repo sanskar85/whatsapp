@@ -990,7 +990,7 @@ export default class GroupMergeService {
 				await GroupPrivateReplyDB.create({
 					...createDocData,
 					mergedGroup: doc._id,
-					unique_id: doc.multiple_responses ? message.id._serialized : 'only-once-key',
+					unique_id: doc.multiple_responses ? message.id._serialized : 'admin-only-once-key',
 				});
 			} catch (err) {
 				return;

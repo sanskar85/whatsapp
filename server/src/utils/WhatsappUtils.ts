@@ -453,16 +453,19 @@ export default class WhatsappUtils {
 	}
 
 	static deleteSession(client_id: string) {
-		WhatsappProvider.deleteSession(client_id);
-		const path = __basedir + '/.wwebjs_auth/session-' + client_id;
-		const dataExists = fs.existsSync(path);
-		if (dataExists) {
-			fs.rmSync(path, {
-				recursive: true,
-			});
-			return true;
+		try {
+			const path = __basedir + '/.wwebjs_auth/session-' + client_id;
+			const dataExists = fs.existsSync(path);
+			if (dataExists) {
+				fs.rmSync(path, {
+					recursive: true,
+				});
+				return true;
+			}
+			return false;
+		} catch (error) {
+			return false;
 		}
-		return false;
 	}
 
 	static async resumeSessions() {
@@ -493,6 +496,10 @@ export default class WhatsappUtils {
 			(client_id) => client_id !== null
 		) as string[];
 
+		const inactive_client_ids = client_ids.filter(
+			(client_id) => !active_client_ids.includes(client_id)
+		);
+
 		active_client_ids.forEach(async (client_id) => {
 			const device = await DeviceService.getServiceByClientID(client_id);
 			const instance = WhatsappProvider.getInstance(new UserService(device.getUser()), client_id);
@@ -512,7 +519,12 @@ export default class WhatsappUtils {
 			}, SESSION_STARTUP_WAIT_TIME);
 		});
 
+		inactive_client_ids.forEach(async (client_id) => {
+			WhatsappUtils.deleteSession(client_id);
+		});
+
 		Logger.info('WHATSAPP-HELPER', `Started ${active_client_ids.length} client sessions`);
+		Logger.info('WHATSAPP-HELPER', `Removed ${inactive_client_ids.length} client sessions`);
 	}
 
 	static async formatMessage(message: string, mapping: { [key: string]: string }) {
