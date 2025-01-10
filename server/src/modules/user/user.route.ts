@@ -23,6 +23,7 @@ router
 	.all(VerifyAdmin, IDValidator, EmailValidator)
 	.post(UserController.shareLogFile);
 
+router.route('/devices').all(VerifyAdmin).get(UserController.listDevices);
 router.route('/').all(VerifyAdmin).get(UserController.listUsers);
 
 export default router;

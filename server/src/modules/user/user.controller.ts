@@ -34,6 +34,35 @@ async function listUsers(req: Request, res: Response, next: NextFunction) {
 	}
 }
 
+async function listDevices(req: Request, res: Response, next: NextFunction) {
+	const userService = req.locals.admin;
+
+	const options = {
+		csv: false,
+	};
+	if (req.query.csv === 'true') {
+		options.csv = true;
+	}
+
+	const devices = await userService.allDevices();
+
+	if (options.csv) {
+		return RespondCSV({
+			res,
+			filename: 'Exported Devices',
+			data: CSVParser.exportUsersDetails(devices),
+		});
+	} else {
+		return Respond({
+			res,
+			status: 200,
+			data: {
+				devices: devices,
+			},
+		});
+	}
+}
+
 async function extendUserExpiry(req: Request, res: Response, next: NextFunction) {
 	try {
 		if (!req.body.date) {
@@ -101,6 +130,7 @@ async function paymentRemainder(req: Request, res: Response, next: NextFunction)
 
 const Controller = {
 	listUsers,
+	listDevices,
 	extendUserExpiry,
 	logoutUsers,
 	paymentRemainder,
