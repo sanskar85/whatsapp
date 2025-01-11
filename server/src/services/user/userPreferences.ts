@@ -1,8 +1,8 @@
 import { Types } from 'mongoose';
+import { DRIVE_SHARE_LINK } from '../../config/const';
+import { addHeader, createSpreadSheet, shareToDrive } from '../../provider/google/SheetAuth';
 import UserPreferencesDB from '../../repository/user/UserPreferences';
 import { IUserPreferences } from '../../types/users';
-import { addHeader, createSpreadSheet, shareToDrive } from '../../provider/google/SheetAuth';
-import { DRIVE_SHARE_LINK } from '../../config/const';
 
 export default class UserPreferencesService {
 	private userPref: IUserPreferences;
@@ -23,8 +23,10 @@ export default class UserPreferencesService {
 
 		const userPref = await UserPreferencesDB.findOne({ user: userId }).populate('user');
 		if (userPref === null || userPref.user === null) {
-			const userPref = await UserPreferencesDB.create({ user: userId });
-			return new UserPreferencesService(userPref);
+			await UserPreferencesDB.create({ user: userId });
+
+			const userPref = await UserPreferencesDB.findOne({ user: userId }).populate('user');
+			return new UserPreferencesService(userPref!, userPref!.user.username);
 		}
 
 		return new UserPreferencesService(userPref, userPref.user.username);
