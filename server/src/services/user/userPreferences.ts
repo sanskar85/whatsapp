@@ -1,14 +1,17 @@
 import { Types } from 'mongoose';
 import UserPreferencesDB from '../../repository/user/UserPreferences';
 import { IUserPreferences } from '../../types/users';
+import { addHeader, createSpreadSheet, shareToDrive } from '../../provider/google/SheetAuth';
+import { DRIVE_SHARE_LINK } from '../../config/const';
 
 export default class UserPreferencesService {
 	private userPref: IUserPreferences;
-
+	private username: string;
 	private static instances = new Map<string, UserPreferencesService>();
 
-	private constructor(userPref: IUserPreferences) {
+	private constructor(userPref: IUserPreferences, username: string) {
 		this.userPref = userPref;
+		this.username = username;
 
 		UserPreferencesService.instances.set(userPref.user.toString() as unknown as string, this);
 	}
@@ -18,13 +21,13 @@ export default class UserPreferencesService {
 			return this.instances.get(userId.toString())!;
 		}
 
-		const userPref = await UserPreferencesDB.findOne({ user: userId });
+		const userPref = await UserPreferencesDB.findOne({ user: userId }).populate('user');
 		if (userPref === null || userPref.user === null) {
 			const userPref = await UserPreferencesDB.create({ user: userId });
 			return new UserPreferencesService(userPref);
 		}
 
-		return new UserPreferencesService(userPref);
+		return new UserPreferencesService(userPref, userPref.user.username);
 	}
 
 	isLoggerEnabled() {
@@ -33,6 +36,12 @@ export default class UserPreferencesService {
 
 	async setLoggerEnabled(enabled: boolean) {
 		this.userPref.isLoggerEnabled = enabled;
+		if (enabled && !this.getMessageLogSheetId()) {
+			const sheetId = await createSpreadSheet(`Message Log @ ${this.username}`);
+			addHeader(sheetId);
+			shareToDrive(sheetId, DRIVE_SHARE_LINK);
+			this.userPref.messageLogSheetId = sheetId;
+		}
 		await this.userPref.save();
 	}
 
