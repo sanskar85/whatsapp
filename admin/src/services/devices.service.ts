@@ -34,7 +34,7 @@ export default class DeviceService {
 				downloadLink.click();
 				document.body.removeChild(downloadLink);
 			} else {
-				return response.data.users.map((user: User) => ({
+				return response.data.devices.map((user: User) => ({
 					id: (user.id as string) ?? '',
 					device_id: (user.device_id as string) ?? '',
 					name: (user.name as string) ?? '',
@@ -54,7 +54,7 @@ export default class DeviceService {
 
 	static async shareMessageLogs(user_id: string, email: string) {
 		try {
-			await APIInstance.post(`/users/devices/${user_id}/share-log-file`, {
+			await APIInstance.post(`/users/${user_id}/share-log-file`, {
 				email,
 			});
 			return true;
@@ -65,7 +65,7 @@ export default class DeviceService {
 
 	static async extendExpiry(user_id: string, date: string) {
 		try {
-			await APIInstance.post(`/users/devices/${user_id}/extend-expiry`, {
+			await APIInstance.post(`/users/${user_id}/extend-expiry`, {
 				date: date,
 			});
 		} catch (err) {
@@ -75,7 +75,7 @@ export default class DeviceService {
 
 	static async sendPaymentReminder(user_id: string, message: string) {
 		try {
-			await APIInstance.post(`/users/devices/${user_id}/send-payment-reminder`, {
+			await APIInstance.post(`/users/${user_id}/send-payment-reminder`, {
 				message,
 			});
 		} catch (err) {
@@ -85,7 +85,7 @@ export default class DeviceService {
 
 	static async logoutDevice(user_id: string) {
 		try {
-			await APIInstance.post(`/users/devices/${user_id}/logout`);
+			await APIInstance.post(`/users/${user_id}/logout`);
 		} catch (err) {
 			//ignore
 		}
