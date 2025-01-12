@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { StoreNames } from '../../../../client/src/store';
+import { StoreNames } from '../config';
 import { PaymentRecords } from '../types/PaymentState';
 
 const initialState: PaymentRecords = {

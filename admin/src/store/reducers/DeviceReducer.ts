@@ -1,10 +1,10 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { StoreNames } from '../config';
-import { UsersState } from '../types/UsersState';
+import { DevicesState } from '../types/DevicesState';
 
-const initialState: UsersState = {
+const initialState: DevicesState = {
 	list: [],
-	selectedUsers: [],
+	selectedDevice: [],
 	uiDetails: {
 		isSaving: false,
 		isFetching: false,
@@ -15,23 +15,23 @@ const initialState: UsersState = {
 	},
 };
 
-const UsersSlice = createSlice({
-	name: StoreNames.USERS,
+const DeviceSlice = createSlice({
+	name: StoreNames.DEVICES,
 	initialState,
 	reducers: {
 		reset: (state) => {
 			state.list = initialState.list;
-			state.selectedUsers = initialState.selectedUsers;
+			state.selectedDevice = initialState.selectedDevice;
 			state.uiDetails = initialState.uiDetails;
 		},
-		setUsersList: (state, action: PayloadAction<typeof initialState.list>) => {
+		setDeviceList: (state, action: PayloadAction<typeof initialState.list>) => {
 			state.list = action.payload;
 		},
-		addSelectedUsers: (state, action: PayloadAction<string>) => {
-			state.selectedUsers.push(action.payload);
+		addSelectedDevice: (state, action: PayloadAction<string>) => {
+			state.selectedDevice.push(action.payload);
 		},
-		removeSelectedUsers: (state, action: PayloadAction<string>) => {
-			state.selectedUsers = state.selectedUsers.filter((id) => id !== action.payload);
+		removeSelectedDevice: (state, action: PayloadAction<string>) => {
+			state.selectedDevice = state.selectedDevice.filter((id) => id !== action.payload);
 		},
 		startSaving: (state) => {
 			state.uiDetails.isSaving = true;
@@ -66,9 +66,9 @@ export const {
 	setIsCreating,
 	setIsUpdating,
 	setError,
-	addSelectedUsers,
-	removeSelectedUsers,
-	setUsersList,
-} = UsersSlice.actions;
+	setDeviceList,
+	addSelectedDevice,
+	removeSelectedDevice,
+} = DeviceSlice.actions;
 
-export default UsersSlice.reducer;
+export default DeviceSlice.reducer;

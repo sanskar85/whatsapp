@@ -9,8 +9,10 @@ import { DATA_LOADED_DELAY, NAVIGATION } from '../../../config/const';
 import { useAuth } from '../../../hooks/useAuth';
 import { useNetwork } from '../../../hooks/useNetwork';
 import '../../../index.css';
+import DeviceService from '../../../services/devices.service';
 import PaymentService from '../../../services/payment.service';
 import UsersService from '../../../services/users.service';
+import { setDeviceList } from '../../../store/reducers/DeviceReducer';
 import { setRecordsList } from '../../../store/reducers/PaymentReducers';
 import { setUsersList } from '../../../store/reducers/UsersReducer';
 import Navbar from '../../components/navbar';
@@ -36,6 +38,7 @@ export default function Home() {
 			const promises = [
 				UsersService.getUsers(),
 				PaymentService.getPaymentRecords(),
+				DeviceService.getDevices(),
 				addDelay(DATA_LOADED_DELAY),
 			];
 
@@ -48,6 +51,12 @@ export default function Home() {
 			if (results[1]) {
 				dispatch(setRecordsList(results[1]));
 			}
+
+			if (results[2]) {
+				dispatch(setDeviceList(results[2]));
+			}
+
+			console.log(results[2])
 
 			setDataLoaded.on();
 		} catch (e) {

@@ -1,4 +1,5 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { StoreNames } from '../config';
 import { AdminDetailsState } from '../types/admin';
 
 const initialState: AdminDetailsState = {
@@ -11,7 +12,7 @@ const initialState: AdminDetailsState = {
 };
 
 const AdminReducers = createSlice({
-	name: 'admin',
+	name: StoreNames.ADMIN,
 	initialState,
 	reducers: {
 		setClientId: (state, action: PayloadAction<typeof state.clientId>) => {
@@ -20,7 +21,10 @@ const AdminReducers = createSlice({
 		setPromotionalMessage: (state, action: PayloadAction<typeof state.promotionalMessage>) => {
 			state.promotionalMessage = action.payload;
 		},
-		changePromotionalMessage: (state, action: PayloadAction<{ message_1: string; message_2: string }>) => {
+		changePromotionalMessage: (
+			state,
+			action: PayloadAction<{ message_1: string; message_2: string }>
+		) => {
 			state.promotionalMessage = action.payload;
 		},
 		setToken: (state, action) => {

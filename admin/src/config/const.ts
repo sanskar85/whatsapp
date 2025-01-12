@@ -11,6 +11,7 @@ export const NAVIGATION = {
 	HOME: '/',
 	DASHBOARD: '/dashboard',
 	USERS: '/users',
+	DEVICE: '/device',
 	NETWORK_ERROR: '/network-error',
 	PAYMENT_HISTORY: '/payment-history',
 };

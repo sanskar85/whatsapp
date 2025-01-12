@@ -11,6 +11,7 @@ import { useTheme } from './hooks/useTheme';
 const Login = lazy(() => import('./views/pages/login'));
 const Dashboard = lazy(() => import('./views/pages/home/Dashboard'));
 const UsersPage = lazy(() => import('./views/pages/users'));
+const DevicesPage = lazy(() => import('./views/pages/devices'));
 const Home = lazy(() => import('./views/pages/home'));
 const NetworkError = lazy(() => import('./views/pages/network-error'));
 const PaymentHistory = lazy(() => import('./views/pages/payment-history'));
@@ -27,6 +28,7 @@ function App() {
 						<Route path={NAVIGATION.HOME} element={<Home />}>
 							<Route path={NAVIGATION.DASHBOARD} element={<Dashboard />} />
 							<Route path={NAVIGATION.USERS} element={<UsersPage />} />
+							<Route path={NAVIGATION.DEVICE} element={<DevicesPage />} />
 							<Route path={NAVIGATION.PAYMENT_HISTORY} element={<PaymentHistory />} />
 						</Route>
 						<Route path={NAVIGATION.NETWORK_ERROR} element={<NetworkError />} />
