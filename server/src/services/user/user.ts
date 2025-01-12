@@ -72,8 +72,7 @@ export default class UserService {
 	}
 
 	async setPassword(password: string) {
-		this.user.password = password;
-		await this.user.save();
+		await this.user.updateOne({ password });
 	}
 
 	getRole() {
