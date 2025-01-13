@@ -5,7 +5,7 @@ import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import StorageDB from '../../repository/storage';
 import { UserDB } from '../../repository/user';
 import { IUser } from '../../types/users';
-import { generateRandomText, idValidator } from '../../utils/ExpressUtils';
+import { generateHashedPassword, generateRandomText, idValidator } from '../../utils/ExpressUtils';
 import UserPreferencesService from './userPreferences';
 
 export default class UserService {
@@ -72,7 +72,8 @@ export default class UserService {
 	}
 
 	async setPassword(password: string) {
-		await this.user.updateOne({ password });
+		const newPassword = await generateHashedPassword(password);
+		await this.user.updateOne({ password: newPassword });
 	}
 
 	getRole() {
