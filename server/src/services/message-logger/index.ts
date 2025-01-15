@@ -102,7 +102,6 @@ export class MessageLoggerService {
 		}
 
 		if (!pref) {
-			Logger.info('No pref found for message logger', `${this.number} - ${contact.id.user}`);
 			return;
 		}
 
