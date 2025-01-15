@@ -184,29 +184,6 @@ export default class BotService extends UserService {
 					return false;
 				}
 
-				if (
-					bot.recipient.exclude.length > 0 &&
-					bot.recipient.exclude.includes(contact.id._serialized)
-				) {
-					return false;
-				}
-
-				const is_include =
-					bot.recipient.include.length > 0 &&
-					bot.recipient.include.includes(contact.id._serialized);
-
-				if (is_include) {
-					return false;
-				}
-
-				const is_recipient =
-					(bot.recipient.saved && contact.isMyContact) ||
-					(bot.recipient.unsaved && !contact.isMyContact);
-
-				if (!is_recipient && !is_include) {
-					return false;
-				}
-
 				if (!DateUtils.isTimeBetween(bot.startAt, bot.endAt, DateUtils.getMomentNow())) {
 					return false;
 				}
@@ -217,6 +194,28 @@ export default class BotService extends UserService {
 						return false;
 					}
 				}
+
+				if (
+					bot.recipient.exclude.length > 0 &&
+					bot.recipient.exclude.includes(contact.id._serialized)
+				) {
+					return false;
+				}
+
+				if (bot.recipient.include.length > 0) {
+					if (!bot.recipient.include.includes(contact.id._serialized)) {
+						return false;
+					}
+				} else {
+					const is_recipient =
+						(bot.recipient.saved && contact.isMyContact) ||
+						(bot.recipient.unsaved && !contact.isMyContact);
+
+					if (!is_recipient) {
+						return false;
+					}
+				}
+
 				if (bot.trigger.length === 0) {
 					return true;
 				}
