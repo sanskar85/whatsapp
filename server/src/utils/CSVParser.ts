@@ -57,7 +57,12 @@ export default class CSVParser {
 			},
 		];
 
-		const csv = json2csv(contacts, {
+		const processedContacts = contacts.map((contact) => ({
+			...contact,
+			number: contact.number.slice(0, 2) + ' ' + contact.number.slice(2),
+		}));
+
+		const csv = json2csv(processedContacts, {
 			keys: keys,
 			emptyFieldValue: '',
 		});
@@ -115,7 +120,12 @@ export default class CSVParser {
 			},
 		];
 
-		const csv = json2csv(contacts, {
+		const processedContacts = contacts.map((contact) => ({
+			...contact,
+			number: contact.number.slice(0, 2) + ' ' + contact.number.slice(2),
+		}));
+
+		const csv = json2csv(processedContacts, {
 			keys: keys,
 			emptyFieldValue: '',
 		});
@@ -173,10 +183,16 @@ export default class CSVParser {
 			},
 		];
 
-		const csv = json2csv(contacts, {
+		const processedContacts = contacts.map((contact) => ({
+			...contact,
+			number: contact.number.slice(0, 2) + ' ' + contact.number.slice(2),
+		}));
+
+		const csv = json2csv(processedContacts, {
 			keys: keys,
 			emptyFieldValue: '',
 		});
+
 		return csv;
 	}
 	static exportGroupBusinessContacts(contacts: TGroupBusinessContact[]) {
@@ -247,10 +263,16 @@ export default class CSVParser {
 			},
 		];
 
-		const csv = json2csv(contacts, {
+		const processedContacts = contacts.map((contact) => ({
+			...contact,
+			number: contact.number.slice(0, 2) + ' ' + contact.number.slice(2),
+		}));
+
+		const csv = json2csv(processedContacts, {
 			keys: keys,
 			emptyFieldValue: '',
 		});
+
 		return csv;
 	}
 	static exportLabelContacts(contacts: TLabelContact[]) {
@@ -285,10 +307,16 @@ export default class CSVParser {
 			},
 		];
 
-		const csv = json2csv(contacts, {
+		const processedContacts = contacts.map((contact) => ({
+			...contact,
+			number: contact.number.slice(0, 2) + ' ' + contact.number.slice(2),
+		}));
+
+		const csv = json2csv(processedContacts, {
 			keys: keys,
 			emptyFieldValue: '',
 		});
+
 		return csv;
 	}
 	static exportLabelBusinessContacts(contacts: TLabelBusinessContact[]) {
@@ -347,10 +375,16 @@ export default class CSVParser {
 			},
 		];
 
-		const csv = json2csv(contacts, {
+		const processedContacts = contacts.map((contact) => ({
+			...contact,
+			number: contact.number.slice(0, 2) + ' ' + contact.number.slice(2),
+		}));
+
+		const csv = json2csv(processedContacts, {
 			keys: keys,
 			emptyFieldValue: '',
 		});
+
 		return csv;
 	}
 

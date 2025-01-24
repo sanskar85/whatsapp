@@ -28,7 +28,7 @@ import StarMessageRulesDialog from './components/star-message-rules-dialog';
 export default function Logger() {
 	const dispatch = useDispatch();
 
-	const { groups } = useSelector((state: StoreState) => state[StoreNames.USER]);
+	const { isWhatsappReady } = useSelector((state: StoreState) => state[StoreNames.USER]);
 	const { message_logger } = useSelector((state: StoreState) => state[StoreNames.ENHANCEMENT]);
 
 	const {
@@ -54,7 +54,7 @@ export default function Logger() {
 		};
 	}, []);
 
-	if (groups.length === 0) {
+	if (!isWhatsappReady) {
 		return (
 			<Box className='p-4 text-center'>
 				<Text className='text-black dark:text-white font-medium text-lg'>

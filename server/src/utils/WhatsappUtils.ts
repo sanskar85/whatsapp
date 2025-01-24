@@ -251,7 +251,7 @@ export default class WhatsappUtils {
 				const contact_details: TGroupContact & {
 					isSaved: boolean;
 				} = {
-					group_id: groupChat.id._serialized.split('@')[0],
+					group_id: groupChat.id._serialized,
 					name: contact ? contact.name : '',
 					number: participant.id.user,
 					country: contact ? contact.country : '',

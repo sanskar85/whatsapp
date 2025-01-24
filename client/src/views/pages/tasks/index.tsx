@@ -116,7 +116,7 @@ const Tasks = () => {
 										{index + 1}.
 									</Td>
 									<Td className='capitalize'>{task.type.toLowerCase().split('_').join(' ')}</Td>
-									<Td>{task.description}</Td>
+									<Td className='whitespace-pre-wrap'>{task.description}</Td>
 									<Td>{task.status}</Td>
 									<Td>{task.createdAt}</Td>
 									<Td>
