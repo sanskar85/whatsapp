@@ -94,9 +94,10 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 		const promises = parsed_csv.map(async (row) => {
 			const numberWithId = await whatsappUtils.getNumberWithId(row.number);
 			if (!numberWithId) {
-				return; // Skips to the next iteration
+				numbers.push(row.number + '@c.us');
+			} else {
+				numbers.push(numberWithId.numberId);
 			}
-			numbers.push(numberWithId.numberId);
 			_attachments!.push(MessagesUtils.formatAttachments(uploaded_attachments, variables, row));
 			messages?.push(MessagesUtils.formatMessageText(message, variables, row));
 		});
