@@ -20,6 +20,7 @@ export type UserDetailsState = {
 	groups: {
 		id: string;
 		name: string;
+		name_with_id: string;
 		isMergedGroup: boolean;
 		participants: number;
 	}[];

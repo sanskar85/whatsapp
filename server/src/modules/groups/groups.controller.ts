@@ -57,16 +57,18 @@ async function groups(req: Request, res: Response, next: NextFunction) {
 
 		const merged_groups = await new GroupMergeService(req.locals.user.getUser()).listGroups();
 
+		const results = [
+			...groups.sort((a, b) => a.name.localeCompare(b.name)),
+			...merged_groups
+				.map((group) => ({ ...group, groups: undefined }))
+				.sort((a, b) => a.name.localeCompare(b.name)),
+		];
+
 		return Respond({
 			res,
 			status: 200,
 			data: {
-				groups: [
-					...groups.sort((a, b) => a.name.localeCompare(b.name)),
-					...merged_groups
-						.map((group) => ({ ...group, groups: undefined }))
-						.sort((a, b) => a.name.localeCompare(b.name)),
-				],
+				groups: results,
 			},
 		});
 	} catch (err) {
@@ -91,14 +93,18 @@ async function refreshGroup(req: Request, res: Response, next: NextFunction) {
 		await saveToCache(CACHE_TOKEN_GENERATOR.CONTACTS(req.locals.user.getUser()._id), contacts);
 		const merged_groups = await new GroupMergeService(req.locals.user.getUser()).listGroups();
 
+		const groups = [
+			...contacts.groups.sort((a, b) => a.name.localeCompare(b.name)),
+			...merged_groups
+				.map((group) => ({ ...group, groups: undefined }))
+				.sort((a, b) => a.name.localeCompare(b.name)),
+		];
+
 		return Respond({
 			res,
 			status: 200,
 			data: {
-				groups: [
-					...contacts.groups,
-					...merged_groups.map((group) => ({ ...group, groups: undefined })),
-				],
+				groups: groups,
 			},
 		});
 	} catch (err) {

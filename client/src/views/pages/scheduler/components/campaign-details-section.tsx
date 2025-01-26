@@ -191,9 +191,7 @@ function RecipientToSelector() {
 						onChange={(e) => {
 							dispatch(setRecipientsError(false));
 							dispatch(setCSVFile(e.target.value));
-							const recipient = recipients.find(
-								(recipient) => recipient.id === e.target.value
-							);
+							const recipient = recipients.find((recipient) => recipient.id === e.target.value);
 							if (!recipient || !recipient.headers) return;
 							if (recipient) dispatch(setVariables(recipient.headers));
 						}}
@@ -248,7 +246,10 @@ function RecipientToSelector() {
 					hideSelectedList={true}
 					options={recipients.map((item, index) => ({
 						...item,
-						displayValue: `${index + 1}. ${item.name}`,
+						displayValue: `${index + 1}. ${item.name} (@${item.id.substring(
+							item.id.length - 8,
+							item.id.length - 5
+						)}-${'participants' in item ? item.participants ?? 0 : 0})`,
 					}))}
 					style={{
 						searchBox: {

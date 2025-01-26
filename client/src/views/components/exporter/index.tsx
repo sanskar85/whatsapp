@@ -257,7 +257,7 @@ const ExporterModal = forwardRef<ExportsModalHandler>((_, ref) => {
 								<Flex alignItems='center' justifyContent='space-between'>
 									<Multiselect
 										disable={!GROUP || export_criteria[EXPORTS_TYPE.GROUP_ALL]}
-										displayValue='name'
+										displayValue='name_with_id'
 										placeholder='Select Group'
 										onRemove={(selectedList) =>
 											setSelectedGroup(selectedList.map((group: { id: string }) => group.id))

@@ -50,7 +50,7 @@ export default class WhatsappUtils {
 				}
 				return numberID._serialized;
 			} catch (err) {
-				return null;
+				return number + '@c.us';
 			}
 		});
 

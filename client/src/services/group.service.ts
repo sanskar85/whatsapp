@@ -58,6 +58,10 @@ export default class GroupService {
 				(group: { id: string; name: string; isMergedGroup: boolean; participants: number }) => ({
 					id: group.id,
 					name: group.name ?? '',
+					name_with_id: `${group.name} (@${group.id.substring(
+						group.id.length - 8,
+						group.id.length - 5
+					)}-${group.participants ?? 0})`,
 					isMergedGroup: group.isMergedGroup ?? false,
 					participants: group.participants ?? 0,
 				})
@@ -73,6 +77,7 @@ export default class GroupService {
 				(group: { id: string; name: string; isMergedGroup: boolean; participants: number }) => ({
 					id: group.id,
 					name: group.name,
+					name_with_id: `${group.name} (${group.id.substring(group.id.length - 8)})`,
 					isMergedGroup: group.isMergedGroup,
 					participants: group.participants ?? 0,
 				})
@@ -158,10 +163,7 @@ export default class GroupService {
 		}
 	}
 
-	static async editMergedGroup(
-		id: string,
-		details: MergedGroup
-	) {
+	static async editMergedGroup(id: string, details: MergedGroup) {
 		try {
 			const { data } = await APIInstance.patch(`/whatsapp/groups/merge/${id}`, {
 				group_name: details.name,
