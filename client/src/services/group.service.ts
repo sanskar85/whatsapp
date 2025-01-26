@@ -65,7 +65,13 @@ export default class GroupService {
 					isMergedGroup: group.isMergedGroup ?? false,
 					participants: group.participants ?? 0,
 				})
-			) as { id: string; name: string; isMergedGroup: boolean; participants: number }[];
+			) as {
+				id: string;
+				name: string;
+				isMergedGroup: boolean;
+				participants: number;
+				name_with_id: string;
+			}[];
 		} catch (err) {
 			return [];
 		}
@@ -81,7 +87,13 @@ export default class GroupService {
 					isMergedGroup: group.isMergedGroup,
 					participants: group.participants ?? 0,
 				})
-			) as { id: string; name: string; isMergedGroup: boolean; participants: number }[];
+			) as {
+				id: string;
+				name: string;
+				isMergedGroup: boolean;
+				participants: number;
+				name_with_id: string;
+			}[];
 		} catch (err) {
 			return [];
 		}

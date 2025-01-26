@@ -19,6 +19,7 @@ const initialState: SchedulerByDateState = {
 		polls: [],
 		description: '',
 		dates: [],
+		remove_duplicates: false,
 	},
 	variables: [],
 	isRecipientsLoading: false,
