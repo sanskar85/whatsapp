@@ -4,7 +4,15 @@ import { z } from 'zod';
 import APIError from '../../errors/api-errors';
 
 export type CreateSchedulerValidationResult = {
-	recipient_from: 'NUMBERS' | 'CSV' | 'GROUP_INDIVIDUAL' | 'GROUP' | 'LABEL';
+	recipient_from:
+		| 'CSV'
+		| 'NUMBERS'
+		| 'SAVED'
+		| 'UNSAVED'
+		| 'GROUP'
+		| 'GROUP_INDIVIDUAL'
+		| 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'
+		| 'LABEL';
 	recipient_data: string | string[];
 
 	message: string;
@@ -24,11 +32,21 @@ export type CreateSchedulerValidationResult = {
 	daily_count: number;
 	start_time: string;
 	end_time: string;
+	remove_duplicates: boolean;
 };
 
 export async function CreateSchedulerValidator(req: Request, res: Response, next: NextFunction) {
 	const reqValidator = z.object({
-		recipient_from: z.enum(['NUMBERS', 'CSV', 'GROUP_INDIVIDUAL', 'GROUP', 'LABEL']),
+		recipient_from: z.enum([
+			'NUMBERS',
+			'CSV',
+			'SAVED',
+			'UNSAVED',
+			'GROUP',
+			'GROUP_INDIVIDUAL',
+			'GROUP_INDIVIDUAL_WITHOUT_ADMINS',
+			'LABEL',
+		]),
 		recipient_data: z.string().or(z.array(z.string())).default(''),
 		random_string: z.boolean().default(false),
 		message: z.string().trim().default(''),
@@ -58,6 +76,7 @@ export async function CreateSchedulerValidator(req: Request, res: Response, next
 			})
 			.array()
 			.default([]),
+		remove_duplicates: z.boolean().default(false),
 	});
 
 	const reqValidatorResult = reqValidator.safeParse(req.body);

@@ -103,7 +103,15 @@ function RecipientFromSelector({ fetchRecipients }: { fetchRecipients: (text: st
 				onChange={(e) => {
 					dispatch(
 						setRecipientsFrom(
-							e.target.value as 'NUMBERS' | 'CSV' | 'GROUP' | 'LABEL' | 'GROUP_INDIVIDUAL'
+							e.target.value as
+								| 'NUMBERS'
+								| 'CSV'
+								| 'GROUP'
+								| 'SAVED'
+								| 'UNSAVED'
+								| 'LABEL'
+								| 'GROUP_INDIVIDUAL'
+								| 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'
 						)
 					);
 					fetchRecipients(e.target.value);
@@ -123,6 +131,18 @@ function RecipientFromSelector({ fetchRecipients }: { fetchRecipients: (text: st
 				</option>
 				<option
 					className="'text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353] "
+					value='SAVED'
+				>
+					Saved Contacts
+				</option>
+				<option
+					className="'text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353] "
+					value='UNSAVED'
+				>
+					Unsaved Contacts
+				</option>
+				<option
+					className="'text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353] "
 					value='GROUP'
 				>
 					Groups
@@ -132,6 +152,12 @@ function RecipientFromSelector({ fetchRecipients }: { fetchRecipients: (text: st
 					value='GROUP_INDIVIDUAL'
 				>
 					Group Individuals
+				</option>
+				<option
+					className="'text-black dark:text-white  !bg-[#ECECEC] dark:!bg-[#535353] "
+					value='GROUP_INDIVIDUAL_WITHOUT_ADMINS'
+				>
+					Group Individuals Without Admins
 				</option>
 				{userType === 'BUSINESS' ? (
 					<option
@@ -164,12 +190,16 @@ function RecipientToSelector() {
 	const dispatch = useDispatch();
 
 	const setSelectedRecipients = (ids: string[]) => {
-		if (details.type === 'GROUP' || details.type === 'GROUP_INDIVIDUAL') {
+		if (['GROUP', 'GROUP_INDIVIDUAL', 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'].includes(details.type)) {
 			dispatch(setGroupRecipients(ids));
 		} else if (details.type === 'LABEL') {
 			dispatch(setLabelRecipients(ids));
 		}
 	};
+
+	if (['SAVED', 'UNSAVED'].includes(details.type)) {
+		return null;
+	}
 
 	return (
 		<FormControl
@@ -227,9 +257,7 @@ function RecipientToSelector() {
 					disable={isRecipientsLoading}
 					displayValue='displayValue'
 					placeholder={
-						details.type === 'GROUP'
-							? 'Select Groups'
-							: details.type === 'GROUP_INDIVIDUAL'
+						['GROUP', 'GROUP_INDIVIDUAL', 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'].includes(details.type)
 							? 'Select Groups'
 							: details.type === 'LABEL'
 							? 'Select Labels'

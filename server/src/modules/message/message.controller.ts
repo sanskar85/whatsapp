@@ -28,6 +28,7 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 		shared_contact_cards,
 		polls,
 		numbers: requestedNumberList,
+		remove_duplicates,
 	} = req_data;
 
 	let messages: string[] = [];
@@ -112,6 +113,21 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 		} catch (err) {
 			return taskService.markFailed(task_id);
 		}
+	} else if (type === 'GROUP_INDIVIDUAL_WITHOUT_ADMINS') {
+		try {
+			const _group_ids = await groupMergeService.extractWhatsappGroupIds(group_ids);
+			numbers = (
+				await Promise.all(
+					_group_ids.map((id) =>
+						whatsappUtils.getParticipantsChatByGroup(id, {
+							exclude_admins: true,
+						})
+					)
+				)
+			).flat();
+		} catch (err) {
+			return taskService.markFailed(task_id);
+		}
 	} else if (type === 'GROUP') {
 		try {
 			const _group_ids = await groupMergeService.extractWhatsappGroupIds(group_ids);
@@ -127,9 +143,13 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 		} catch (err) {
 			return taskService.markFailed(task_id);
 		}
+	} else if (type === 'SAVED') {
+		numbers = (await whatsappUtils.getContacts()).saved.map((contact) => contact.number);
+	} else if (type === 'UNSAVED') {
+		numbers = (await whatsappUtils.getContacts()).non_saved.map((contact) => contact.number);
 	}
 
-	const sendMessageList = numbers.map(async (number, index) => {
+	let sendMessageList = numbers.map((number, index) => {
 		const _message = type === 'CSV' ? messages[index] : message ?? '';
 		const attachments = type === 'CSV' ? _attachments![index] : uploaded_attachments;
 		return {
@@ -141,11 +161,17 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 		};
 	});
 
+	if (remove_duplicates) {
+		sendMessageList = sendMessageList.filter((item, index, self) => {
+			return self.findIndex((t) => t.number === item.number) === index;
+		});
+	}
+
 	try {
 		if (campaign_exists) {
 			return taskService.markFailed(task_id);
 		}
-		const campaign = await campaignService.scheduleCampaign(await Promise.all(sendMessageList), {
+		const campaign = await campaignService.scheduleCampaign(sendMessageList, {
 			...req_data,
 			description: req_data.description,
 			startsFrom: req_data.startDate,

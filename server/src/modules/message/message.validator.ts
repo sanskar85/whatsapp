@@ -4,7 +4,15 @@ import { z } from 'zod';
 import APIError from '../../errors/api-errors';
 
 export type ScheduleMessageValidationResult = {
-	type: 'CSV' | 'GROUP' | 'NUMBERS' | 'GROUP_INDIVIDUAL' | 'LABEL';
+	type:
+		| 'CSV'
+		| 'NUMBERS'
+		| 'SAVED'
+		| 'UNSAVED'
+		| 'GROUP'
+		| 'GROUP_INDIVIDUAL'
+		| 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'
+		| 'LABEL';
 	message: string;
 	numbers: string[];
 	csv_file: Types.ObjectId;
@@ -29,12 +37,22 @@ export type ScheduleMessageValidationResult = {
 	batch_delay: number;
 	batch_size: number;
 	random_string: boolean;
+	remove_duplicates: boolean;
 };
 
 export async function ScheduleMessageValidator(req: Request, res: Response, next: NextFunction) {
 	const reqValidator = z
 		.object({
-			type: z.enum(['NUMBERS', 'CSV', 'GROUP_INDIVIDUAL', 'GROUP', 'LABEL']),
+			type: z.enum([
+				'NUMBERS',
+				'CSV',
+				'GROUP_INDIVIDUAL',
+				'GROUP',
+				'SAVED',
+				'UNSAVED',
+				'LABEL',
+				'GROUP_INDIVIDUAL_WITHOUT_ADMINS',
+			]),
 			numbers: z.string().array().default([]),
 			csv_file: z
 				.string()
@@ -75,6 +93,7 @@ export async function ScheduleMessageValidator(req: Request, res: Response, next
 			max_delay: z.number().positive(),
 			batch_delay: z.number().positive().default(1),
 			batch_size: z.number().positive().default(1),
+			remove_duplicates: z.boolean().default(false),
 		})
 		.refine((obj) => {
 			if (obj.type === 'NUMBERS' && obj.numbers.length === 0) {

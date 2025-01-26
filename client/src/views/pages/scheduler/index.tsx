@@ -159,7 +159,7 @@ export default function Scheduler() {
 
 	const fetchRecipients = useCallback(
 		function (type: string) {
-			if (type === 'GROUP' || type === 'GROUP_INDIVIDUAL') {
+			if (['GROUP', 'GROUP_INDIVIDUAL', 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'].includes(type)) {
 				dispatch(setRecipients(groups));
 			} else if (type === 'LABEL') {
 				dispatch(setRecipients(labels));

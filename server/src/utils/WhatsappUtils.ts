@@ -93,13 +93,26 @@ export default class WhatsappUtils {
 		).filter((chat) => chat) as string[];
 	}
 
-	async getParticipantsChatByGroup(group_id: string) {
+	async getParticipantsChatByGroup(
+		group_id: string,
+		{
+			exclude_admins = false,
+		}: {
+			exclude_admins?: boolean;
+		} = {
+			exclude_admins: false,
+		}
+	) {
 		const chat = await this.getChat(group_id);
 		if (!chat || !chat.isGroup) {
 			throw new InternalError(INTERNAL_ERRORS.WHATSAPP_ERROR.INVALID_GROUP_ID);
 		}
 
-		return (chat as GroupChat).participants.map((participant) => participant.id._serialized);
+		return (chat as GroupChat).participants
+			.filter(
+				(participant) => !exclude_admins || !(participant.isAdmin || participant.isSuperAdmin)
+			)
+			.map((participant) => participant.id._serialized);
 	}
 
 	async getChatIdsByLabel(label_id: string) {

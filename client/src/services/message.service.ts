@@ -20,7 +20,15 @@ type Scheduler = {
 
 export default class MessageService {
 	static async scheduleCampaign(data: {
-		type: 'NUMBERS' | 'CSV' | 'GROUP' | 'LABEL' | 'GROUP_INDIVIDUAL';
+		type:
+			| 'NUMBERS'
+			| 'CSV'
+			| 'GROUP'
+			| 'SAVED'
+			| 'UNSAVED'
+			| 'LABEL'
+			| 'GROUP_INDIVIDUAL'
+			| 'GROUP_INDIVIDUAL_WITHOUT_ADMINS';
 		numbers?: string[];
 		csv_file?: string;
 		group_ids?: string[];

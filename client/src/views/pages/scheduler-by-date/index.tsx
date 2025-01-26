@@ -78,7 +78,7 @@ export default function SchedulerByDate() {
 
 	const fetchRecipients = useCallback(
 		function (type: string) {
-			if (type === 'GROUP' || type === 'GROUP_INDIVIDUAL') {
+			if (['GROUP', 'GROUP_INDIVIDUAL', 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'].includes(type)) {
 				dispatch(setRecipients(groups));
 			} else if (type === 'LABEL') {
 				dispatch(setRecipients(labels));
@@ -374,7 +374,8 @@ export default function SchedulerByDate() {
 					</Text>
 					<Text textAlign={'center'} color={'red.400'} marginTop={'0.25rem'}>
 						All the changes made will take some time, please refer to
-						<Box as='span'
+						<Box
+							as='span'
 							onClick={() => {
 								navigate(NAVIGATION.TASKS);
 							}}

@@ -118,6 +118,21 @@ async function createScheduler(req: Request, res: Response, next: NextFunction) 
 		} catch (err) {
 			return taskService.markFailed(task_id);
 		}
+	} else if (type === 'GROUP_INDIVIDUAL_WITHOUT_ADMINS') {
+		try {
+			const _group_ids = await groupMergeService.extractWhatsappGroupIds(recipient_data);
+			numbers = (
+				await Promise.all(
+					_group_ids.map((id) =>
+						whatsappUtils.getParticipantsChatByGroup(id, {
+							exclude_admins: true,
+						})
+					)
+				)
+			).flat();
+		} catch (err) {
+			return taskService.markFailed(task_id);
+		}
 	} else if (type === 'GROUP') {
 		try {
 			const _group_ids = await groupMergeService.extractWhatsappGroupIds(recipient_data);
@@ -133,6 +148,16 @@ async function createScheduler(req: Request, res: Response, next: NextFunction) 
 		} catch (err) {
 			return taskService.markFailed(task_id);
 		}
+	} else if (type === 'SAVED') {
+		numbers = (await whatsappUtils.getContacts()).saved.map((contact) => contact.number);
+	} else if (type === 'UNSAVED') {
+		numbers = (await whatsappUtils.getContacts()).non_saved.map((contact) => contact.number);
+	}
+
+	if (data.remove_duplicates) {
+		numbers = numbers.filter((item, index, self) => {
+			return self.findIndex((t) => t === item) === index;
+		});
 	}
 
 	try {
@@ -215,6 +240,21 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 		} catch (err) {
 			return taskService.markFailed(task_id);
 		}
+	} else if (type === 'GROUP_INDIVIDUAL_WITHOUT_ADMINS') {
+		try {
+			const _group_ids = await groupMergeService.extractWhatsappGroupIds(recipient_data);
+			numbers = (
+				await Promise.all(
+					_group_ids.map((id) =>
+						whatsappUtils.getParticipantsChatByGroup(id, {
+							exclude_admins: true,
+						})
+					)
+				)
+			).flat();
+		} catch (err) {
+			return taskService.markFailed(task_id);
+		}
 	} else if (type === 'GROUP') {
 		try {
 			const _group_ids = await groupMergeService.extractWhatsappGroupIds(recipient_data);
@@ -230,6 +270,16 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 		} catch (err) {
 			return taskService.markFailed(task_id);
 		}
+	} else if (type === 'SAVED') {
+		numbers = (await whatsappUtils.getContacts()).saved.map((contact) => contact.number);
+	} else if (type === 'UNSAVED') {
+		numbers = (await whatsappUtils.getContacts()).non_saved.map((contact) => contact.number);
+	}
+
+	if (data.remove_duplicates) {
+		numbers = numbers.filter((item, index, self) => {
+			return self.findIndex((t) => t === item) === index;
+		});
 	}
 
 	try {

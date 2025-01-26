@@ -55,7 +55,15 @@ export type ScheduledCampaign = {
 
 export type SchedulerDetails = {
 	message_scheduler_id: string;
-	type: 'NUMBERS' | 'CSV' | 'GROUP' | 'LABEL' | 'GROUP_INDIVIDUAL';
+	type:
+		| 'NUMBERS'
+		| 'CSV'
+		| 'GROUP'
+		| 'SAVED'
+		| 'UNSAVED'
+		| 'LABEL'
+		| 'GROUP_INDIVIDUAL'
+		| 'GROUP_INDIVIDUAL_WITHOUT_ADMINS';
 	numbers?: string[];
 	csv_file: string;
 	group_ids: string[];

@@ -26,7 +26,15 @@ export type SchedulerByDateState = {
 
 export type SchedulerByDateDetails = {
 	id: string;
-	recipient_from: 'NUMBERS' | 'CSV' | 'GROUP' | 'LABEL' | 'GROUP_INDIVIDUAL';
+	recipient_from:
+		| 'NUMBERS'
+		| 'CSV'
+		| 'GROUP'
+		| 'SAVED'
+		| 'UNSAVED'
+		| 'LABEL'
+		| 'GROUP_INDIVIDUAL'
+		| 'GROUP_INDIVIDUAL_WITHOUT_ADMINS';
 	recipient_data: string[] | string;
 	message: string;
 	random_string: boolean;
