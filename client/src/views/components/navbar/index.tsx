@@ -13,15 +13,19 @@ import {
 	InputLeftElement,
 	Text,
 } from '@chakra-ui/react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setNavbarSearchText, useNavbar } from '../../../hooks/useNavbar';
 import { useTheme } from '../../../hooks/useTheme';
+import { StoreNames, StoreState } from '../../../store';
 
 export default function Navbar() {
 	const theme = useTheme();
 	const navigate = useNavigate();
 
 	const { locations } = useNavbar();
+
+	const { phone_number } = useSelector((state: StoreState) => state[StoreNames.USER]);
 
 	return (
 		<Flex
@@ -77,6 +81,19 @@ export default function Navbar() {
 				</Box>
 			</Flex>
 			<Flex alignItems={'center'}>
+			<Box
+				marginTop={'0.25rem'}
+				className='bg-[#C6E3FF] dark:bg-[#234768] group'
+				paddingX={'1rem'}
+				paddingY={'0.5rem'}
+				width={'max-content'}
+				rounded={'md'}
+				marginRight={'1rem'}
+			>
+				<Text className='text-[#158FFF] dark:text-[#158FFF] blur group-hover:blur-0'>
+					{phone_number ? `+${phone_number}` : ''}
+				</Text>
+			</Box>
 				{locations.length > 0 ? locations[locations.length - 1].actions : null}
 			</Flex>
 		</Flex>
