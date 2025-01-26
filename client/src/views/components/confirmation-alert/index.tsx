@@ -13,16 +13,30 @@ import { useTheme } from '../../../hooks/useTheme';
 
 export type ConfirmationAlertHandle = {
 	close: () => void;
-	open: (details: { id?: string; disclaimer?: string; type?: string }) => void;
+	open: (details?: { id?: string; disclaimer?: string; type?: string }) => void;
 };
 
 type Props = {
 	onConfirm: (id: string, type: string) => void;
 	disclaimer: string;
+	confirmText?: string;
+	secondaryText?: string;
+	secondaryAction?: () => void;
+	cancelButton?: boolean;
 };
 
 const ConfirmationAlert = forwardRef<ConfirmationAlertHandle, Props>(
-	({ onConfirm, disclaimer }: Props, ref) => {
+	(
+		{
+			onConfirm,
+			disclaimer,
+			confirmText,
+			secondaryText,
+			secondaryAction,
+			cancelButton = true,
+		}: Props,
+		ref
+	) => {
 		const theme = useTheme();
 		const [isOpen, setOpen] = useState(false);
 		const [id, setId] = useState('');
@@ -36,6 +50,13 @@ const ConfirmationAlert = forwardRef<ConfirmationAlertHandle, Props>(
 		};
 		const handleConfirm = () => {
 			onConfirm(id, type);
+			onClose();
+		};
+
+		const handleSecondaryAction = () => {
+			if (secondaryAction) {
+				secondaryAction();
+			}
 			onClose();
 		};
 
@@ -66,12 +87,19 @@ const ConfirmationAlert = forwardRef<ConfirmationAlertHandle, Props>(
 							<Text>{_disclaimer}</Text>
 						</AlertDialogBody>
 
-						<AlertDialogFooter>
-							<Button ref={cancelRef} onClick={onClose}>
-								Cancel
-							</Button>
-							<Button colorScheme='blue' onClick={handleConfirm} ml={3}>
-								Continue
+						<AlertDialogFooter className='flex gap-2'>
+							{cancelButton && (
+								<Button ref={cancelRef} onClick={onClose} ml={'auto'}>
+									Cancel
+								</Button>
+							)}
+							{secondaryText && secondaryAction && (
+								<Button colorScheme='yellow' onClick={handleSecondaryAction}>
+									{secondaryText}
+								</Button>
+							)}
+							<Button colorScheme='blue' onClick={handleConfirm}>
+								{confirmText ? confirmText : 'Continue'}
 							</Button>
 						</AlertDialogFooter>
 					</AlertDialogContent>

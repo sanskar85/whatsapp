@@ -1,5 +1,4 @@
 import { Types } from 'mongoose';
-import Logger from 'n23-logger';
 import { CAMPAIGN_STATUS, MESSAGE_SCHEDULER_TYPE, MESSAGE_STATUS } from '../../config/const';
 import { CampaignDB, MessageDB } from '../../repository/messenger';
 import TimeGenerator from '../../structures/TimeGenerator';

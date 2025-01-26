@@ -46,6 +46,7 @@ export default class MessageService {
 		batch_delay?: number;
 		batch_size?: number;
 		description?: string;
+		remove_duplicates?: boolean;
 	}) {
 		const { csv_file, ...details } = data;
 		try {

@@ -51,4 +51,5 @@ export type SchedulerByDateDetails = {
 		isMultiSelect: boolean;
 	}[];
 	description: string;
+	remove_duplicates: boolean;
 };

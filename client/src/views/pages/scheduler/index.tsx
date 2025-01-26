@@ -20,7 +20,7 @@ import {
 	VStack,
 	useToast,
 } from '@chakra-ui/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MdCampaign } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { NAVIGATION } from '../../../config/const';
@@ -60,6 +60,7 @@ import {
 	setVariables,
 } from '../../../store/reducers/SchedulerReducer';
 import AddOns from '../../components/add-ons';
+import ConfirmationAlert, { ConfirmationAlertHandle } from '../../components/confirmation-alert';
 import SubscriptionAlert, {
 	AddDevicePopup,
 	SubscriptionPopup,
@@ -90,6 +91,7 @@ export default function Scheduler() {
 	const toast = useToast();
 	const dispatch = useDispatch();
 	const theme = useTheme();
+	const confirmRef = useRef<ConfirmationAlertHandle>(null);
 
 	const [uiDetails, setUIDetails] = useState<{
 		uploadingCSV: boolean;
@@ -243,7 +245,7 @@ export default function Scheduler() {
 		message: '',
 	});
 
-	const scheduleMessage = () => {
+	const scheduleMessage = (remove_duplicates: boolean) => {
 		if (!validate()) {
 			return;
 		}
@@ -257,6 +259,7 @@ export default function Scheduler() {
 			message: isAlertMessage
 				? readMoreDetails.title + '\n' + '\u200B'.repeat(4000) + readMoreDetails.message
 				: details.message,
+			remove_duplicates,
 		})
 			.then((success) => {
 				if (!success) {
@@ -554,7 +557,10 @@ export default function Scheduler() {
 									variant='solid'
 									width='full'
 									mt={8}
-									onClick={scheduleMessage}
+									onClick={() => {
+										if (!validate()) return;
+										confirmRef.current?.open();
+									}}
 									isLoading={uiDetails.schedulingMessages}
 								>
 									Schedule
@@ -723,6 +729,15 @@ export default function Scheduler() {
 					</TabPanel>
 				</TabPanels>
 			</Tabs>
+			<ConfirmationAlert
+				cancelButton={false}
+				onConfirm={() => scheduleMessage(false)}
+				confirmText=' Yes'
+				secondaryAction={() => scheduleMessage(true)}
+				secondaryText=' No'
+				disclaimer='There might be some duplicate numbers in the campaign you are scheduling. Proceed with Possible Duplicates?'
+				ref={confirmRef}
+			/>
 		</Flex>
 	);
 }

@@ -12,7 +12,7 @@ import {
 	Text,
 	useToast,
 } from '@chakra-ui/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { BiTrash } from 'react-icons/bi';
 import { MdCampaign } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
@@ -43,6 +43,7 @@ import {
 	setStartTime,
 } from '../../../store/reducers/SchedulerByDateReducer';
 import AddOns from '../../components/add-ons';
+import ConfirmationAlert, { ConfirmationAlertHandle } from '../../components/confirmation-alert';
 import SubscriptionAlert, {
 	AddDevicePopup,
 	SubscriptionPopup,
@@ -55,6 +56,7 @@ export default function SchedulerByDate() {
 	const dispatch = useDispatch();
 	const theme = useTheme();
 	const navigate = useNavigate();
+	const confirmRef = useRef<ConfirmationAlertHandle>(null);
 
 	const {
 		details,
@@ -184,13 +186,14 @@ export default function SchedulerByDate() {
 		message: '',
 	});
 
-	const scheduleMessage = () => {
+	const scheduleMessage = (remove_duplicates: boolean) => {
 		if (!validate()) {
 			return;
 		}
 		const data = {
 			...details,
 			daily_count: Number(details.daily_count),
+			remove_duplicates,
 		};
 
 		if (details.id) {
@@ -353,7 +356,12 @@ export default function SchedulerByDate() {
 								variant='solid'
 								width='full'
 								mt={8}
-								onClick={scheduleMessage}
+								onClick={() => {
+									if (!validate()) {
+										return;
+									}
+									confirmRef.current?.open();
+								}}
 							>
 								Edit
 							</Button>
@@ -364,7 +372,12 @@ export default function SchedulerByDate() {
 							variant='solid'
 							width='full'
 							mt={8}
-							onClick={scheduleMessage}
+							onClick={() => {
+								if (!validate()) {
+									return;
+								}
+								confirmRef.current?.open();
+							}}
 						>
 							Schedule
 						</Button>
@@ -390,6 +403,15 @@ export default function SchedulerByDate() {
 				<SchedulerList />
 			</Flex>
 			<SubscriptionAlert />
+			<ConfirmationAlert
+				cancelButton={false}
+				onConfirm={() => scheduleMessage(false)}
+				confirmText=' Yes'
+				secondaryAction={() => scheduleMessage(true)}
+				secondaryText=' No'
+				disclaimer='There might be some duplicate numbers in the campaign you are scheduling. Proceed with Possible Duplicates?'
+				ref={confirmRef}
+			/>
 		</Flex>
 	);
 }
