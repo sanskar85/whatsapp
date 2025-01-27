@@ -131,4 +131,44 @@ export default class UserPreferencesService {
 			{ $set: { messageStarRules: this.userPref.messageStarRules } }
 		);
 	}
+
+	async addMediaModerationRule(
+		rules: {
+			id: string;
+			name: string;
+			restricted_medias: string[];
+		}[]
+	) {
+		for (const rule of rules) {
+			this.userPref.mediaModerationRules[rule.id] = rule;
+		}
+		await UserPreferencesDB.updateOne(
+			{ user: this.userPref.user },
+			{ $set: { mediaModerationRules: this.userPref.mediaModerationRules } }
+		);
+	}
+
+	async updateMediaModerationRule(rule: { id: string; restricted_medias: string[] }) {
+		this.userPref.mediaModerationRules[rule.id] = {
+			id: rule.id,
+			name: this.userPref.mediaModerationRules[rule.id].name,
+			restricted_medias: rule.restricted_medias,
+		};
+		await UserPreferencesDB.updateOne(
+			{ user: this.userPref.user },
+			{ $set: { mediaModerationRules: this.userPref.mediaModerationRules } }
+		);
+	}
+
+	async deleteMediaModerationRule(id: string) {
+		delete this.userPref.mediaModerationRules[id];
+		await UserPreferencesDB.updateOne(
+			{ user: this.userPref.user },
+			{ $set: { mediaModerationRules: this.userPref.mediaModerationRules } }
+		);
+	}
+
+	getMediaModerationRules() {
+		return this.userPref.mediaModerationRules;
+	}
 }

@@ -2,7 +2,9 @@ import express from 'express';
 import { VerifyClientID, VerifyUser } from '../../middleware';
 import UserController from './preferences.controller';
 import {
+	CreateMediaModerationRuleValidator,
 	CreateMessageLogRuleValidator,
+	UpdateMediaModerationRuleValidator,
 	UpdateMessageLogRuleValidator,
 	UpdateMessageStarRulesValidator,
 } from './preferences.validator';
@@ -21,6 +23,13 @@ router
 	.get(UserController.getMessageLogRules)
 	.post(CreateMessageLogRuleValidator, VerifyClientID, UserController.addMessageLogRule)
 	.patch(UpdateMessageLogRuleValidator, UserController.updateMessageLogRule);
+
+router
+	.route('/media-moderation/rules')
+	.all(VerifyUser)
+	.get(UserController.getMediaModerationRules)
+	.post(CreateMediaModerationRuleValidator, UserController.addMediaModerationRule)
+	.patch(UpdateMediaModerationRuleValidator, UserController.updateMediaModerationRule);
 
 router
 	.route('/message-star-rules')

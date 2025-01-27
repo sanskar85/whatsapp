@@ -20,6 +20,16 @@ export type UpdateMessageLogRule = {
 	exclude: string[];
 };
 
+export type CreateMediaModerationRule = {
+	group_id: string[];
+	restricted_medias: string[];
+};
+
+export type UpdateMediaModerationRule = {
+	id: string;
+	restricted_medias: string[];
+};
+
 export type UpdateMessageStar = {
 	individual_outgoing_messages: boolean;
 	individual_incoming_messages: boolean;
@@ -108,6 +118,67 @@ export async function UpdateMessageStarRulesValidator(
 		group_incoming_messages: z.boolean().default(false),
 	});
 
+	const reqValidatorResult = reqValidator.safeParse(req.body);
+
+	if (reqValidatorResult.success) {
+		req.locals.data = reqValidatorResult.data;
+		return next();
+	}
+	const message = reqValidatorResult.error.issues
+		.map((err) => err.path)
+		.flat()
+		.filter((item, pos, arr) => arr.indexOf(item) == pos)
+		.join(', ');
+
+	return next(
+		new APIError({
+			STATUS: 400,
+			TITLE: 'INVALID_FIELDS',
+			MESSAGE: message,
+		})
+	);
+}
+
+export async function CreateMediaModerationRuleValidator(
+	req: Request,
+	res: Response,
+	next: NextFunction
+) {
+	const reqValidator = z.object({
+		group_id: z.string().array().default([]),
+		restricted_medias: z.string().array().default([]),
+	});
+
+	const reqValidatorResult = reqValidator.safeParse(req.body);
+
+	if (reqValidatorResult.success) {
+		req.locals.data = reqValidatorResult.data;
+		return next();
+	}
+	const message = reqValidatorResult.error.issues
+		.map((err) => err.path)
+		.flat()
+		.filter((item, pos, arr) => arr.indexOf(item) == pos)
+		.join(', ');
+
+	return next(
+		new APIError({
+			STATUS: 400,
+			TITLE: 'INVALID_FIELDS',
+			MESSAGE: message,
+		})
+	);
+}
+
+export async function UpdateMediaModerationRuleValidator(
+	req: Request,
+	res: Response,
+	next: NextFunction
+) {
+	const reqValidator = z.object({
+		id: z.string(),
+		restricted_medias: z.string().array().default([]),
+	});
 	const reqValidatorResult = reqValidator.safeParse(req.body);
 
 	if (reqValidatorResult.success) {

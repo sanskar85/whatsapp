@@ -20,6 +20,14 @@ export default interface IUserPreferences extends Document {
 		};
 	};
 
+	mediaModerationRules: {
+		[key: string]: {
+			id: string;
+			name: string;
+			restricted_medias: string[];
+		};
+	};
+
 	messageStarRules: {
 		individual_outgoing_messages: boolean;
 		individual_incoming_messages: boolean;
