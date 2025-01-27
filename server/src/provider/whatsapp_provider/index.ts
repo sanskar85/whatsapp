@@ -8,6 +8,7 @@ import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import StorageDB from '../../repository/storage';
 import { CampaignService } from '../../services';
 import ApiKeyService from '../../services/keys';
+import { MediaModerationService } from '../../services/media-moderation';
 import GroupMergeService from '../../services/merged-groups';
 import { MessageLoggerService } from '../../services/message-logger';
 import SchedulerService from '../../services/scheduler';
@@ -57,6 +58,7 @@ export class WhatsappProvider {
 	private webhookService: ApiKeyService;
 	private userPrefService: UserPreferencesService | undefined;
 	private messageLoggerService: MessageLoggerService | undefined;
+	private mediaModerationService: MediaModerationService | undefined;
 
 	private status: STATUS;
 
@@ -174,6 +176,7 @@ export class WhatsappProvider {
 				);
 
 				this.messageLoggerService = new MessageLoggerService(this.number!, this.userPrefService!);
+				this.mediaModerationService = new MediaModerationService(this.userPrefService!);
 
 				this.deviceService = await DeviceService.createDevice({
 					user: this.userService,
@@ -352,6 +355,11 @@ export class WhatsappProvider {
 					chat,
 				});
 			}
+
+			this.mediaModerationService!.handleMessage({
+				message,
+				chat,
+			});
 
 			if (this.userPrefService?.getMessageStarRules().individual_incoming_messages && !isGroup) {
 				message.star();
