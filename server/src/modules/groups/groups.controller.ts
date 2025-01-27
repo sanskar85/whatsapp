@@ -683,7 +683,7 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 
 			let details = {
 				Link: link,
-				'Group ID': info.id.user,
+				'Group ID': info.id._serialized,
 				'Group Name': info.subject,
 				Description: info.desc,
 				'Created At': DateUtils.getUnixMoment(info.creation).format('YYYY-MM-DD HH:mm:ss'),
@@ -709,7 +709,7 @@ async function groupLinks(req: Request, res: Response, next: NextFunction) {
 				number: string;
 				type: string;
 			}[] = info.participants.map((participant: any) => ({
-				number: participant.id.user,
+				number: participant.id._serialized,
 				type: participant.isSuperAdmin ? 'CREATOR' : participant.isAdmin ? 'ADMIN' : 'USER',
 			}));
 
