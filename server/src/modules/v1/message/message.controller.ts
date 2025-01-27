@@ -22,7 +22,7 @@ async function sendMessage(req: Request, res: Response, next: NextFunction) {
 
 	const whatsapp = WhatsappProvider.clientByClientID(client_id)!;
 
-	const recipient = data.recipient + '@c.us';
+	const recipient = data.recipient + data.recipient_type === 'INDIVIDUAL' ? '@c.us' : '@g.us';
 
 	let contact;
 	const opts = {} as WAWebJS.MessageSendOptions;

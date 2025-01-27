@@ -43,6 +43,7 @@ export type SendMessageValidationResult = {
 				};
 		  };
 	recipient: string;
+	recipient_type: 'INDIVIDUAL' | 'GROUP';
 };
 
 export async function SendMessageValidator(req: Request, res: Response, next: NextFunction) {
@@ -90,6 +91,7 @@ export async function SendMessageValidator(req: Request, res: Response, next: Ne
 
 	const reqValidator = z.object({
 		recipient: z.string().trim().min(1, 'Please provide a valid phone number.'),
+		recipient_type: z.enum(['INDIVIDUAL', 'GROUP']).default('INDIVIDUAL'),
 		message: z.discriminatedUnion('type', [textType, mediaType, contactType, pollType]),
 	});
 
