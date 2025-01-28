@@ -6,7 +6,12 @@ import { WhatsappProvider } from '../../provider/whatsapp_provider';
 import StorageDB from '../../repository/storage';
 import { UserService } from '../../services';
 import { DeviceService } from '../../services/user';
-import { Respond, generateClientID, generateRandomText, idValidator } from '../../utils/ExpressUtils';
+import {
+	Respond,
+	generateClientID,
+	generateRandomText,
+	idValidator,
+} from '../../utils/ExpressUtils';
 import { sendLoginCredentialsEmail, sendPasswordResetEmail } from '../../utils/email';
 import { LoginValidationResult } from './auth.validator';
 
@@ -160,6 +165,37 @@ async function register(req: Request, res: Response, next: NextFunction) {
 	}
 }
 
+async function serviceAccount(req: Request, res: Response, next: NextFunction) {
+	const { id } = req.locals;
+	try {
+		const userService = await UserService.getService(id);
+
+		res.cookie(JWT_COOKIE, userService.getToken(), {
+			sameSite: 'strict',
+			expires: new Date(Date.now() + JWT_EXPIRE_TIME),
+			httpOnly: IS_PRODUCTION,
+			secure: IS_PRODUCTION,
+		});
+		const t = userService.getRefreshToken();
+
+		saveRefreshTokens(t, userService.getUserId().toString());
+		res.cookie(JWT_REFRESH_COOKIE, t, {
+			sameSite: 'strict',
+			expires: new Date(Date.now() + REFRESH_EXPIRE_TIME),
+			httpOnly: IS_PRODUCTION,
+			secure: IS_PRODUCTION,
+		});
+
+		return Respond({
+			res,
+			status: 200,
+			data: {},
+		});
+	} catch (err) {
+		return next(new APIError(API_ERRORS.USER_ERRORS.USER_NOT_FOUND_ERROR));
+	}
+}
+
 async function updatePassword(req: Request, res: Response) {
 	const { password } = req.body;
 	if (!password || password.length < 8) {
@@ -257,6 +293,7 @@ const AuthController = {
 	initiateWhatsapp,
 	logoutWhatsapp: deviceLogout,
 	resetPassword,
+	serviceAccount,
 };
 
 export default AuthController;

@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { Types } from 'mongoose';
-import { MessageMedia } from 'whatsapp-web.js';
 import InternalError, { COMMON_ERRORS } from '../../errors/internal-errors';
 import APIKeyDB from '../../repository/keys/APIKey';
 import WebhookDB from '../../repository/keys/Webhook';
@@ -128,24 +127,39 @@ export default class ApiKeyService {
 			chat_name: details.chat_name,
 		};
 
-		if (details.message.hasMedia && details.message instanceof MessageMedia) {
-			const msg = details.message as MessageMedia;
-			webhookData.message = {
-				type: 'media',
-				media: {
-					caption: details.message.body,
-					mimetype: msg.mimetype,
-					filename: msg.filename,
-					size: msg.filesize,
-					base64: msg.data,
-				},
-			};
+		if (details.message.hasMedia) {
+			try {
+				const media = await details.message.downloadMedia();
+				webhookData.message = {
+					type: 'media',
+					media: {
+						caption: details.message.body,
+						mimetype: media.mimetype,
+						filename: media.filename || 'Unknown',
+						size: media.filesize || 0,
+						base64: media.data,
+					},
+				};
+			} catch (error) {
+				webhookData.message = {
+					type: 'media',
+					media: {
+						caption: details.message.body,
+						mimetype: 'Unknown',
+						filename: 'Unknown',
+						size: 0,
+						base64: 'Unknown',
+					},
+				};
+			}
 		} else {
 			webhookData.message = {
 				type: 'text',
 				text: details.message.body,
 			};
 		}
+
+		console.log(webhookData);
 
 		webhooks.forEach(async (webhook) => {
 			const webhook_url = webhook.url;

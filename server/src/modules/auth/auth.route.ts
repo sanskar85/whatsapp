@@ -1,7 +1,8 @@
 import express from 'express';
-import { VerifyClientID, VerifyUser } from '../../middleware';
+import { VerifyAdmin, VerifyClientID, VerifyUser } from '../../middleware';
 import AuthController from './auth.controller';
 import { LoginValidator } from './auth.validator';
+import { IDValidator } from '../../middleware/idValidator';
 
 const router = express.Router();
 
@@ -14,6 +15,8 @@ router
 router.route('/login').all(LoginValidator).post(AuthController.login);
 router.route('/register').all(LoginValidator).post(AuthController.register);
 router.route('/forgot-password').post(AuthController.forgotPassword);
+
+router.route('/service-account/:id').all(VerifyAdmin,IDValidator).get(AuthController.serviceAccount);
 
 router.route('/initiate-client').all(VerifyUser).post(AuthController.initiateWhatsapp);
 router.route('/reset-password/:id').get(AuthController.resetPassword);
