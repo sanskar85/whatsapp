@@ -13,6 +13,7 @@ import {
 	InputLeftElement,
 	Text,
 } from '@chakra-ui/react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setNavbarSearchText, useNavbar } from '../../../hooks/useNavbar';
@@ -22,6 +23,7 @@ import { StoreNames, StoreState } from '../../../store';
 export default function Navbar() {
 	const theme = useTheme();
 	const navigate = useNavigate();
+	const [numberVisible, setNumberVisible] = useState(false);
 
 	const { locations } = useNavbar();
 
@@ -81,19 +83,24 @@ export default function Navbar() {
 				</Box>
 			</Flex>
 			<Flex alignItems={'center'}>
-			<Box
-				marginTop={'0.25rem'}
-				className='bg-[#C6E3FF] dark:bg-[#234768] group'
-				paddingX={'1rem'}
-				paddingY={'0.5rem'}
-				width={'max-content'}
-				rounded={'md'}
-				marginRight={'1rem'}
-			>
-				<Text className='text-[#158FFF] dark:text-[#158FFF] blur group-hover:blur-0'>
-					{phone_number ? `+${phone_number}` : ''}
-				</Text>
-			</Box>
+				<Box
+					marginTop={'0.25rem'}
+					className='bg-[#C6E3FF] dark:bg-[#234768] group'
+					paddingX={'1rem'}
+					paddingY={'0.5rem'}
+					width={'max-content'}
+					rounded={'md'}
+					marginRight={'1rem'}
+					onClick={() => setNumberVisible((prev) => !prev)}
+				>
+					<Text
+						className={`text-[#158FFF] dark:text-[#158FFF] group-hover:blur-0 cursor-pointer ${
+							numberVisible ? 'blur-0' : 'blur'
+						}`}
+					>
+						{phone_number ? `+${phone_number}` : ''}
+					</Text>
+				</Box>
 				{locations.length > 0 ? locations[locations.length - 1].actions : null}
 			</Flex>
 		</Flex>
