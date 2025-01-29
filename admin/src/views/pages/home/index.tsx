@@ -56,8 +56,6 @@ export default function Home() {
 				dispatch(setDeviceList(results[2]));
 			}
 
-			console.log(results[2])
-
 			setDataLoaded.on();
 		} catch (e) {
 			navigate(NAVIGATION.LOGIN);
