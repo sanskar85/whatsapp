@@ -317,7 +317,7 @@ function RecipientToSelector() {
 							className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md text-black dark:text-white '
 							onClick={openGroupInput}
 						>
-							<Text>Groups ({details.group_ids?.length ?? 0})</Text>
+							<Text>({details.group_ids?.length ?? 0}) Selected</Text>
 						</Button>
 					) : null}
 					{details.type === 'LABEL' ? (
@@ -326,7 +326,7 @@ function RecipientToSelector() {
 							className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md text-black dark:text-white '
 							onClick={openLabelInput}
 						>
-							<Text>Labels ({details.label_ids?.length ?? 0})</Text>
+							<Text>({details.label_ids?.length ?? 0}) Selected</Text>
 						</Button>
 					) : null}
 				</Flex>

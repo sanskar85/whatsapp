@@ -319,7 +319,7 @@ function RecipientToSelector() {
 							className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md text-black dark:text-white '
 							onClick={openGroupInput}
 						>
-							<Text>Groups ({details.recipient_data?.length ?? 0})</Text>
+							<Text>({details.recipient_data?.length ?? 0}) Selected</Text>
 						</Button>
 					) : null}
 					{details.recipient_from === 'LABEL' ? (
@@ -328,7 +328,7 @@ function RecipientToSelector() {
 							className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md text-black dark:text-white '
 							onClick={openLabelInput}
 						>
-							<Text>Labels ({details.recipient_data?.length ?? 0})</Text>
+							<Text>({details.recipient_data?.length ?? 0}) Selected</Text>
 						</Button>
 					) : null}
 				</Flex>
