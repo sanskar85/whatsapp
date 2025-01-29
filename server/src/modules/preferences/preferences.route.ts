@@ -25,6 +25,11 @@ router
 	.patch(UpdateMessageLogRuleValidator, UserController.updateMessageLogRule);
 
 router
+	.route('/media-moderation/rules/:id')
+	.all(VerifyUser)
+	.delete(UserController.deleteMediaModerationRule);
+
+router
 	.route('/media-moderation/rules')
 	.all(VerifyUser)
 	.get(UserController.getMediaModerationRules)
