@@ -164,6 +164,9 @@ const DevicesPage = () => {
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'5%'}>
 								sl no
 							</Th>
+							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'15%'} isNumeric>
+								Phone
+							</Th>
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'15%'}>
 								Name
 							</Th>
@@ -173,9 +176,7 @@ const DevicesPage = () => {
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'15%'}>
 								Whatsapp Public Name
 							</Th>
-							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'15%'} isNumeric>
-								Phone
-							</Th>
+
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'10%'}>
 								Type
 							</Th>
@@ -236,39 +237,39 @@ const DevicesPage = () => {
 										<Td>
 											<Select value={''} onChange={(e) => handleAction(device, e.target.value)}>
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='select'
 												>
 													Select Action
 												</option>
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='extend_expiry'
 												>
 													Extend Subscription
 												</option>
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='payment_history'
 												>
 													Payment History
 												</option>
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='payment_reminder'
 												>
 													Payment Reminder
 												</option>
 												{device.isGoogleSheetAvailable ? (
 													<option
-														className='bg-white text-black dark:bg-gray-700 dark:text-white'
+														className='text-black bg-white dark:bg-gray-700 dark:text-white'
 														value='share-google-sheet'
 													>
 														Share Google Sheet
 													</option>
 												) : null}
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='logout'
 												>
 													Logout Device
