@@ -72,6 +72,9 @@ export default class AdminService extends UserService {
 				subscription_expiry: device?.subscription_expiry
 					? DateUtils.format(device.subscription_expiry, 'DD/MM/YYYY')
 					: 'N/A',
+				is_expired: device?.subscription_expiry
+					? DateUtils.getMoment(device.subscription_expiry).isBefore(DateUtils.getMomentNow())
+					: true,
 				description: device?.business_details.description ?? '',
 				email: device?.business_details.email ?? '',
 				websites: (device?.business_details.websites ?? []).join(', '),
@@ -139,6 +142,9 @@ export default class AdminService extends UserService {
 				subscription_expiry: device?.subscription_expiry
 					? DateUtils.format(device.subscription_expiry, 'DD/MM/YYYY')
 					: 'N/A',
+				is_expired: device?.subscription_expiry
+					? DateUtils.getMoment(device.subscription_expiry).isBefore(DateUtils.getMomentNow())
+					: true,
 				description: device?.business_details.description ?? '',
 				email: device?.business_details.email ?? '',
 				websites: (device?.business_details.websites ?? []).join(', '),
