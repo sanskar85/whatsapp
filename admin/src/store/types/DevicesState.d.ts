@@ -22,4 +22,5 @@ type Device = {
 	subscription_expiry: string;
 	isOnline: boolean;
 	isGoogleSheetAvailable: boolean;
+	is_expired: boolean;
 };

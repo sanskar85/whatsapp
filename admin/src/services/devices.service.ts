@@ -45,6 +45,7 @@ export default class DeviceService {
 					isOnline: (user.isOnline as boolean) ?? false,
 					isGoogleSheetAvailable: (user.isGoogleSheetAvailable as boolean) ?? false,
 					subscription_expiry: (user.subscription_expiry as string) ?? '',
+					is_expired: (user.is_expired as boolean) ?? false,
 				}));
 			}
 		} catch (err) {

@@ -91,13 +91,9 @@ const UsersPage = () => {
 	}
 
 	if (expiry === 'Expired') {
-		filtered = filtered.filter(
-			(user) => user.subscription_expiry < new Date().toLocaleDateString() && user.subscription_expiry !== 'N/A'
-		);
+		filtered = filtered.filter((user) => user.is_expired && user.subscription_expiry !== 'N/A');
 	} else if (expiry === 'Active') {
-		filtered = filtered.filter(
-			(user) => user.subscription_expiry >= new Date().toLocaleDateString() && user.subscription_expiry !== 'N/A'
-		);
+		filtered = filtered.filter((user) => !user.is_expired && user.subscription_expiry !== 'N/A');
 	}
 
 	const handleAction = ({ id, phone, subscription_expiry, device_id }: User, action: string) => {

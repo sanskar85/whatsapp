@@ -46,6 +46,7 @@ const DevicesPage = () => {
 	const dispatch = useDispatch();
 	const toast = useToast();
 	const [activeOnly, setActiveOnly] = useState(false);
+	const [expiry, setExpiry] = useState('All');
 	const {
 		list,
 		uiDetails: { isFetching },
@@ -89,6 +90,11 @@ const DevicesPage = () => {
 		filtered = filtered.filter((device) => device.isOnline);
 	}
 
+	if (expiry === 'Expired') {
+		filtered = filtered.filter((user) => user.is_expired && user.subscription_expiry !== 'N/A');
+	} else if (expiry === 'Active') {
+		filtered = filtered.filter((user) => !user.is_expired && user.subscription_expiry !== 'N/A');
+	}
 	const handleAction = ({ id, phone, subscription_expiry, device_id }: Device, action: string) => {
 		if (action === 'extend_expiry') {
 			if (!device_id) {
@@ -182,6 +188,17 @@ const DevicesPage = () => {
 							</Th>
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'10%'}>
 								Expiry
+								<Select value={expiry} onChange={(e) => setExpiry(e.target.value)}>
+									<option value={'All'} className='text-black'>
+										All
+									</option>
+									<option value={'Expired'} className='text-black'>
+										Expired
+									</option>
+									<option value={'Active'} className='text-black'>
+										Active
+									</option>
+								</Select>
 							</Th>
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'20%'}>
 								Actions
