@@ -25,32 +25,28 @@ import {
 	useToast,
 } from '@chakra-ui/react';
 import { useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import EnhancementService from '../../../../services/enhancements.service';
+import { useSelector } from 'react-redux';
 import { StoreNames, StoreState } from '../../../../store';
-import {
-	resetNewRuleDetails,
-	setMessageLoggerSettings,
-	setNewRuleGroup,
-	setNewRuleLoggers,
-} from '../../../../store/reducers/EnhancementsReducers';
 import MimeSelector from './mime-type-selector';
 
 export default function GroupsRuleDialog({
+	onConfirm,
 	onClose,
 	isOpen,
+	selectedGroupIds,
+	isApk = false,
 }: {
+	onConfirm: (details: { group_id: string[]; loggers: string[] }) => void;
 	onClose: () => void;
 	isOpen: boolean;
+	selectedGroupIds: string[];
+	isApk?: boolean;
 }) {
 	const toast = useToast();
-	const dispatch = useDispatch();
+	const [group_id, setGroupId] = useState<string[]>([]);
+	const [loggers, setLoggers] = useState<string[]>(['application/vnd.android.package-archive']);
 
 	const { groups } = useSelector((store: StoreState) => store[StoreNames.USER]);
-	const {
-		newRuleDetails: { group_id, exclude, include, loggers },
-		logger_prefs,
-	} = useSelector((store: StoreState) => store[StoreNames.ENHANCEMENT]);
 
 	const [range, setRange] = useState<{ start: string; end: string }>({
 		start: '',
@@ -59,7 +55,7 @@ export default function GroupsRuleDialog({
 
 	const [searchText, setSearchText] = useState<string>('');
 
-	const filteredGroups = groups.filter((group) => !Object.keys(logger_prefs).includes(group.id));
+	const filteredGroups = groups.filter((group) => !selectedGroupIds.includes(group.id));
 
 	const filtered = filteredGroups.filter((group) =>
 		group.name?.toLowerCase().includes(searchText.toLowerCase())
@@ -77,9 +73,9 @@ export default function GroupsRuleDialog({
 
 	const handleSelectAll = (allSelected: boolean) => {
 		if (allSelected) {
-			dispatch(setNewRuleGroup(filteredGroups.map((g) => g.id)));
+			setGroupId(filteredGroups.map((g) => g.id));
 		} else {
-			dispatch(setNewRuleGroup([]));
+			setGroupId([]);
 		}
 	};
 
@@ -117,52 +113,20 @@ export default function GroupsRuleDialog({
 		}
 		const selected = groups.slice(Number(range.start) - 1, Number(range.end));
 		const selectedIds = selected.map((group) => group.id);
-		dispatch(setNewRuleGroup(selectedIds));
+		setGroupId(selectedIds);
 		setRange({ start: '', end: '' });
 	};
 
 	const handleSelectGroup = (id: string) => {
 		if (group_id.includes(id)) {
-			dispatch(setNewRuleGroup(group_id.filter((gid) => gid !== id)));
+			setGroupId(group_id.filter((gid) => gid !== id));
 		} else {
-			dispatch(setNewRuleGroup([...group_id, id]));
+			setGroupId([...group_id, id]);
 		}
 	};
 
 	const handleSave = () => {
-		toast.promise(
-			EnhancementService.createMessageLogRule({
-				exclude,
-				group_id,
-				include,
-				loggers,
-			}),
-			{
-				loading: {
-					title: 'Saving Rule',
-				},
-				error: {
-					title: 'Error saving rule',
-				},
-				success: (res) => {
-					if (!res) {
-						return {
-							title: 'Error saving rule',
-						};
-					}
-					EnhancementService.getEnhancements().then((res) => {
-						if (res) {
-							dispatch(setMessageLoggerSettings(res));
-						}
-					});
-					dispatch(resetNewRuleDetails());
-					onClose();
-					return {
-						title: ' Rule saved',
-					};
-				},
-			}
-		);
+		onConfirm({ group_id, loggers });
 	};
 
 	return (
@@ -172,12 +136,9 @@ export default function GroupsRuleDialog({
 				<ModalHeader>Group Rule</ModalHeader>
 				<ModalBody>
 					<Box>
-						<HStack pb={4}>
+						<HStack pb={4} display={isApk ? 'none' : 'flex'}>
 							<Box flex={1}>
-								<MimeSelector
-									selectedValue={loggers}
-									onChange={(value) => dispatch(setNewRuleLoggers(value))}
-								/>
+								<MimeSelector selectedValue={loggers} onChange={(value) => setLoggers(value)} />
 							</Box>
 						</HStack>
 						<Box>
@@ -196,7 +157,11 @@ export default function GroupsRuleDialog({
 											/>
 										</Th>
 										<Th>
-											<Flex alignItems={'center'} justifyContent={'space-between'} direction={'row'}>
+											<Flex
+												alignItems={'center'}
+												justifyContent={'space-between'}
+												direction={'row'}
+											>
 												<Box>
 													<Text>Name</Text>
 												</Box>

@@ -3,7 +3,6 @@ import {
 	Box,
 	Button,
 	Checkbox,
-	Divider,
 	Flex,
 	HStack,
 	IconButton,
@@ -26,42 +25,27 @@ import { useDispatch, useSelector } from 'react-redux';
 import EnhancementService from '../../../../services/enhancements.service';
 import { StoreNames, StoreState } from '../../../../store';
 import {
-	resetNewRuleDetails,
 	resetUpdatedValues,
-	setIndividualMediaLoggers,
-	setMediaExclude,
-	setMediaInclude,
-	setMessageLoggerSettings,
-	setSavedMedia,
-	setSavedText,
-	setTextExclude,
-	setTextInclude,
-	setUnsavedMedia,
-	setUnsavedText,
-	updateLoggerPrefs,
+	setMediaModerationRules,
 } from '../../../../store/reducers/EnhancementsReducers';
-import CheckButton from '../../../components/check-button';
 import DeleteAlert, { DeleteAlertHandle } from '../../../components/delete-alert';
-import Info from '../../../components/info';
-import NumberInputDialog from '../../../components/number-input-dialog';
-import MimeSelector from './mime-type-selector';
 import GroupsRuleDialog from './rule-dialog';
 
-type MessageLoggingDialogProps = {
+type MediaModerationDialogProps = {
 	isOpen: boolean;
 	onClose: () => void;
 };
 
-const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) => {
+const MediaModerationDialog = ({ isOpen, onClose }: MediaModerationDialogProps) => {
 	const toast = useToast();
 
 	const deleteRef = useRef<DeleteAlertHandle>(null);
 
-	const {
-		logger_prefs,
-		updated_values,
-		newRuleDetails: { exclude, include },
-	} = useSelector((state: StoreState) => state[StoreNames.ENHANCEMENT]);
+	const { mediaModerationRules, updated_values } = useSelector(
+		(state: StoreState) => state[StoreNames.ENHANCEMENT]
+	);
+
+	const { groups: userGroups } = useSelector((store: StoreState) => store[StoreNames.USER]);
 	const dispatch = useDispatch();
 
 	const [group_id, setGroupId] = useState<string[]>([]);
@@ -74,36 +58,12 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 	const [searchText, setSearchText] = useState<string>('');
 
 	const {
-		isOpen: isSavedIncludeNumberInputOpen,
-		onClose: closeSavedIncludeNumberInput,
-		onOpen: openSavedIncludeNumberInput,
-	} = useDisclosure();
-
-	const {
-		isOpen: isUnsavedIncludeNumberInputOpen,
-		onClose: closeUnsavedIncludeNumberInput,
-		onOpen: openUnsavedIncludeNumberInput,
-	} = useDisclosure();
-
-	const {
-		isOpen: isSavedExcludeNumberInputOpen,
-		onClose: closeSavedExcludeNumberInput,
-		onOpen: openSavedExcludeNumberInput,
-	} = useDisclosure();
-
-	const {
-		isOpen: isUnsavedExcludeNumberInputOpen,
-		onClose: closeUnsavedExcludeNumberInput,
-		onOpen: openUnsavedExcludeNumberInput,
-	} = useDisclosure();
-
-	const {
 		isOpen: isNewRuleOpen,
 		onClose: closeNewRuleInput,
 		onOpen: openNewRuleInput,
 	} = useDisclosure();
 
-	const groups = Object.values(logger_prefs).filter(
+	const groups = Object.values(mediaModerationRules).filter(
 		(group) => group.id !== 'individual_text' && group.id !== 'individual_media'
 	);
 
@@ -113,14 +73,10 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 
 	const updatePreferences = () => {
 		const promises = Object.keys(updated_values).map((key) => {
-			const group = logger_prefs[key];
-			return EnhancementService.updateMessageLoggerPreferences({
+			const group = mediaModerationRules[key];
+			return EnhancementService.updateMediaModerationPreference({
 				id: group.id,
-				exclude: group.exclude,
-				include: group.include,
-				loggers: group.loggers,
-				saved: group.saved,
-				unsaved: group.unsaved,
+				restricted_medias: group.restricted_medias,
 			});
 		});
 
@@ -135,9 +91,9 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 						duration: 3000,
 					};
 				}
-				EnhancementService.getEnhancements().then((res) => {
+				EnhancementService.getMediaModerationRules().then((res) => {
 					if (res) {
-						dispatch(setMessageLoggerSettings(res));
+						dispatch(setMediaModerationRules(res));
 					}
 				});
 
@@ -221,7 +177,7 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 
 	const handleDeleteRule = () => {
 		const promises = group_id.map((id) => {
-			return EnhancementService.deleteLoggerRule(id);
+			return EnhancementService.deleteMediaModerationRule(id);
 		});
 
 		toast.promise(Promise.all(promises), {
@@ -235,13 +191,13 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 						duration: 3000,
 					};
 				}
-				EnhancementService.getEnhancements().then((res) => {
+				EnhancementService.getMediaModerationRules().then((res) => {
 					if (res) {
-						dispatch(setMessageLoggerSettings(res));
+						dispatch(setMediaModerationRules(res));
 					}
 				});
 
-				closeNewRuleInput();
+				onClose();
 				setGroupId([]);
 				return {
 					title: 'Selected rules deleted',
@@ -257,35 +213,30 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 
 	const handleAddRules = ({ group_id, loggers }: { group_id: string[]; loggers: string[] }) => {
 		toast.promise(
-			EnhancementService.createMessageLogRule({
-				exclude,
-				group_id,
-				include,
-				loggers,
-			}),
+			EnhancementService.createMediaModerationPreference({ group_id, restricted_medias: loggers }),
 			{
 				loading: {
-					title: 'Saving Rule',
-				},
-				error: {
-					title: 'Error saving rule',
+					title: 'Adding new rule',
 				},
 				success: (res) => {
 					if (!res) {
 						return {
-							title: 'Error saving rule',
+							title: 'Error adding new rule',
 						};
 					}
-					EnhancementService.getEnhancements().then((res) => {
+					EnhancementService.getMediaModerationRules().then((res) => {
 						if (res) {
-							dispatch(setMessageLoggerSettings(res));
+							dispatch(setMediaModerationRules(res));
 						}
 					});
-					dispatch(resetNewRuleDetails());
-					onClose();
+
+					closeNewRuleInput();
 					return {
-						title: 'Rule saved',
+						title: 'New rule added',
 					};
+				},
+				error: {
+					title: 'Error adding new rule',
 				},
 			}
 		);
@@ -296,140 +247,9 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 			<Modal isOpen={isOpen} isCentered onClose={onClose} size={'6xl'} scrollBehavior='inside'>
 				<ModalOverlay />
 				<ModalContent minHeight={'50vh'}>
-					<ModalHeader>Message logging rules</ModalHeader>
+					<ModalHeader>APK Moderation rules</ModalHeader>
 					<ModalBody>
 						<Box>
-							<Box>
-								<Text fontWeight={'medium'} fontSize={'lg'}>
-									Individual Text Message
-									<Info>
-										Priority: Exclude {'>'} Include {'>'} Saved {'>'} Unsaved
-									</Info>
-								</Text>
-							</Box>
-							<Flex width={'full'} alignItems={'center'} justifyContent={'flex-end'} gap={4}>
-								<Box mr={'auto'}>
-									<Text fontWeight={'medium'} color={'gray'}>
-										Rules:-
-									</Text>
-								</Box>
-								<Flex className='gap-2'>
-									<CheckButton
-										gap={2}
-										label='Saved'
-										name='Saved'
-										onChange={({ value }) => dispatch(setSavedText(value))}
-										value={logger_prefs.individual_text.saved}
-									/>
-								</Flex>
-								<Flex className='gap-2'>
-									<CheckButton
-										gap={2}
-										label='Unsaved'
-										name='Unsaved'
-										onChange={({ value }) => dispatch(setUnsavedText(value))}
-										value={logger_prefs.individual_text.unsaved}
-									/>
-								</Flex>
-								<Flex gap={2}>
-									<Button
-										fontWeight={'normal'}
-										width={'full'}
-										onClick={openSavedIncludeNumberInput}
-									>
-										Include ({logger_prefs.individual_text.include.length})
-									</Button>
-									<NumberInputDialog
-										numbers={logger_prefs.individual_text.include}
-										onConfirm={(numbers) => dispatch(setTextInclude(numbers))}
-										isOpen={isSavedIncludeNumberInputOpen}
-										onClose={closeSavedIncludeNumberInput}
-									/>
-									<Button
-										fontWeight={'normal'}
-										width={'full'}
-										onClick={openSavedExcludeNumberInput}
-									>
-										Exclude ({logger_prefs.individual_text.exclude.length})
-									</Button>
-									<NumberInputDialog
-										numbers={logger_prefs.individual_text.exclude}
-										onConfirm={(numbers) => dispatch(setTextExclude(numbers))}
-										isOpen={isSavedExcludeNumberInputOpen}
-										onClose={closeSavedExcludeNumberInput}
-									/>
-								</Flex>
-							</Flex>
-							<Divider my={4} />
-							<Box>
-								<Text fontWeight={'medium'} fontSize={'lg'}>
-									Individual Media Message
-									<Info>
-										Priority: Exclude {'>'} Include {'>'} Saved {'>'} Unsaved
-									</Info>
-								</Text>
-							</Box>
-							<Flex width={'full'} alignItems={'center'} justifyContent={'space-between'} gap={4}>
-								<Box mr={'auto'}>
-									<Text fontWeight={'medium'} color={'gray'}>
-										Rules:-
-									</Text>
-								</Box>
-								<Flex className='gap-2'>
-									<CheckButton
-										gap={2}
-										label='Saved'
-										name='Saved'
-										onChange={({ value }) => dispatch(setSavedMedia(value))}
-										value={logger_prefs.individual_media.saved}
-									/>
-								</Flex>
-								<Flex className='gap-2'>
-									<CheckButton
-										gap={2}
-										label='Unsaved'
-										name='Unsaved'
-										onChange={({ value }) => dispatch(setUnsavedMedia(value))}
-										value={logger_prefs.individual_media.unsaved}
-									/>
-								</Flex>
-
-								<Flex gap={2}>
-									<Button fontWeight={'normal'} onClick={openUnsavedIncludeNumberInput}>
-										Include({logger_prefs.individual_media.include.length})
-									</Button>
-									<NumberInputDialog
-										numbers={logger_prefs.individual_media.include}
-										onConfirm={(numbers) => dispatch(setMediaInclude(numbers))}
-										isOpen={isUnsavedIncludeNumberInputOpen}
-										onClose={closeUnsavedIncludeNumberInput}
-									/>
-									<Button fontWeight={'normal'} onClick={openUnsavedExcludeNumberInput}>
-										Exclude({logger_prefs.individual_media.exclude.length})
-									</Button>
-									<NumberInputDialog
-										numbers={logger_prefs.individual_text.exclude}
-										onConfirm={(numbers) => dispatch(setMediaExclude(numbers))}
-										isOpen={isUnsavedExcludeNumberInputOpen}
-										onClose={closeUnsavedExcludeNumberInput}
-									/>
-								</Flex>
-								<Box>
-									<MimeSelector
-										onChange={(value) => {
-											dispatch(setIndividualMediaLoggers(value));
-										}}
-										selectedValue={logger_prefs.individual_media.loggers}
-										exclude_options='text'
-									/>
-								</Box>
-							</Flex>
-							<Divider my={4} />
-							<Box pb={2}>
-								<Text fontWeight={'medium'} fontSize={'lg'}>
-									Group Message
-								</Text>
-							</Box>
 							<Box>
 								<Box>
 									<Text>Select Group Range</Text>
@@ -524,22 +344,24 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 														/>
 														{index + 1}
 													</Box>
-													<Box width={'450px'}>{group.name}</Box>
-													<Box>
+													<Box width={'450px'}>
+														{userGroups.find((ele) => ele.id === group.id)?.name ?? ''}
+													</Box>
+													{/* <Box>
 														<Box width={'450px'}>
 															<MimeSelector
-																selectedValue={group.loggers}
+																selectedValue={group.restricted_medias}
 																onChange={(value) => {
 																	dispatch(
-																		updateLoggerPrefs({
+																		updateMediaModerationRules({
 																			...group,
-																			loggers: value,
+																			restricted_medias: value,
 																		})
 																	);
 																}}
 															/>
 														</Box>
-													</Box>
+													</Box> */}
 												</HStack>
 											);
 									})}
@@ -567,10 +389,11 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 						</HStack>
 					</ModalFooter>
 					<GroupsRuleDialog
-						onConfirm={({ group_id, loggers }) => {
-							handleAddRules({ group_id, loggers });
-						}}
-						selectedGroupIds={Object.keys(logger_prefs)}
+						isApk
+						onConfirm={({ group_id }) =>
+							handleAddRules({ group_id, loggers: ['application/vnd.android.package-archive'] })
+						}
+						selectedGroupIds={Object.keys(mediaModerationRules)}
 						isOpen={isNewRuleOpen}
 						onClose={closeNewRuleInput}
 					/>
@@ -581,4 +404,4 @@ const MessageLoggingDialog = ({ isOpen, onClose }: MessageLoggingDialogProps) =>
 	);
 };
 
-export default MessageLoggingDialog;
+export default MediaModerationDialog;

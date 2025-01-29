@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { LoggerRule } from '../../services/enhancements.service';
-import { EnhancementState } from '../types/Enhancements';
+import { EnhancementState, MediaModerationRule } from '../types/Enhancements';
 
 const initState: EnhancementState = {
 	message_logger: false,
@@ -37,6 +37,11 @@ const initState: EnhancementState = {
 		individual_incoming_messages: false,
 		group_outgoing_messages: false,
 		group_incoming_messages: false,
+	},
+	mediaModerationRules: {},
+	newMediaModerationRuleDetails: {
+		group_id: [],
+		restricted_medias: [],
 	},
 };
 
@@ -112,6 +117,9 @@ const EnhancementsSlice = createSlice({
 			state.isMessageStarEnabled = action.payload.isMessageStarEnabled;
 			state.messageStarRules = action.payload.messageStarRules;
 		},
+		setMediaModerationRules: (state, action: PayloadAction<typeof state.mediaModerationRules>) => {
+			state.mediaModerationRules = action.payload;
+		},
 		setNewRuleDetails: (
 			state,
 			action: PayloadAction<{
@@ -138,6 +146,13 @@ const EnhancementsSlice = createSlice({
 		updateLoggerPrefs: (state, action: PayloadAction<LoggerRule>) => {
 			state.updated_values[action.payload.id] = true;
 			state.logger_prefs = { ...state.logger_prefs, [action.payload.id]: action.payload };
+		},
+		updateMediaModerationRules: (state, action: PayloadAction<MediaModerationRule>) => {
+			state.updated_values[action.payload.id] = true;
+			state.mediaModerationRules = {
+				...state.mediaModerationRules,
+				[action.payload.id]: action.payload,
+			};
 		},
 		updateStarMessages: (
 			state,
@@ -182,6 +197,7 @@ export const {
 	setTextInclude,
 	setIndividualMediaLoggers,
 	setMessageLoggerSettings,
+	setMediaModerationRules,
 	setNewRuleDetails,
 	setNewRuleExclude,
 	setNewRuleGroup,
@@ -197,6 +213,7 @@ export const {
 	setMediaInclude,
 	resetNewRuleDetails,
 	updateStarMessages,
+	updateMediaModerationRules,
 } = EnhancementsSlice.actions;
 
 export default EnhancementsSlice.reducer;

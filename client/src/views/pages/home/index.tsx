@@ -26,7 +26,10 @@ import { setAttachments } from '../../../store/reducers/AttachmentReducers';
 import { setBots } from '../../../store/reducers/BotReducers';
 import { setCSVFileList } from '../../../store/reducers/CSVFileReducers';
 import { setContactList } from '../../../store/reducers/ContactCardReducers';
-import { setMessageLoggerSettings } from '../../../store/reducers/EnhancementsReducers';
+import {
+	setMediaModerationRules,
+	setMessageLoggerSettings,
+} from '../../../store/reducers/EnhancementsReducers';
 import { setLinksList } from '../../../store/reducers/LinkShortnerReducers';
 import { setMergedGroupList } from '../../../store/reducers/MergeGroupReducer';
 import { setAllRepetitiveSchedulers } from '../../../store/reducers/SchedulerByDateReducer';
@@ -94,6 +97,7 @@ export default function Home() {
 				APIWebhookService.listWebhooks(),
 				SchedulerByDateService.listAllSchedulers(),
 				EnhancementService.getEnhancements(),
+				EnhancementService.getMediaModerationRules(),
 			];
 
 			const results = await Promise.all(promises);
@@ -117,6 +121,7 @@ export default function Home() {
 			dispatch(setWebhookList(results[10]));
 			dispatch(setAllRepetitiveSchedulers(results[11]));
 			dispatch(setMessageLoggerSettings(results[12]));
+			dispatch(setMediaModerationRules(results[13]));
 
 			AuthService.validateClientID().then((res) => {
 				if (res) {
@@ -170,7 +175,7 @@ export default function Home() {
 				width={'full'}
 			>
 				<Flex justifyContent={'center'} alignItems={'center'} width={'full'} gap={'1rem'}>
-					<Image src={LOGO} width={'48px'} className='shadow-lg rounded-full' />
+					<Image src={LOGO} width={'48px'} className='rounded-full shadow-lg' />
 					<Text className='text-black dark:text-white' fontSize={'lg'} fontWeight='bold'>
 						WhatsLeads
 					</Text>

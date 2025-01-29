@@ -31,7 +31,7 @@ router
 
 router
 	.route('/media-moderation/rules')
-	.all(VerifyUser)
+	.all(VerifyUser, VerifyClientID)
 	.get(UserController.getMediaModerationRules)
 	.post(CreateMediaModerationRuleValidator, UserController.addMediaModerationRule)
 	.patch(UpdateMediaModerationRuleValidator, UserController.updateMediaModerationRule);

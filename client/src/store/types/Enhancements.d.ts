@@ -22,4 +22,17 @@ export type EnhancementState = {
 		group_outgoing_messages: boolean;
 		group_incoming_messages: boolean;
 	};
+	mediaModerationRules: {
+		[key: string]: MediaModerationRule;
+	};
+	newMediaModerationRuleDetails: {
+		group_id: string[];
+		restricted_medias: string[];
+	};
+};
+
+export type MediaModerationRule = {
+	id: string;
+	name: string;
+	restricted_medias: string[];
 };

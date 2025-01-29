@@ -47,6 +47,22 @@ export default class EnhancementService {
 		}
 	}
 
+	static async getMediaModerationRules() {
+		try {
+			const { data } = await APIInstance.get('/preferences/media-moderation/rules');
+
+			return data.media_moderation_rules as {
+				[key: string]: {
+					id: string;
+					name: string;
+					restricted_medias: string[];
+				};
+			};
+		} catch (error) {
+			return {};
+		}
+	}
+
 	static async updateMessageLoggerPreferences(details: {
 		id: string;
 		loggers: string[];
@@ -139,6 +155,45 @@ export default class EnhancementService {
 				group_outgoing_messages: false,
 				group_incoming_messages: false,
 			};
+		}
+	}
+
+	static async createMediaModerationPreference(details: {
+		group_id: string[];
+		restricted_medias: string[];
+	}) {
+		try {
+			const { data } = await APIInstance.post('/preferences/media-moderation/rules', {
+				group_id: details.group_id,
+				restricted_medias: details.restricted_medias,
+			});
+			return data.success as boolean;
+		} catch (error) {
+			throw new Error('Failed to create media moderation rule');
+		}
+	}
+
+	static async updateMediaModerationPreference(details: {
+		id: string;
+		restricted_medias: string[];
+	}) {
+		try {
+			const { data } = await APIInstance.patch(`/preferences/media-moderation/rules`, {
+				id: details.id,
+				restricted_medias: details.restricted_medias,
+			});
+			return data.success as boolean;
+		} catch (error) {
+			throw new Error('Failed to update media moderation rule');
+		}
+	}
+
+	static async deleteMediaModerationRule(id: string) {
+		try {
+			const { data } = await APIInstance.delete(`/preferences/media-moderation/rules/${id}`);
+			return data.success as boolean;
+		} catch (error) {
+			throw new Error('Failed to delete media moderation rule');
 		}
 	}
 }

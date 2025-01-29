@@ -22,6 +22,7 @@ import { popFromNavbar, pushToNavbar } from '../../../hooks/useNavbar';
 import EnhancementService from '../../../services/enhancements.service';
 import { StoreNames, StoreState } from '../../../store';
 import { setMessageLogger } from '../../../store/reducers/EnhancementsReducers';
+import MediaModerationDialog from './components/media-moderation-dialog';
 import MessageLoggingDialog from './components/message-logger-dialog';
 import StarMessageRulesDialog from './components/star-message-rules-dialog';
 
@@ -35,6 +36,12 @@ export default function Logger() {
 		isOpen: isOpenMessageLoggingDialog,
 		onClose: onCloseMessageLoggingDialog,
 		onOpen: onOpenMessageLoggingDialog,
+	} = useDisclosure();
+
+	const {
+		isOpen: isOpenMediaModerationDialog,
+		onClose: onCloseMediaModerationDialog,
+		onOpen: onOpenMediaModerationDialog,
 	} = useDisclosure();
 
 	const {
@@ -57,7 +64,7 @@ export default function Logger() {
 	if (!isWhatsappReady) {
 		return (
 			<Box className='p-4 text-center'>
-				<Text className='text-black dark:text-white font-medium text-lg'>
+				<Text className='text-lg font-medium text-black dark:text-white'>
 					Please Link WhatsApp First!
 				</Text>
 			</Box>
@@ -128,6 +135,20 @@ export default function Logger() {
 									</Flex>
 								</Td>
 							</Tr>
+							<Tr>
+								<Td className='text-black dark:text-white'>APK Moderation</Td>
+								<Td>
+									<Flex gap={4} alignItems={'center'} justifyContent={'flex-end'} px={8}>
+										<IconButton
+											aria-label='settings'
+											colorScheme='blue'
+											onClick={onOpenMediaModerationDialog}
+										>
+											<PiGear />
+										</IconButton>
+									</Flex>
+								</Td>
+							</Tr>
 						</Tbody>
 					</Table>
 				</TableContainer>
@@ -135,6 +156,10 @@ export default function Logger() {
 			<MessageLoggingDialog
 				isOpen={isOpenMessageLoggingDialog}
 				onClose={onCloseMessageLoggingDialog}
+			/>
+			<MediaModerationDialog
+				isOpen={isOpenMediaModerationDialog}
+				onClose={onCloseMediaModerationDialog}
 			/>
 			<StarMessageRulesDialog
 				isOpen={isOpenStarMessageRulesDialog}
