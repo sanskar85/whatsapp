@@ -46,6 +46,7 @@ const UsersPage = () => {
 	const dispatch = useDispatch();
 	const toast = useToast();
 	const [activeOnly, setActiveOnly] = useState(false);
+	const [expiry, setExpiry] = useState('All');
 	const {
 		list,
 		uiDetails: { isFetching },
@@ -87,6 +88,16 @@ const UsersPage = () => {
 
 	if (activeOnly) {
 		filtered = filtered.filter((user) => user.isOnline);
+	}
+
+	if (expiry === 'Expired') {
+		filtered = filtered.filter(
+			(user) => user.subscription_expiry < new Date().toLocaleDateString() && user.subscription_expiry !== 'N/A'
+		);
+	} else if (expiry === 'Active') {
+		filtered = filtered.filter(
+			(user) => user.subscription_expiry >= new Date().toLocaleDateString() && user.subscription_expiry !== 'N/A'
+		);
 	}
 
 	const handleAction = ({ id, phone, subscription_expiry, device_id }: User, action: string) => {
@@ -181,6 +192,17 @@ const UsersPage = () => {
 							</Th>
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'10%'}>
 								Expiry
+								<Select value={expiry} onChange={(e) => setExpiry(e.target.value)}>
+									<option value={'All'} className='text-black'>
+										All
+									</option>
+									<option value={'Expired'} className='text-black'>
+										Expired
+									</option>
+									<option value={'Active'} className='text-black'>
+										Active
+									</option>
+								</Select>
 							</Th>
 							<Th color={theme === 'dark' ? 'whitesmoke' : 'gray'} width={'20%'}>
 								Actions
@@ -236,39 +258,39 @@ const UsersPage = () => {
 										<Td>
 											<Select value={''} onChange={(e) => handleAction(user, e.target.value)}>
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='select'
 												>
 													Select Action
 												</option>
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='extend_expiry'
 												>
 													Extend Subscription
 												</option>
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='payment_history'
 												>
 													Payment History
 												</option>
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='payment_reminder'
 												>
 													Payment Reminder
 												</option>
 												{user.isGoogleSheetAvailable ? (
 													<option
-														className='bg-white text-black dark:bg-gray-700 dark:text-white'
+														className='text-black bg-white dark:bg-gray-700 dark:text-white'
 														value='share-google-sheet'
 													>
 														Share Google Sheet
 													</option>
 												) : null}
 												<option
-													className='bg-white text-black dark:bg-gray-700 dark:text-white'
+													className='text-black bg-white dark:bg-gray-700 dark:text-white'
 													value='logout'
 												>
 													Logout User
