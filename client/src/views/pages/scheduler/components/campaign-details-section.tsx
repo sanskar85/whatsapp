@@ -308,7 +308,7 @@ function RecipientToSelector() {
 									width: '100%',
 								},
 							}}
-							className='  bg-[#ECECEC] dark:bg-[#535353] rounded-md border-none '
+							className='  bg-[#ECECEC] dark:bg-[#535353] rounded-md border-none text-black '
 						/>
 					</Box>
 					{details.type.includes('GROUP') ? (
