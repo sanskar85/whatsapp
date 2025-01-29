@@ -406,10 +406,10 @@ export default function SchedulerByDate() {
 			<ConfirmationAlert
 				cancelButton={false}
 				onConfirm={() => scheduleMessage(false)}
-				confirmText=' Yes'
+				confirmText='Proceed with Duplicates'
 				secondaryAction={() => scheduleMessage(true)}
-				secondaryText=' No'
-				disclaimer='There might be some duplicate numbers in the campaign you are scheduling. Proceed with Possible Duplicates?'
+				secondaryText='Exclude Duplicates'
+				disclaimer='There might be some duplicate numbers in the campaign you are scheduling.'
 				ref={confirmRef}
 			/>
 		</Flex>
