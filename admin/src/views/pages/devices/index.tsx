@@ -245,10 +245,10 @@ const DevicesPage = () => {
 								return (
 									<Tr key={index} color={theme === 'dark' ? 'white' : 'black'}>
 										<Td>{index + 1}.</Td>
+										<Td isNumeric>{device.phone}</Td>
 										<Td>{device.name}</Td>
 										<Td>{device.username}</Td>
 										<Td>{device.profile_name}</Td>
-										<Td isNumeric>{device.phone}</Td>
 										<Td>{device.type}</Td>
 										<Td>{device.subscription_expiry}</Td>
 										<Td>
