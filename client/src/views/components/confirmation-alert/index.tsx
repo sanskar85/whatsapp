@@ -73,7 +73,7 @@ const ConfirmationAlert = forwardRef<ConfirmationAlertHandle, Props>(
 		const cancelRef = React.useRef() as RefObject<HTMLButtonElement>;
 
 		return (
-			<AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
+			<AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose} size={'2xl'}>
 				<AlertDialogOverlay>
 					<AlertDialogContent
 						backgroundColor={theme === 'dark' ? '#252525' : 'white'}
