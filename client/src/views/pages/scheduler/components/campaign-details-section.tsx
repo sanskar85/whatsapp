@@ -27,6 +27,7 @@ import {
 	setVariables,
 } from '../../../../store/reducers/SchedulerReducer';
 import GroupIdsInputDialog from '../../../components/group-ids-input-dialog';
+import LabelInputDialog from '../../../components/label-input-dialog';
 import NumberInputDialog from './numbers-input-dialog';
 
 export default function CampaignDetailsSection({
@@ -45,7 +46,7 @@ export default function CampaignDetailsSection({
 	return (
 		<VStack flex={1}>
 			<Flex gap={'2rem'} width={'full'}>
-				<FormControl isInvalid={campaignNameError} flex={1}>
+				<FormControl isInvalid={campaignNameError} flex={2}>
 					<FormLabel color={theme === 'dark' ? 'white' : 'zinc.500'}>Campaign Name</FormLabel>
 					<Input
 						color={theme === 'dark' ? 'white' : 'gray.800'}
@@ -57,7 +58,7 @@ export default function CampaignDetailsSection({
 						}}
 					/>
 				</FormControl>
-				<Flex flex={1} gap={'1rem'}>
+				<Flex flex={3} gap={'1rem'}>
 					<RecipientFromSelector fetchRecipients={fetchRecipients} />
 					<RecipientToSelector />
 				</Flex>
@@ -94,7 +95,7 @@ function RecipientFromSelector({ fetchRecipients }: { fetchRecipients: (text: st
 	const { userType } = useSelector((state: StoreState) => state[StoreNames.USER]);
 
 	return (
-		<FormControl width={'10rem'}>
+		<FormControl width={'10rem'} flex={2}>
 			<FormLabel color={theme === 'dark' ? 'white' : 'GrayText'}>Recipients From</FormLabel>
 			<Select
 				className={`!bg-[#ECECEC] dark:!bg-[#535353] rounded-md w-full ${
@@ -192,6 +193,12 @@ function RecipientToSelector() {
 	} = useDisclosure();
 
 	const {
+		isOpen: isLabelInputOpen,
+		onOpen: openLabelInput,
+		onClose: closeLabelInput,
+	} = useDisclosure();
+
+	const {
 		details,
 		recipients,
 		isRecipientsLoading,
@@ -216,7 +223,7 @@ function RecipientToSelector() {
 			alignItems='flex-end'
 			justifyContent={'space-between'}
 			width={'full'}
-			flex={1}
+			flex={3}
 			isInvalid={recipientsError}
 		>
 			<FormLabel color={theme === 'dark' ? 'white' : 'GrayText'}>
@@ -304,13 +311,24 @@ function RecipientToSelector() {
 							className='  bg-[#ECECEC] dark:bg-[#535353] rounded-md border-none '
 						/>
 					</Box>
-					<Button
-						flex={1}
-						className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md text-black dark:text-white '
-						onClick={openGroupInput}
-					>
-						<Text>Groups ({details.group_ids?.length ?? 0})</Text>
-					</Button>
+					{details.type.includes('GROUP') ? (
+						<Button
+							flex={1}
+							className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md text-black dark:text-white '
+							onClick={openGroupInput}
+						>
+							<Text>Groups ({details.group_ids?.length ?? 0})</Text>
+						</Button>
+					) : null}
+					{details.type === 'LABEL' ? (
+						<Button
+							flex={1}
+							className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md text-black dark:text-white '
+							onClick={openLabelInput}
+						>
+							<Text>Labels ({details.label_ids?.length ?? 0})</Text>
+						</Button>
+					) : null}
 				</Flex>
 			)}
 			<NumberInputDialog isOpen={isNumberInputOpen} onClose={closeNumberInput} />
@@ -319,6 +337,12 @@ function RecipientToSelector() {
 				onClose={closeGroupInput}
 				onConfirm={setSelectedRecipients}
 				ids={details.group_ids ?? []}
+			/>
+			<LabelInputDialog
+				isOpen={isLabelInputOpen}
+				onClose={closeLabelInput}
+				onConfirm={setSelectedRecipients}
+				labels={details.label_ids ?? []}
 			/>
 		</FormControl>
 	);

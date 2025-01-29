@@ -1,4 +1,5 @@
 import {
+	Box,
 	Button,
 	Flex,
 	FormControl,
@@ -23,6 +24,8 @@ import {
 	setRecipientsFrom,
 	setVariables,
 } from '../../../../store/reducers/SchedulerByDateReducer';
+import GroupIdsInputDialog from '../../../components/group-ids-input-dialog';
+import LabelInputDialog from '../../../components/label-input-dialog';
 import NumberInputDialog from './numbers-input-dialog';
 
 export default function CampaignDetailsSection({
@@ -41,7 +44,7 @@ export default function CampaignDetailsSection({
 	return (
 		<VStack flex={1}>
 			<Flex gap={'2rem'} width={'full'}>
-				<FormControl isInvalid={campaignNameError} flex={1}>
+				<FormControl isInvalid={campaignNameError} flex={2}>
 					<FormLabel color={theme === 'dark' ? 'white' : 'zinc.500'}>Campaign Name</FormLabel>
 					<Input
 						color={theme === 'dark' ? 'white' : 'gray.800'}
@@ -53,7 +56,7 @@ export default function CampaignDetailsSection({
 						}}
 					/>
 				</FormControl>
-				<Flex flex={1} gap={'1rem'}>
+				<Flex flex={3} gap={'1rem'}>
 					<RecipientFromSelector fetchRecipients={fetchRecipients} />
 					<RecipientToSelector />
 				</Flex>
@@ -90,7 +93,7 @@ function RecipientFromSelector({ fetchRecipients }: { fetchRecipients: (text: st
 	const { userType } = useSelector((state: StoreState) => state[StoreNames.USER]);
 
 	return (
-		<FormControl flex={1}>
+		<FormControl flex={2}>
 			<FormLabel color={theme === 'dark' ? 'white' : 'GrayText'}>Recipients From</FormLabel>
 			<Select
 				className={`!bg-[#ECECEC] dark:!bg-[#535353] rounded-md w-full ${
@@ -182,6 +185,18 @@ function RecipientToSelector() {
 	} = useDisclosure();
 
 	const {
+		isOpen: isGroupInputOpen,
+		onOpen: openGroupInput,
+		onClose: closeGroupInput,
+	} = useDisclosure();
+
+	const {
+		isOpen: isLabelInputOpen,
+		onOpen: openLabelInput,
+		onClose: closeLabelInput,
+	} = useDisclosure();
+
+	const {
 		details,
 		recipients,
 		isRecipientsLoading,
@@ -210,7 +225,7 @@ function RecipientToSelector() {
 			alignItems='flex-end'
 			justifyContent={'space-between'}
 			width={'full'}
-			flex={1}
+			flex={3}
 			isInvalid={recipientsError}
 		>
 			<FormLabel color={theme === 'dark' ? 'white' : 'GrayText'}>
@@ -257,46 +272,80 @@ function RecipientToSelector() {
 					</Button>
 				</Flex>
 			) : (
-				<Multiselect
-					disable={isRecipientsLoading}
-					displayValue='displayValue'
-					placeholder={
-						['GROUP', 'GROUP_INDIVIDUAL', 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'].includes(
-							details.recipient_from
-						)
-							? 'Select Groups'
-							: details.recipient_from === 'LABEL'
-							? 'Select Labels'
-							: 'Select One!'
-					}
-					onRemove={(selectedList: { id: string }[]) =>
-						setSelectedRecipients(selectedList.map((label) => label.id))
-					}
-					onSelect={(selectedList: { id: string }[]) => {
-						dispatch(setRecipientsError(false));
-						setSelectedRecipients(selectedList.map((label) => label.id));
-					}}
-					showCheckbox={true}
-					hideSelectedList={true}
-					options={recipients.map((item, index) => ({
-						...item,
-						displayValue: `${index + 1}. ${item.name} (@${item.id.substring(
-							item.id.length - 8,
-							item.id.length - 5
-						)}-${'participants' in item ? item.participants ?? 0 : 0})`,
-					}))}
-					style={{
-						searchBox: {
-							border: 'none',
-						},
-						inputField: {
-							width: '100%',
-						},
-					}}
-					className='  bg-[#ECECEC] dark:bg-[#535353] rounded-md border-none '
-				/>
+				<Flex direction={'row'} gap={2} justifyContent={'center'}>
+					<Box flex={1}>
+						<Multiselect
+							disable={isRecipientsLoading}
+							displayValue='displayValue'
+							placeholder={
+								['GROUP', 'GROUP_INDIVIDUAL', 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'].includes(
+									details.recipient_from
+								)
+									? 'Select Groups'
+									: details.recipient_from === 'LABEL'
+									? 'Select Labels'
+									: 'Select One!'
+							}
+							onRemove={(selectedList: { id: string }[]) =>
+								setSelectedRecipients(selectedList.map((label) => label.id))
+							}
+							onSelect={(selectedList: { id: string }[]) => {
+								dispatch(setRecipientsError(false));
+								setSelectedRecipients(selectedList.map((label) => label.id));
+							}}
+							showCheckbox={true}
+							hideSelectedList={true}
+							options={recipients.map((item, index) => ({
+								...item,
+								displayValue: `${index + 1}. ${item.name} (@${item.id.substring(
+									item.id.length - 8,
+									item.id.length - 5
+								)}-${'participants' in item ? item.participants ?? 0 : 0})`,
+							}))}
+							style={{
+								searchBox: {
+									border: 'none',
+								},
+								inputField: {
+									width: '100%',
+								},
+							}}
+							className='  bg-[#ECECEC] dark:bg-[#535353] rounded-md border-none '
+						/>
+					</Box>
+					{details.recipient_from.includes('GROUP') ? (
+						<Button
+							flex={1}
+							className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md text-black dark:text-white '
+							onClick={openGroupInput}
+						>
+							<Text>Groups ({details.recipient_data?.length ?? 0})</Text>
+						</Button>
+					) : null}
+					{details.recipient_from === 'LABEL' ? (
+						<Button
+							flex={1}
+							className='!bg-[#ECECEC] dark:!bg-[#535353] rounded-md text-black dark:text-white '
+							onClick={openLabelInput}
+						>
+							<Text>Labels ({details.recipient_data?.length ?? 0})</Text>
+						</Button>
+					) : null}
+				</Flex>
 			)}
 			<NumberInputDialog isOpen={isNumberInputOpen} onClose={closeNumberInput} />
+			<GroupIdsInputDialog
+				isOpen={isGroupInputOpen}
+				onClose={closeGroupInput}
+				onConfirm={setSelectedRecipients}
+				ids={Array.isArray(details.recipient_data) ? details.recipient_data : []}
+			/>
+			<LabelInputDialog
+				isOpen={isLabelInputOpen}
+				onClose={closeLabelInput}
+				onConfirm={setSelectedRecipients}
+				labels={Array.isArray(details.recipient_data) ? details.recipient_data : []}
+			/>
 		</FormControl>
 	);
 }
