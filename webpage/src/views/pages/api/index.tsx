@@ -16,7 +16,7 @@ export default function APIWebhook() {
 			<Navbar />
 			<section className='p-6 md:px-[5%]'>
 				<section id='heading' className=' pt-[70px]'>
-					<h1 className='text-primary text-2xl md:text-4xl font-bold'>
+					<h1 className='text-2xl font-bold text-primary md:text-4xl'>
 						Whatsleads API Keys and Webhooks
 					</h1>
 				</section>
@@ -28,42 +28,42 @@ export default function APIWebhook() {
 					<TabPanels>
 						<TabPanel>
 							<div>
-								<p className='text-lg pt-4'>
+								<p className='pt-4 text-lg'>
 									1. After logging in go to https://app.whatsleads.com/api-keys
 								</p>
 							</div>
 							<section
 								id='terms'
-								className='grid grid-cols-1 md:grid-cols-2 justify-center items-end'
+								className='grid items-end justify-center grid-cols-1 md:grid-cols-2'
 							>
 								<div className='flex flex-col justify-between gap-4'>
-									<p className='text-lg pt-4'>2. Generate an API key for your Whatsleads API.</p>
+									<p className='pt-4 text-lg'>2. Generate an API key for your Whatsleads API.</p>
 									<img
 										src={API_PAGE}
 										alt='API'
 										width={1200}
 										height={1200}
-										className='md:w-3/4 mx-auto'
+										className='mx-auto md:w-3/4'
 									/>
 								</div>
 								<div className='flex flex-col justify-between gap-4'>
-									<p className='text-lg pt-4'>3. Enter a name for key.</p>
+									<p className='pt-4 text-lg'>3. Enter a name for key.</p>
 									<img
 										src={API_NAME}
 										alt='API'
 										width={1200}
 										height={1200}
-										className='md:w-3/4 mx-auto'
+										className='mx-auto md:w-3/4'
 									/>
 								</div>
 								<div className='md:col-span-2'>
-									<p className='text-lg pt-4'>4. This token will be used for authentication.</p>
+									<p className='pt-4 text-lg'>4. This token will be used for authentication.</p>
 									<img
 										src={API_KEY}
 										alt='API'
 										width={1200}
 										height={1200}
-										className='md:w-3/4 mx-auto'
+										className='mx-auto md:w-3/4'
 									/>
 									<p className='font-bold'>
 										{' '}
@@ -74,12 +74,12 @@ export default function APIWebhook() {
 							</section>
 							<section id='text-message'>
 								<div>
-									<p className='text-2xl pt-4 font-medium'>Send Message</p>
+									<p className='pt-4 text-2xl font-medium'>Send Message</p>
 								</div>
 								<Divider className='w-full' />
 								<div>
 									<div>
-										<p className='text-lg pt-4 font-medium'>Text Message</p>
+										<p className='pt-4 text-lg font-medium'>Text Message</p>
 									</div>
 									<div className='grid grid-cols-1 md:grid-cols-2'>
 										<div>
@@ -93,6 +93,7 @@ export default function APIWebhook() {
 --header 'Content-Type: application/json' 
 --data '{
     "recipient": "91XXXXXXXXXXX",
+	"recipient_type": "INDIVIDUAL",
     "message": {
         "type": "text",
         "text": "Hello user"
@@ -121,11 +122,22 @@ export default function APIWebhook() {
 												<span className='text-red-500'> (required)</span>
 											</p>
 											<p>Recipient number with country code (without &lsquo;+&lsquo;).</p>
+											<Divider className='w-3/4 my-4' />
+											<p>
+												recipient_type: <span className='text-gray-400'>string</span>
+												<span className='text-red-500'> (required)("INDIVIDUAL" or "GROUP")</span>
+											</p>
+											<p>
+												<span className='font-semibold'>NOTE: </span>Use "INDIVIDUAL" for sending
+												message to an individual using phone number and use "GROUP" for sending
+												message in a group using "id" of that group.
+											</p>
 										</div>
 										<CodeBlocks
 											title='Request body example'
 											code={`{
     "recipient": "91XXXXXXXXXX",
+	"recipient_type": "INDIVIDUAL",
     "message": {
         "type": "text",
         "text": "Hello user"
@@ -139,7 +151,7 @@ export default function APIWebhook() {
 							<section id='media-message'>
 								<div>
 									<div>
-										<p className='text-lg pt-4 font-medium'>Media Message</p>
+										<p className='pt-4 text-lg font-medium'>Media Message</p>
 									</div>
 									<div className='grid grid-cols-1 md:grid-cols-2'>
 										<div>
@@ -154,6 +166,7 @@ export default function APIWebhook() {
 --header 'Content-Type: application/json'
 --data '{
     "recipient": "91XXXXXXXXXX",
+	"recipient_type": "INDIVIDUAL",
     "message": {
         "type": "media",
         "link": "https://________"
@@ -185,6 +198,16 @@ export default function APIWebhook() {
 											</p>
 											<Divider className='w-3/4 my-4' />
 											<p>
+												recipient_type: <span className='text-gray-400'>string</span>
+												<span className='text-red-500'> (required)("INDIVIDUAL" or "GROUP")</span>
+											</p>
+											<p>
+												<span className='font-semibold'>NOTE: </span>Use "INDIVIDUAL" for sending
+												message to an individual using phone number and use "GROUP" for sending
+												message in a group using "id" of that group.
+											</p>
+											<Divider className='w-3/4 my-4' />
+											<p>
 												caption: <span className='text-gray-400'>string</span>
 											</p>
 											<p>Custom caption for the media.</p>
@@ -195,6 +218,7 @@ export default function APIWebhook() {
 												title='Request body example'
 												code={`{
     "recipient": "91XXXXXXXXXX",
+	"recipient_type": "INDIVIDUAL",
     "message": {
         "type": "media",
         "link": "https://________",
@@ -210,7 +234,7 @@ export default function APIWebhook() {
 							<section id='contact-message'>
 								<div>
 									<div>
-										<p className='text-lg pt-4 font-medium'>Contact Message</p>
+										<p className='pt-4 text-lg font-medium'>Contact Message</p>
 									</div>
 									<div className='grid grid-cols-1 md:grid-cols-2'>
 										<div>
@@ -225,6 +249,7 @@ export default function APIWebhook() {
 --header 'Content-Type: application/json' \
 --data-raw '{
     "recipient": "91XXXXXXXXXX",
+	"recipient_type": "INDIVIDUAL",
     "message": {
         "type": "contact",
         "contact": {
@@ -328,12 +353,22 @@ export default function APIWebhook() {
 											</p>
 											<p>Recipient number with country code (without &lsquo;+&lsquo;).</p>
 											<Divider className='w-3/4 my-4' />
+											<p>
+												recipient_type: <span className='text-gray-400'>string</span>
+												<span className='text-red-500'> (required)("INDIVIDUAL" or "GROUP")</span>
+											</p>
+											<p>
+												<span className='font-semibold'>NOTE: </span>Use "INDIVIDUAL" for sending
+												message to an individual using phone number and use "GROUP" for sending
+												message in a group using "id" of that group.
+											</p>
 										</div>
 										<div>
 											<CodeBlocks
 												title='Request body example'
 												code={`{
     "recipient": "91XXXXXXXXXX",
+	"recipient_type": "INDIVIDUAL",
     "message": {
         "type": "contact",
         "contact": {
@@ -363,7 +398,7 @@ export default function APIWebhook() {
 							<section id='poll-message'>
 								<div>
 									<div>
-										<p className='text-lg pt-4 font-medium'>Poll Message</p>
+										<p className='pt-4 text-lg font-medium'>Poll Message</p>
 									</div>
 									<div className='grid grid-cols-1 md:grid-cols-2'>
 										<div>
@@ -378,6 +413,7 @@ export default function APIWebhook() {
 --header 'Content-Type: application/json' 
 --data '{
     "recipient": "91XXXXXXXXXX",
+	"recipient_type": "INDIVIDUAL",
     "message": {
         "type": "poll",
         "poll": {
@@ -424,6 +460,15 @@ export default function APIWebhook() {
 											</p>
 											<p>Recipient number with country code (without &lsquo;+&lsquo;).</p>
 											<Divider className='w-3/4 my-4' />
+											<p>
+												recipient_type: <span className='text-gray-400'>string</span>
+												<span className='text-red-500'> (required)("INDIVIDUAL" or "GROUP")</span>
+												<p>
+													<span className='font-semibold'>NOTE: </span>Use "INDIVIDUAL" for sending
+													message to an individual using phone number and use "GROUP" for sending
+													message in a group using "id" of that group.
+												</p>
+											</p>
 										</div>
 										<div>
 											<CodeBlocks
@@ -445,26 +490,167 @@ export default function APIWebhook() {
 									</div>
 								</div>
 							</section>
+							<section id='groups-list'>
+								<div>
+									<p className='pt-4 text-2xl font-medium'>Groups</p>
+								</div>
+								<Divider className='w-full' />
+								<div>
+									<div>
+										<p className='pt-4 text-lg font-medium'>List all groups</p>
+									</div>
+									<div className='grid grid-cols-1 md:grid-cols-2'>
+										<div>
+											<Divider className='w-1/2' />
+											<p className='mt-4'>List all groups that you have in your whatsapp.</p>
+											<p className='mt-4'>
+												<span className='font-semibold'>id:</span> Unique id of the group.
+											</p>
+											<p className='mt-4'>
+												<span className='font-semibold'>name:</span> Name of the group.
+											</p>
+											<p className='mt-4'>
+												<span className='font-semibold'>isMergedGroup:</span> The group is whatsapp
+												group or a merged groups.
+											</p>
+											<p className='mt-4'>
+												<span className='font-semibold'>participants:</span> Number of participants
+												in that group. (0 in case of merged group)
+											</p>
+											<Divider className='w-1/2' />
+											<p className='font-semibold text-red-500'>NOTE:</p>
+											<p>
+												If you are the admin or creator of a WhatsApp community, you may notice two
+												entries in the participant list. One entry will show only Admin
+												participants, while the other will display the actual number of
+												participants. Sending a message to the entry with Admin participants will
+												return a success response, but the message will not be sent.
+											</p>
+										</div>
+										<div>
+											<CodeBlocks
+												title='Request Example'
+												code={`curl --location 'https://api.whatsleads.in/v1/groups'
+--header 'Authorization: Bearer YOUR_API_KEY'
+--header 'Content-Type: application/json' 
+`}
+												language={'bash'}
+											/>
+
+											<CodeBlocks
+												title='Response example'
+												code={`{
+	"groups": [
+		{
+			"id": "GROUP_ID",
+			"name": "GROUP_NAME",
+			"isMergedGroup": true or false,
+			"participants": NO_OF_PARTICIPATNS
+			},
+			...
+		]
+}`}
+												language={'javascript'}
+											/>
+										</div>
+									</div>
+								</div>
+							</section>
+							<section id='group-message'>
+								<div>
+									<div>
+										<p className='pt-4 text-lg font-medium'>Message to Group</p>
+									</div>
+									<div className='grid grid-cols-1 md:grid-cols-2'>
+										<div>
+											<Divider className='w-1/2' />
+											<p className='mt-4'>Sends a service text message.</p>
+											<p className='mt-4'>
+												Refer to above documentation for sending other types of message.
+											</p>
+										</div>
+										<CodeBlocks
+											title='Request Example'
+											code={`curl --location 'https://api.whatsleads.in/v1/message/send-message'
+--header 'Authorization: Bearer YOUR_API_TOKEN'
+--header 'Content-Type: application/json'
+--data '{
+    "recipient": "GROUP_ID",
+    "recipient_type": "GROUP",
+    "message": {
+        "type": "text",
+        "text": "Sample_Text_Message"
+    }
+}'`}
+											language={'bash'}
+										/>
+									</div>
+									<div className='grid grid-cols-1 md:grid-cols-2'>
+										<div>
+											<p className='mt-4 text-lg'>Arguments:</p>
+											<Divider className='w-3/4 my-4' />
+											<p className=''>
+												type: <span className='text-gray-400'>string</span>
+												<span className='text-red-500'> (required)</span>
+											</p>
+											<Divider className='w-3/4 my-4' />
+											<p>
+												text: <span className='text-gray-400'>string</span>
+												<span className='text-red-500'> (required)</span>
+											</p>
+											<p>Message you want to send.</p>
+											<Divider className='w-3/4 my-4' />
+											<p>
+												recipient: <span className='text-gray-400'>string</span>
+												<span className='text-red-500'> (required)</span>
+											</p>
+											<p>Unique group "id"</p>
+											<Divider className='w-3/4 my-4' />
+											<p>
+												recipient_type: <span className='text-gray-400'>string</span>
+												<span className='text-red-500'> (required)("INDIVIDUAL" or "GROUP")</span>
+											</p>
+											<p>
+												<span className='font-semibold'>NOTE: </span>Use "INDIVIDUAL" for sending
+												message to an individual using phone number and use "GROUP" for sending
+												message in a group using "id" of that group.
+											</p>
+										</div>
+										<CodeBlocks
+											title='Request body example'
+											code={`{
+    "recipient": "GROUP_ID",
+    "recipient_type": "GROUP",
+    "message": {
+        "type": "text",
+        "text": "Sample_Text_Message"
+    }
+}`}
+											language={'javascript'}
+										/>
+									</div>
+								</div>
+							</section>
 						</TabPanel>
 						<TabPanel>
 							<div>
-								<p className='text-lg pt-4'>
+								<p className='pt-4 text-lg'>
 									1. After logging in go to https://app.whatsleads.in/api-keys
 								</p>
 							</div>
-							<section id='terms' className='grid grid-cols-1 md:grid-cols-2 justify-center'>
+							<section id='terms' className='grid justify-center grid-cols-1 md:grid-cols-2'>
 								<div className='flex flex-col justify-between gap-4'>
-									<p className='text-lg pt-4'>2. Generate an Webhook for your WhatsApp API.</p>
+									<p className='pt-4 text-lg'>2. Generate an Webhook for your WhatsApp API.</p>
 									<img
 										src={WEBHOOK_CREATE}
 										alt='API'
 										width={1200}
 										height={1200}
-										className='md:w-3/4 mx-auto'
+										className='mx-auto md:w-3/4'
 									/>
 								</div>
 								<div className='flex flex-col justify-between gap-4'>
-									<p className='text-lg pt-4'>
+									<p className='pt-4 text-lg'>
 										3. Enter your name, select WhatsApp number and enter your webhook endpoint url
 										to receive the message for your device.
 									</p>
@@ -473,11 +659,11 @@ export default function APIWebhook() {
 										alt='API'
 										width={1200}
 										height={1200}
-										className='md:w-3/4 mx-auto'
+										className='mx-auto md:w-3/4'
 									/>
 								</div>
 								<div className='md:col-span-2'>
-									<p className='text-lg pt-4'>4. Validate your webhook.</p>
+									<p className='pt-4 text-lg'>4. Validate your webhook.</p>
 									<img
 										src={WEBHOOK_VALIDATE}
 										alt='API'

@@ -3,6 +3,6 @@ import Controller from './groups.controller';
 
 const router = express.Router();
 
-router.route('/groups').get(Controller.listGroups);
+router.route('/').get(Controller.listGroups);
 
 export default router;
