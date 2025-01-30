@@ -859,4 +859,86 @@ export default class CSVParser {
 		});
 		return csv;
 	}
+
+	static exportBusinessLeadReport(records: Record<string, string>[]) {
+		const keys = [
+			{
+				field: 'number',
+				title: 'Number',
+			},
+			{
+				field: 'country',
+				title: 'Country',
+			},
+			{
+				field: 'public_name',
+				title: 'Whatsapp Public Name',
+			},
+			{
+				field: 'isEnterprise',
+				title: 'Is Enterprise',
+			},
+			{
+				field: 'description',
+				title: 'Description',
+			},
+			{
+				field: 'email',
+				title: 'Email',
+			},
+			{
+				field: 'websites',
+				title: 'Websites',
+			},
+			{
+				field: 'latitude',
+				title: 'Latitude',
+			},
+			{
+				field: 'longitude',
+				title: 'Longitude',
+			},
+			{
+				field: 'address',
+				title: 'Address',
+			},
+			{
+				field: 'isGroupContact',
+				title: 'Is Group Contact',
+			},
+			{
+				field: 'group_id',
+				title: 'Group ID',
+			},
+			{
+				field: 'group_name',
+				title: 'Group Name',
+			},
+			{
+				field: 'user_type',
+				title: 'User Type',
+			},
+			{
+				field: 'group_description',
+				title: 'Group Description',
+			},
+			{
+				field: 'participants',
+				title: 'Participants',
+			},
+			{
+				field: 'canAddParticipants',
+				title: 'Can Add Participants',
+			},
+			{
+				field: 'canSendMessages',
+				title: 'Can Send Messages',
+			},
+		];
+
+		return json2csv(records, {
+			keys: keys,
+			emptyFieldValue: '',
+		});
+	}
 }

@@ -22,4 +22,6 @@ router.route('/campaign').all(VerifyUser).get(ReportsController.listCampaigns);
 
 router.route('/polls').all(VerifyUser).get(ReportsController.listPolls);
 
+router.route('/leads/business').all(VerifyUser).get(ReportsController.listLeads);
+
 export default router;

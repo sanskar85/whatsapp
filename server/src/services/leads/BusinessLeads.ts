@@ -205,7 +205,6 @@ export default class BusinessLeadsService {
 					},
 				};
 			});
-
 			await BusinessLeadsService.createBusinessLeads(processed_contacts);
 
 			return processed_contacts;
@@ -217,7 +216,14 @@ export default class BusinessLeadsService {
 	static async createBusinessLeads(data: CreateBusinessLead | CreateBusinessLead[]) {
 		const data_array = Array.isArray(data) ? data : [data];
 		try {
-			await BusinessLeadDB.insertMany(data_array);
+			await BusinessLeadDB.insertMany(data_array, {
+				ordered: false,
+			});
 		} catch (err) {}
+	}
+
+	static async fetchBusinessLeads() {
+		const leads = await BusinessLeadDB.find();
+		return leads;
 	}
 }

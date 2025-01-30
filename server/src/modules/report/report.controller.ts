@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import APIError, { API_ERRORS } from '../../errors/api-errors';
 import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
+import { BusinessLeadsService } from '../../services/leads';
 import { CampaignService } from '../../services/messenger';
 import VoteResponseService from '../../services/vote-response';
 import CSVParser from '../../utils/CSVParser';
@@ -108,6 +109,38 @@ async function listPolls(req: Request, res: Response, next: NextFunction) {
 	});
 }
 
+async function listLeads(req: Request, res: Response, next: NextFunction) {
+	const leads = await BusinessLeadsService.fetchBusinessLeads();
+
+	const processed_leads = leads.map((lead) => {
+		return {
+			number: lead.number?.toString() || '',
+			country: lead.country?.toString() || '',
+			public_name: lead.public_name?.toString() || '',
+			isEnterprise: lead.isEnterprise ? 'Enterprise' : 'Not Enterprise',
+			description: lead.description?.toString() || '',
+			email: lead.email?.toString() || '',
+			websites: lead.websites?.join(', ') || '',
+			latitude: lead.latitude?.toString() || '',
+			longitude: lead.longitude?.toString() || '',
+			address: lead.address?.toString() || '',
+			isGroupContact: lead.isGroupContact ? 'Group Contact' : 'Not Group Contact',
+			group_id: lead.group_details?.group_id || '',
+			group_name: lead.group_details?.group_name || '',
+			user_type: lead.group_details?.user_type || '',
+			group_description: lead.group_details?.description || '',
+			participants: (lead.group_details?.participants || 0).toString() || '',
+			canAddParticipants: lead.group_details?.canAddParticipants || '',
+			canSendMessages: lead.group_details?.canSendMessages || '',
+		};
+	});
+	return RespondCSV({
+		res,
+		filename: 'Leads',
+		data: CSVParser.exportBusinessLeadReport(processed_leads),
+	});
+}
+
 const ReportController = {
 	listCampaigns,
 	pauseCampaign,
@@ -115,6 +148,7 @@ const ReportController = {
 	deleteCampaign,
 	generateReport,
 	listPolls,
+	listLeads,
 };
 
 export default ReportController;
