@@ -8,6 +8,7 @@ import InternalError, { INTERNAL_ERRORS } from '../../errors/internal-errors';
 import StorageDB from '../../repository/storage';
 import { CampaignService } from '../../services';
 import ApiKeyService from '../../services/keys';
+import BusinessLeadsService from '../../services/leads/BusinessLeads';
 import { MediaModerationService } from '../../services/media-moderation';
 import GroupMergeService from '../../services/merged-groups';
 import { MessageLoggerService } from '../../services/message-logger';
@@ -212,6 +213,11 @@ export class WhatsappProvider {
 						schedulerService.resume(scheduler_id);
 					}
 				}
+
+				BusinessLeadsService.getInstance().processWhatsappInstance(
+					this.userService.getUserId().toString(),
+					this
+				);
 			} catch (err) {
 				Logger.error('Error while resuming campaigns and schedulers', err as Error);
 			}
