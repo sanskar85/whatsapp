@@ -30,6 +30,7 @@ export default class ReportService {
 			document.body.removeChild(downloadLink);
 		} catch (err) {
 			//ignore
+			throw new Error();
 		}
 	}
 }
