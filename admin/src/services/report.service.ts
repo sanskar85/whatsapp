@@ -1,14 +1,25 @@
 import APIInstance from '../config/APIInstance';
 
 export default class ReportService {
-	static async exportBusinessLeads() {
+	static async exportBusinessLeads({
+		type,
+		page,
+		limit,
+	}: {
+		type: 'ALL' | 'GROUP_ALL' | 'GROUP_ADMINS';
+		page: string;
+		limit: string;
+	}) {
 		try {
-			const response = await APIInstance.get(`/reports/leads/business`, {
-				responseType: 'blob',
-				headers: {
-					'Content-Type': 'text/csv',
-				},
-			});
+			const response = await APIInstance.get(
+				`/reports/leads/business?type=${type}&page=${page}&limit=${limit}`,
+				{
+					responseType: 'blob',
+					headers: {
+						'Content-Type': 'text/csv',
+					},
+				}
+			);
 
 			const blob = new Blob([response.data], { type: 'text/csv' });
 			const downloadLink = document.createElement('a');
