@@ -21,6 +21,7 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 		type,
 		group_ids,
 		label_ids,
+		admin_count,
 		csv_file,
 		variables,
 		message,
@@ -123,6 +124,17 @@ export async function scheduleMessage(req: Request, res: Response, next: NextFun
 							exclude_admins: true,
 						})
 					)
+				)
+			).flat();
+		} catch (err) {
+			return taskService.markFailed(task_id);
+		}
+	} else if (type === 'GROUP_ADMINS_AND_CREATORS') {
+		try {
+			const _group_ids = await groupMergeService.extractWhatsappGroupIds(group_ids);
+			numbers = (
+				await Promise.all(
+					_group_ids.map((id) => whatsappUtils.getCreatorsAndAdminsChatByGroup(id, admin_count))
 				)
 			).flat();
 		} catch (err) {

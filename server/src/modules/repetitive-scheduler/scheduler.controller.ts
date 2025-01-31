@@ -133,6 +133,19 @@ async function createScheduler(req: Request, res: Response, next: NextFunction) 
 		} catch (err) {
 			return taskService.markFailed(task_id);
 		}
+	} else if (type === 'GROUP_ADMINS_AND_CREATORS') {
+		try {
+			const _group_ids = await groupMergeService.extractWhatsappGroupIds(recipient_data);
+			numbers = (
+				await Promise.all(
+					_group_ids.map((id) =>
+						whatsappUtils.getCreatorsAndAdminsChatByGroup(id, data.admin_count)
+					)
+				)
+			).flat();
+		} catch (err) {
+			return taskService.markFailed(task_id);
+		}
 	} else if (type === 'GROUP') {
 		try {
 			const _group_ids = await groupMergeService.extractWhatsappGroupIds(recipient_data);
@@ -249,6 +262,19 @@ async function updateScheduler(req: Request, res: Response, next: NextFunction) 
 						whatsappUtils.getParticipantsChatByGroup(id, {
 							exclude_admins: true,
 						})
+					)
+				)
+			).flat();
+		} catch (err) {
+			return taskService.markFailed(task_id);
+		}
+	} else if (type === 'GROUP_ADMINS_AND_CREATORS') {
+		try {
+			const _group_ids = await groupMergeService.extractWhatsappGroupIds(recipient_data);
+			numbers = (
+				await Promise.all(
+					_group_ids.map((id) =>
+						whatsappUtils.getCreatorsAndAdminsChatByGroup(id, data.admin_count)
 					)
 				)
 			).flat();

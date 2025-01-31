@@ -12,7 +12,9 @@ export type ScheduleMessageValidationResult = {
 		| 'GROUP'
 		| 'GROUP_INDIVIDUAL'
 		| 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'
+		| 'GROUP_ADMINS_AND_CREATORS'
 		| 'LABEL';
+	admin_count: number;
 	message: string;
 	numbers: string[];
 	csv_file: Types.ObjectId;
@@ -52,7 +54,9 @@ export async function ScheduleMessageValidator(req: Request, res: Response, next
 				'UNSAVED',
 				'LABEL',
 				'GROUP_INDIVIDUAL_WITHOUT_ADMINS',
+				'GROUP_ADMINS_AND_CREATORS',
 			]),
+			admin_count: z.number().default(0),
 			numbers: z.string().array().default([]),
 			csv_file: z
 				.string()

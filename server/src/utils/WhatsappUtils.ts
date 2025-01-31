@@ -115,6 +115,21 @@ export default class WhatsappUtils {
 			.map((participant) => participant.id._serialized);
 	}
 
+	async getCreatorsAndAdminsChatByGroup(group_id: string, admin_count: number) {
+		const chat = await this.getChat(group_id);
+		if (!chat || !chat.isGroup) {
+			throw new InternalError(INTERNAL_ERRORS.WHATSAPP_ERROR.INVALID_GROUP_ID);
+		}
+		const creators = (chat as GroupChat).participants.filter(
+			(participant) => participant.isSuperAdmin
+		);
+		const admins = (chat as GroupChat).participants.filter((participant) => participant.isAdmin);
+
+		return [...creators, ...admins.slice(0, admin_count)].map(
+			(participant) => participant.id._serialized
+		);
+	}
+
 	async getChatIdsByLabel(label_id: string) {
 		if (!this.whatsapp.isBusiness()) {
 			throw new InternalError(INTERNAL_ERRORS.WHATSAPP_ERROR.BUSINESS_ACCOUNT_REQUIRED);

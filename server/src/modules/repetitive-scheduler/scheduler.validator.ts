@@ -12,7 +12,9 @@ export type CreateSchedulerValidationResult = {
 		| 'GROUP'
 		| 'GROUP_INDIVIDUAL'
 		| 'GROUP_INDIVIDUAL_WITHOUT_ADMINS'
+		| 'GROUP_ADMINS_AND_CREATORS'
 		| 'LABEL';
+	admin_count: number;	
 	recipient_data: string | string[];
 
 	message: string;
@@ -45,8 +47,10 @@ export async function CreateSchedulerValidator(req: Request, res: Response, next
 			'GROUP',
 			'GROUP_INDIVIDUAL',
 			'GROUP_INDIVIDUAL_WITHOUT_ADMINS',
+			'GROUP_ADMINS_AND_CREATORS',
 			'LABEL',
 		]),
+		admin_count: z.number().default(0),
 		recipient_data: z.string().or(z.array(z.string())).default(''),
 		random_string: z.boolean().default(false),
 		message: z.string().trim().default(''),
