@@ -860,7 +860,7 @@ export default class CSVParser {
 		return csv;
 	}
 
-	static exportBusinessLeadReport(records: Record<string, string>[]) {
+	static exportBusinessLeadReport(records: Record<string, string>[], groupBased: boolean) {
 		const keys = [
 			{
 				field: 'number',
@@ -906,34 +906,38 @@ export default class CSVParser {
 				field: 'isGroupContact',
 				title: 'Is Group Contact',
 			},
-			{
-				field: 'group_id',
-				title: 'Group ID',
-			},
-			{
-				field: 'group_name',
-				title: 'Group Name',
-			},
-			{
-				field: 'user_type',
-				title: 'User Type',
-			},
-			{
-				field: 'group_description',
-				title: 'Group Description',
-			},
-			{
-				field: 'participants',
-				title: 'Participants',
-			},
-			{
-				field: 'canAddParticipants',
-				title: 'Can Add Participants',
-			},
-			{
-				field: 'canSendMessages',
-				title: 'Can Send Messages',
-			},
+			...(groupBased
+				? [
+						{
+							field: 'group_id',
+							title: 'Group ID',
+						},
+						{
+							field: 'group_name',
+							title: 'Group Name',
+						},
+						{
+							field: 'user_type',
+							title: 'User Type',
+						},
+						{
+							field: 'group_description',
+							title: 'Group Description',
+						},
+						{
+							field: 'participants',
+							title: 'Participants',
+						},
+						{
+							field: 'canAddParticipants',
+							title: 'Can Add Participants',
+						},
+						{
+							field: 'canSendMessages',
+							title: 'Can Send Messages',
+						},
+				  ]
+				: []),
 		];
 
 		return json2csv(records, {

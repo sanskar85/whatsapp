@@ -222,8 +222,32 @@ export default class BusinessLeadsService {
 		} catch (err) {}
 	}
 
-	static async fetchBusinessLeads() {
-		const leads = await BusinessLeadDB.find();
-		return leads;
+	static async fetchBusinessLeads({
+		type,
+		starts,
+		limit,
+	}: {
+		type: 'ALL' | 'GROUP_ALL' | 'GROUP_ADMINS' | 'INDIVIDUAL';
+		starts: number;
+		limit: number;
+	}) {
+		if (type === 'ALL') {
+			const leads = await BusinessLeadDB.find().skip(starts).limit(limit);
+			return leads;
+		} else if (type === 'GROUP_ALL') {
+			const leads = await BusinessLeadDB.find({ isGroupContact: true }).skip(starts).limit(limit);
+			return leads;
+		} else if (type === 'GROUP_ADMINS') {
+			const leads = await BusinessLeadDB.find({
+				isGroupContact: true,
+				user_type: { $in: ['ADMIN', 'CREATOR'] },
+			})
+				.skip(starts)
+				.limit(limit);
+			return leads;
+		} else if (type === 'INDIVIDUAL') {
+			const leads = await BusinessLeadDB.find({ isGroupContact: false }).skip(starts).limit(limit);
+			return leads;
+		}
 	}
 }

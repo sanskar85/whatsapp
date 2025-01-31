@@ -110,35 +110,72 @@ async function listPolls(req: Request, res: Response, next: NextFunction) {
 }
 
 async function listLeads(req: Request, res: Response, next: NextFunction) {
-	const leads = await BusinessLeadsService.fetchBusinessLeads();
+	const { type, page, limit } = req.query as {
+		type: 'ALL' | 'GROUP_ALL' | 'GROUP_ADMINS' | 'INDIVIDUAL';
+		page: string;
+		limit: string;
+	};
 
-	const processed_leads = leads.map((lead) => {
-		return {
-			number: lead.number?.toString() || '',
-			country: lead.country?.toString() || '',
-			public_name: lead.public_name?.toString() || '',
-			isEnterprise: lead.isEnterprise ? 'Enterprise' : 'Not Enterprise',
-			description: lead.description?.toString() || '',
-			email: lead.email?.toString() || '',
-			websites: lead.websites?.join(', ') || '',
-			latitude: lead.latitude?.toString() || '',
-			longitude: lead.longitude?.toString() || '',
-			address: lead.address?.toString() || '',
-			isGroupContact: lead.isGroupContact ? 'Group Contact' : 'Not Group Contact',
-			group_id: lead.group_details?.group_id || '',
-			group_name: lead.group_details?.group_name || '',
-			user_type: lead.group_details?.user_type || '',
-			group_description: lead.group_details?.description || '',
-			participants: (lead.group_details?.participants || 0).toString() || '',
-			canAddParticipants: lead.group_details?.canAddParticipants || '',
-			canSendMessages: lead.group_details?.canSendMessages || '',
-		};
+	const leads = await BusinessLeadsService.fetchBusinessLeads({
+		type,
+		starts: Number(page),
+		limit: Number(limit),
 	});
-	return RespondCSV({
-		res,
-		filename: 'Leads',
-		data: CSVParser.exportBusinessLeadReport(processed_leads),
-	});
+
+	if (!leads) {
+		return next(new APIError(API_ERRORS.COMMON_ERRORS.INVALID_FIELDS));
+	}
+
+	if (type === 'GROUP_ALL' || type === 'GROUP_ADMINS' || type === 'ALL') {
+		const processed_leads = leads.map((lead) => {
+			return {
+				number: lead.number?.toString() || '',
+				country: lead.country?.toString() || '',
+				public_name: lead.public_name?.toString() || '',
+				isEnterprise: lead.isEnterprise ? 'Enterprise' : 'Not Enterprise',
+				description: lead.description?.toString() || '',
+				email: lead.email?.toString() || '',
+				websites: lead.websites?.join(', ') || '',
+				latitude: lead.latitude?.toString() || '',
+				longitude: lead.longitude?.toString() || '',
+				address: lead.address?.toString() || '',
+				isGroupContact: lead.isGroupContact ? 'Group Contact' : 'Not Group Contact',
+				group_id: lead.group_details?.group_id || '',
+				group_name: lead.group_details?.group_name || '',
+				user_type: lead.group_details?.user_type || '',
+				group_description: lead.group_details?.description || '',
+				participants: (lead.group_details?.participants || 0).toString() || '',
+				canAddParticipants: lead.group_details?.canAddParticipants || '',
+				canSendMessages: lead.group_details?.canSendMessages || '',
+			};
+		});
+		return RespondCSV({
+			res,
+			filename: 'Leads',
+			data: CSVParser.exportBusinessLeadReport(processed_leads, true),
+		});
+	} else if (type === 'INDIVIDUAL') {
+		const processed_leads = leads.map((lead) => {
+			return {
+				number: lead.number?.toString() || '',
+				country: lead.country?.toString() || '',
+				public_name: lead.public_name?.toString() || '',
+				isEnterprise: lead.isEnterprise ? 'Enterprise' : 'Not Enterprise',
+				description: lead.description?.toString() || '',
+				email: lead.email?.toString() || '',
+				websites: lead.websites?.join(', ') || '',
+				latitude: lead.latitude?.toString() || '',
+				longitude: lead.longitude?.toString() || '',
+				address: lead.address?.toString() || '',
+			};
+		});
+
+		return RespondCSV({
+			res,
+			filename: 'Leads',
+			data: CSVParser.exportBusinessLeadReport(processed_leads, false),
+		});
+	}
 }
 
 const ReportController = {
